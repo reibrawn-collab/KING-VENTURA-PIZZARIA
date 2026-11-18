@@ -33,7 +33,13 @@ href="css/style.css">
 
 <label>Telefone</label>
 <input id="telefone" placeholder="Telefone">
-
+    
+<label>CEP</label>
+<input id="cep">
+    
+<label>Número</label>
+<input id="numero" placeholder="129">
+    
 <label>Endereço</label>
 <input id="endereco" placeholder="Endereço">
 
@@ -129,11 +135,14 @@ Adicionar Bebida
 
 <h3>
 
-Total:
+Taxa de Entrega:
 
-R$ <span id="totalPedido">0,00</span>
+R$ <span id="taxaEntrega">0,00</span>
 
 </h3>
+
+<div id="mensagemEntrega"></div>
+    
 
 <button
 id="btnWhatsApp">
@@ -452,7 +461,91 @@ document
     "change",
     atualizarVisualPedido
 );
+let taxaEntrega = 0;
 
+function calcularTaxaEntrega() {
+
+    const cep =
+        document
+        .getElementById(
+            "cep"
+        )
+        .value
+        .replace(
+            /[^0-9]/g,
+            ""
+        );
+
+    if (
+        cep.length < 8
+    ) {
+        return;
+    }
+
+    if (
+        cep.startsWith(
+            "79097"
+        )
+    ) {
+
+        taxaEntrega = 0;
+
+        document
+        .getElementById(
+            "mensagemEntrega"
+        )
+        .innerHTML =
+        "🎉 Você ganhou ENTREGA GRÁTIS";
+
+    } else {
+
+        taxaEntrega = 5;
+
+        document
+        .getElementById(
+            "mensagemEntrega"
+        )
+        .innerHTML =
+        "Taxa de Entrega: R$ 5,00";
+
+    }
+
+    document
+    .getElementById(
+        "taxaEntrega"
+    )
+    .innerText =
+    taxaEntrega.toFixed(2);
+
+    const totalAtual =
+        parseFloat(
+            document
+            .getElementById(
+                "totalPedido"
+            )
+            .innerText
+            .replace(",", ".")
+        ) || 0;
+
+    document
+    .getElementById(
+        "totalPedido"
+    )
+    .innerText =
+    (
+        totalAtual +
+        taxaEntrega
+    ).toFixed(2);
+}
+
+document
+.getElementById(
+    "cep"
+)
+.addEventListener(
+    "blur",
+    calcularTaxaEntrega
+);
 carregarSabores();
 
 </script>
