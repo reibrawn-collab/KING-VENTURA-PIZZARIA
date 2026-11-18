@@ -540,12 +540,74 @@ function calcularTaxaEntrega() {
 
 document
 .getElementById(
-    "cep"
+"cep"
 )
 .addEventListener(
-    "blur",
-    calcularTaxaEntrega
+"blur",
+function(){
+ 
+buscarCEP();
+ 
+calcularTaxaEntrega();
+ 
+}
 );
+);
+async function buscarCEP() {
+
+    const cep =
+        document
+        .getElementById(
+            "cep"
+        )
+        .value
+        .replace(
+            /\D/g,
+            ""
+        );
+
+    if (
+        cep.length !== 8
+    ) {
+        return;
+    }
+
+    try {
+
+        const resposta =
+            await fetch(
+                "https://viacep.com.br/ws/"
+                + cep
+                + "/json/"
+            );
+
+        const dados =
+            await resposta.json();
+
+        if (
+            !dados.erro
+        ) {
+
+            document
+            .getElementById(
+                "endereco"
+            )
+            .value =
+                dados.logradouro +
+                " - " +
+                dados.bairro;
+
+        }
+
+    } catch (erro) {
+
+        console.log(
+            "Erro CEP",
+            erro
+        );
+
+    }
+}    
 carregarSabores();
 
 </script>
