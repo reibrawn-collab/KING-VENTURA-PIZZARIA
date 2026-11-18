@@ -10,7 +10,9 @@ function carregarHistorico() {
     if (dados) {
 
         historicoPedidos =
-            JSON.parse(dados);
+            JSON.parse(
+                dados
+            );
 
     }
 }
@@ -23,17 +25,6 @@ function salvarHistorico() {
             historicoPedidos
         )
     );
-}
-
-function adicionarAoHistorico(
-    pedido
-) {
-
-    historicoPedidos.push(
-        pedido
-    );
-
-    salvarHistorico();
 }
 
 function gerarNumeroPedido() {
@@ -56,6 +47,26 @@ function gerarNumeroPedido() {
         String(numero)
         .padStart(4, "0")
     );
+}
+
+function registrarPedido(
+    pedido
+) {
+
+    pedido.numero =
+        gerarNumeroPedido();
+
+    pedido.data =
+        new Date()
+        .toLocaleString(
+            "pt-BR"
+        );
+
+    historicoPedidos.push(
+        pedido
+    );
+
+    salvarHistorico();
 }
 
 carregarHistorico();
