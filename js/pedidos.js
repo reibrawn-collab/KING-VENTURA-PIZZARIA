@@ -100,3 +100,37 @@ html += `
 
     }
 }
+function salvarPedidoAtual() {
+ 
+pedidoAtual.cliente =
+document.getElementById(
+"nome"
+).value;
+ 
+pedidoAtual.telefone =
+document.getElementById(
+"telefone"
+).value;
+ 
+pedidoAtual.endereco =
+document.getElementById(
+"endereco"
+).value;
+ 
+pedidoAtual.observacao =
+document.getElementById(
+"observacao"
+).value;
+ 
+registrarPedido(
+JSON.parse(
+JSON.stringify(
+pedidoAtual
+)
+)
+);
+ 
+alert(
+"Pedido salvo com sucesso."
+);
+}
