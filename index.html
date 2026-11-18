@@ -540,15 +540,15 @@ function calcularTaxaEntrega() {
 
 document
 .getElementById(
-"cep"
+    "cep"
 )
 .addEventListener(
-"blur",
-function(){
- 
-buscarCEP();
- 
-calcularTaxaEntrega();
+    "blur",
+    async function(){
+
+        await buscarCEP();
+
+        calcularTaxaEntrega();
  
 }
 );
