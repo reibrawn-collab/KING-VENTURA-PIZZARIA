@@ -1,72 +1,50 @@
 const NUMERO_WHATSAPP = "5567991476156";
 
-function gerarMensagemWhatsApp(pedido) {
+function enviarWhatsApp(pedido) {
 
-    let mensagem = [];
+    let mensagem =
+        "KING VENTURA PIZZARIA\n\n";
 
-    mensagem.push(
-        "KING VENTURA PIZZARIA"
-    );
-
-    mensagem.push("");
-
-    mensagem.push(
+    mensagem +=
         "Cliente: " +
-        pedido.cliente
-    );
+        pedido.cliente +
+        "\n";
 
-    mensagem.push(
+    mensagem +=
         "Telefone: " +
-        pedido.telefone
-    );
+        pedido.telefone +
+        "\n";
 
-    mensagem.push(
+    mensagem +=
         "Endereço: " +
-        pedido.endereco
-    );
+        pedido.endereco +
+        "\n\n";
 
-    mensagem.push("");
-
-    mensagem.push("ITENS:");
+    mensagem +=
+        "ITENS:\n";
 
     pedido.itens.forEach(
-    item => {
+        item => {
 
-        mensagem.push(
-            "- " +
-            item.descricao
-        );
-
-        if(
-            item.ingredientes
-        ){
-
-            mensagem.push(
-                "Ingredientes:"
-            );
-
-            mensagem.push(
-                item.ingredientes
-            );
-        }
-
-        mensagem.push("");
-
-    }
-);
-            );
+            mensagem +=
+                item.descricao +
+                " - R$ " +
+                item.valor.toFixed(2) +
+                "\n";
 
         }
     );
 
-    mensagem.push("");
+    mensagem +=
+        "\nTOTAL: R$ " +
+        pedido.total.toFixed(2);
 
-    mensagem.push(
-        "TOTAL: R$ " +
-        pedido.total
-    );
-
-    return mensagem.join(
-        "\n"
+    window.open(
+        "https://wa.me/" +
+        NUMERO_WHATSAPP +
+        "?text=" +
+        encodeURIComponent(
+            mensagem
+        )
     );
 }
