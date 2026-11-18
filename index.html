@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
 
 <meta charset="UTF-8">
@@ -7,9 +8,7 @@
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0">
 
-<title>
-KING VENTURA PIZZARIA
-</title>
+<title>KING VENTURA PIZZARIA</title>
 
 <link rel="stylesheet"
 href="css/style.css">
@@ -23,21 +22,15 @@ href="css/style.css">
 
 <body>
 
-<div class="container">
-
-<h1>
-KING VENTURA PIZZARIA
-</h1>
+<h1>KING VENTURA PIZZARIA</h1>
 
 <div class="card">
 
-<h2>
-Cliente
-</h2>
+<h2>Cliente</h2>
 
 <input
 id="nome"
-placeholder="Nome do Cliente">
+placeholder="Nome">
 
 <input
 id="telefone"
@@ -53,15 +46,10 @@ placeholder="Observação">
 </textarea>
 
 </div>
+
 <div class="card">
 
-<h2>
-Pedido
-</h2>
-
-<label>
-Tamanho
-</label>
+<h2>Pedido</h2>
 
 <select id="tamanho">
 
@@ -75,10 +63,6 @@ Grande 35cm
 
 </select>
 
-<label>
-Tipo
-</label>
-
 <select id="tipoPizza">
 
 <option value="inteira">
@@ -91,24 +75,18 @@ Meio a Meio
 
 </select>
 
-<label>
-Sabor 1
-</label>
+<select id="sabor1"></select>
 
-<select id="sabor1">
-</select>
-
-<label id="labelSabor2">
-Sabor 2
-</label>
-
-<select id="sabor2">
+<select
+id="sabor2"
+style="display:none">
 </select>
 
 <div id="ingredientes">
 </div>
 
-<button id="btnAdicionarPizza">
+<button
+id="btnAdicionarPizza">
 
 Adicionar Pizza
 
@@ -118,9 +96,7 @@ Adicionar Pizza
 
 <div class="card">
 
-<h2>
-Bebidas
-</h2>
+<h2>Bebidas</h2>
 
 <select id="bebida">
 
@@ -138,7 +114,8 @@ Coca-Cola Lata 310ml - R$ 6,00
 
 </select>
 
-<button id="btnAdicionarBebida">
+<button
+id="btnAdicionarBebida">
 
 Adicionar Bebida
 
@@ -148,9 +125,7 @@ Adicionar Bebida
 
 <div class="card">
 
-<h2>
-Carrinho
-</h2>
+<h2>Carrinho</h2>
 
 <div id="carrinho">
 </div>
@@ -163,13 +138,15 @@ R$ <span id="totalPedido">0,00</span>
 
 </h3>
 
-<button id="btnWhatsApp">
+<button
+id="btnWhatsApp">
 
 Enviar WhatsApp
 
 </button>
 
-<button onclick="window.print()">
+<button
+onclick="window.print()">
 
 Imprimir Pedido
 
@@ -177,399 +154,6 @@ Imprimir Pedido
 
 </div>
 
-</div>
-<script>
+</body>
 
-console.log(
-    "KING VENTURA INICIADO"
-);
-
-document
-.getElementById(
-    "labelSabor2"
-)
-.style.display = "none";
-
-document
-.getElementById(
-    "sabor2"
-)
-.style.display = "none";
-
-</script>
-<script>
- 
-function carregarSabores(){
- 
-const tamanho =
-document.getElementById(
-"tamanho"
-).value;
- 
-const sabor1 =
-document.getElementById(
-"sabor1"
-);
- 
-const sabor2 =
-document.getElementById(
-"sabor2"
-);
- 
-sabor1.innerHTML = "";
- 
-sabor2.innerHTML = "";
- 
-Object.keys(
-SABORES
-).forEach(
-nome => {
- 
-const preco =
-tamanho === "brotinho"
-?
-SABORES[nome]
-.brotinho
-:
-SABORES[nome]
-.grande;
- 
-const texto =
-nome +
-" - R$ " +
-preco.toFixed(2);
- 
-sabor1.innerHTML +=
-`<option value="${nome}">
-${texto}
-</option>`;
- 
-sabor2.innerHTML +=
-`<option value="${nome}">
-${texto}
-</option>`;
-}
-);
- 
-atualizarVisualPedido();
-}
- 
-function atualizarVisualPedido(){
- 
-const tamanho =
-document.getElementById(
-"tamanho"
-).value;
- 
-const tipo =
-document.getElementById(
-"tipoPizza"
-).value;
- 
-const labelSabor2 =
-document.getElementById(
-"labelSabor2"
-);
- 
-const sabor2 =
-document.getElementById(
-"sabor2"
-);
- 
-if(
-tamanho ===
-"brotinho"
-){
- 
-document
-.getElementById(
-"tipoPizza"
-)
-.value =
-"inteira";
- 
-document
-.getElementById(
-"tipoPizza"
-)
-.disabled = true;
- 
-labelSabor2
-.style.display =
-"none";
- 
-sabor2
-.style.display =
-"none";
- 
-}
-else{
- 
-document
-.getElementById(
-"tipoPizza"
-)
-.disabled = false;
- 
-if(
-tipo ===
-"meio"
-){
- 
-labelSabor2
-.style.display =
-"block";
- 
-sabor2
-.style.display =
-"block";
- 
-}
-else{
- 
-labelSabor2
-.style.display =
-"none";
- 
-sabor2
-.style.display =
-"none";
- 
-}
-}
-}
- 
-document
-.getElementById(
-"tamanho"
-)
-.addEventListener(
-"change",
-carregarSabores
-);
- 
-document
-.getElementById(
-"tipoPizza"
-)
-.addEventListener(
-"change",
-atualizarVisualPedido
-);
- 
-carregarSabores();
- 
-document
-.getElementById(
-    "btnAdicionarPizza"
-)
-.addEventListener(
-    "click",
-    function(){
-
-        const tamanho =
-            document
-            .getElementById(
-                "tamanho"
-            )
-            .value;
-
-        const tipo =
-            document
-            .getElementById(
-                "tipoPizza"
-            )
-            .value;
-
-        const sabor1 =
-            document
-            .getElementById(
-                "sabor1"
-            )
-            .value;
-
-        const sabor2 =
-            document
-            .getElementById(
-                "sabor2"
-            )
-            .value;
-
-        let descricao = "";
-
-        let valor = 0;
-
-        if(
-            tamanho ===
-            "brotinho"
-        ){
-
-            descricao =
-                "Brotinho 25cm - "
-                + sabor1;
-
-            valor =
-                SABORES[sabor1]
-                .brotinho;
-
-        }
-        else{
-
-            if(
-                tipo ===
-                "meio"
-            ){
-
-                descricao =
-                    "Grande 35cm Meio a Meio - "
-                    + sabor1
-                    + " / "
-                    + sabor2;
-
-                valor =
-                    Math.max(
-                        SABORES[sabor1]
-                        .grande,
-
-                        SABORES[sabor2]
-                        .grande
-                    );
-
-            }
-            else{
-
-                descricao =
-                    "Grande 35cm - "
-                    + sabor1;
-
-                valor =
-                    SABORES[sabor1]
-                    .grande;
-
-            }
-        }
-
-        adicionarItem({
-            descricao,
-            valor
-        });
-
-    }
-);document
-.getElementById(
-    "btnAdicionarBebida"
-)
-.addEventListener(
-    "click",
-    function(){
-
-        const bebida =
-            document
-            .getElementById(
-                "bebida"
-            );
-
-        const descricao =
-            bebida.options[
-                bebida.selectedIndex
-            ].text;
-
-        const valor =
-            Number(
-                bebida.value
-            );
-
-let ingredientesTexto = "";
-
-if(
-    tamanho === "grande"
-    &&
-    tipo === "meio"
-){
-
-    ingredientesTexto =
-        "50% "
-        + sabor1
-        + ": "
-        + SABORES[sabor1]
-        .ingredientes
-        .join(", ")
-
-        +
-
-        " | 50% "
-
-        + sabor2
-
-        + ": "
-
-        + SABORES[sabor2]
-        .ingredientes
-        .join(", ");
-
-}
-else{
-
-    ingredientesTexto =
-        SABORES[sabor1]
-        .ingredientes
-        .join(", ");
-}
-
-adicionarItem({
-
-    descricao,
-
-    valor,
-
-    ingredientes:
-        ingredientesTexto
-
-});
-        });
-
-    }
-);document
-.getElementById(
-    "btnWhatsApp"
-)
-.addEventListener(
-    "click",
-    function(){
-
-        pedidoAtual.cliente =
-            document
-            .getElementById(
-                "nome"
-            )
-            .value;
-
-        pedidoAtual.telefone =
-            document
-            .getElementById(
-                "telefone"
-            )
-            .value;
-
-        pedidoAtual.endereco =
-            document
-            .getElementById(
-                "endereco"
-            )
-            .value;
-
-        pedidoAtual.observacao =
-            document
-            .getElementById(
-                "observacao"
-            )
-            .value;
-
-        enviarWhatsApp(
-            pedidoAtual
-        );
-
-    }
-);</script>
-Console</body>
 </html>
