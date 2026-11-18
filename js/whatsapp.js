@@ -30,11 +30,30 @@ function gerarMensagemWhatsApp(pedido) {
     mensagem.push("ITENS:");
 
     pedido.itens.forEach(
-        item => {
+    item => {
+
+        mensagem.push(
+            "- " +
+            item.descricao
+        );
+
+        if(
+            item.ingredientes
+        ){
 
             mensagem.push(
-                "- " +
-                item.descricao
+                "Ingredientes:"
+            );
+
+            mensagem.push(
+                item.ingredientes
+            );
+        }
+
+        mensagem.push("");
+
+    }
+);
             );
 
         }
