@@ -1,15 +1,5 @@
 let historicoPedidos = [];
 
-function salvarPedido(pedido) {
-
-    historicoPedidos.push(pedido);
-
-    localStorage.setItem(
-        "historicoPedidos",
-        JSON.stringify(historicoPedidos)
-    );
-}
-
 function carregarHistorico() {
 
     const dados =
@@ -24,3 +14,48 @@ function carregarHistorico() {
 
     }
 }
+
+function salvarHistorico() {
+
+    localStorage.setItem(
+        "historicoPedidos",
+        JSON.stringify(
+            historicoPedidos
+        )
+    );
+}
+
+function adicionarAoHistorico(
+    pedido
+) {
+
+    historicoPedidos.push(
+        pedido
+    );
+
+    salvarHistorico();
+}
+
+function gerarNumeroPedido() {
+
+    let numero = Number(
+        localStorage.getItem(
+            "ultimoPedido"
+        ) || 0
+    );
+
+    numero++;
+
+    localStorage.setItem(
+        "ultimoPedido",
+        numero
+    );
+
+    return (
+        "KV" +
+        String(numero)
+        .padStart(4, "0")
+    );
+}
+
+carregarHistorico();
