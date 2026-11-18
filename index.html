@@ -480,8 +480,12 @@ document
             );
 
         adicionarItem({
-            descricao,
-            valor
+    descricao,
+    valor,
+    ingredientes:
+        SABORES[sabor1]
+        .ingredientes
+        .join(", ")
         });
 
     }
