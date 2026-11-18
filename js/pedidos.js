@@ -7,40 +7,90 @@ let pedidoAtual = {
     total: 0
 };
 
-function adicionarItem(item) {
+function adicionarItem(item){
 
     pedidoAtual.itens.push(item);
 
-    calcularTotal();
+    atualizarCarrinho();
 }
 
-function removerItem(indice) {
+function removerItem(indice){
 
-    pedidoAtual.itens.splice(indice, 1);
+    pedidoAtual.itens.splice(
+        indice,
+        1
+    );
 
-    calcularTotal();
+    atualizarCarrinho();
 }
 
-function limparPedido() {
+function limparPedido(){
 
     pedidoAtual.itens = [];
 
-    pedidoAtual.total = 0;
-
-    calcularTotal();
+    atualizarCarrinho();
 }
 
-function calcularTotal() {
+function atualizarCarrinho(){
+
+    const carrinho =
+        document.getElementById(
+            "carrinho"
+        );
+
+    const totalPedido =
+        document.getElementById(
+            "totalPedido"
+        );
+
+    if(!carrinho){
+        return;
+    }
+
+    let html = "";
 
     let total = 0;
 
-    pedidoAtual.itens.forEach(item => {
+    pedidoAtual.itens.forEach(
+        (item,index)=>{
+            
+            total += item.valor;
 
-        total += item.valor;
+            html += `
+            <div class="item">
 
-    });
+                <b>
+                ${item.descricao}
+                </b>
 
-    pedidoAtual.total = total;
+                <br>
 
-    return total;
+                R$ ${item.valor.toFixed(2)}
+
+                <br>
+
+                <button
+                onclick="removerItem(${index})">
+
+                Excluir
+
+                </button>
+
+            </div>
+            `;
+        }
+    );
+
+    carrinho.innerHTML =
+        html;
+
+    pedidoAtual.total =
+        total;
+
+    if(totalPedido){
+
+        totalPedido.innerText =
+            total.toFixed(2);
+
+    }
 }
