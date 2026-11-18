@@ -153,7 +153,312 @@ Imprimir Pedido
 </button>
 
 </div>
+<script>
 
+function carregarSabores(){
+
+    const tamanho =
+        document.getElementById(
+            "tamanho"
+        ).value;
+
+    const sabor1 =
+        document.getElementById(
+            "sabor1"
+        );
+
+    const sabor2 =
+        document.getElementById(
+            "sabor2"
+        );
+
+    sabor1.innerHTML = "";
+    sabor2.innerHTML = "";
+
+    Object.keys(
+        SABORES
+    ).forEach(nome => {
+
+        const preco =
+            tamanho === "brotinho"
+            ? SABORES[nome].brotinho
+            : SABORES[nome].grande;
+
+        sabor1.innerHTML +=
+            `<option value="${nome}">
+            ${nome} - R$ ${preco.toFixed(2)}
+            </option>`;
+
+        sabor2.innerHTML +=
+            `<option value="${nome}">
+            ${nome} - R$ ${preco.toFixed(2)}
+            </option>`;
+    });
+
+    atualizarVisualPedido();
+}
+
+function atualizarVisualPedido(){
+
+    const tamanho =
+        document.getElementById(
+            "tamanho"
+        ).value;
+
+    const tipo =
+        document.getElementById(
+            "tipoPizza"
+        ).value;
+
+    const sabor2 =
+        document.getElementById(
+            "sabor2"
+        );
+
+    if(tamanho === "brotinho"){
+
+        document
+        .getElementById(
+            "tipoPizza"
+        )
+        .disabled = true;
+
+        document
+        .getElementById(
+            "tipoPizza"
+        )
+        .value = "inteira";
+
+        sabor2.style.display =
+            "none";
+
+    }else{
+
+        document
+        .getElementById(
+            "tipoPizza"
+        )
+        .disabled = false;
+
+        sabor2.style.display =
+            tipo === "meio"
+            ? "block"
+            : "none";
+    }
+}
+
+document
+.getElementById(
+    "btnAdicionarPizza"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        const tamanho =
+            document
+            .getElementById(
+                "tamanho"
+            )
+            .value;
+
+        const tipo =
+            document
+            .getElementById(
+                "tipoPizza"
+            )
+            .value;
+
+        const sabor1 =
+            document
+            .getElementById(
+                "sabor1"
+            )
+            .value;
+
+        const sabor2 =
+            document
+            .getElementById(
+                "sabor2"
+            )
+            .value;
+
+        let descricao = "";
+        let valor = 0;
+        let ingredientes = "";
+
+        if(
+            tamanho === "brotinho"
+        ){
+
+            descricao =
+                "Brotinho 25cm - "
+                + sabor1;
+
+            valor =
+                SABORES[sabor1]
+                .brotinho;
+
+            ingredientes =
+                SABORES[sabor1]
+                .ingredientes
+                .join(", ");
+
+        }else{
+
+            if(tipo === "meio"){
+
+                descricao =
+                    "Grande 35cm Meio a Meio - "
+                    + sabor1
+                    + " / "
+                    + sabor2;
+
+                valor =
+                    Math.max(
+                        SABORES[
+                            sabor1
+                        ].grande,
+
+                        SABORES[
+                            sabor2
+                        ].grande
+                    );
+
+                ingredientes =
+                    "50% "
+                    + sabor1
+                    + ": "
+                    + SABORES[
+                        sabor1
+                    ].ingredientes.join(", ")
+
+                    +
+
+                    " | 50% "
+
+                    + sabor2
+
+                    + ": "
+
+                    + SABORES[
+                        sabor2
+                    ].ingredientes.join(", ");
+
+            }else{
+
+                descricao =
+                    "Grande 35cm - "
+                    + sabor1;
+
+                valor =
+                    SABORES[
+                        sabor1
+                    ].grande;
+
+                ingredientes =
+                    SABORES[
+                        sabor1
+                    ].ingredientes.join(", ");
+            }
+        }
+
+        adicionarItem({
+            descricao,
+            valor,
+            ingredientes
+        });
+    }
+);
+
+document
+.getElementById(
+    "btnAdicionarBebida"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        const bebida =
+            document
+            .getElementById(
+                "bebida"
+            );
+
+        adicionarItem({
+
+            descricao:
+                bebida.options[
+                    bebida.selectedIndex
+                ].text,
+
+            valor:
+                Number(
+                    bebida.value
+                ),
+
+            ingredientes: ""
+
+        });
+    }
+);
+
+document
+.getElementById(
+    "btnWhatsApp"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        pedidoAtual.cliente =
+            document
+            .getElementById(
+                "nome"
+            )
+            .value;
+
+        pedidoAtual.telefone =
+            document
+            .getElementById(
+                "telefone"
+            )
+            .value;
+
+        pedidoAtual.endereco =
+            document
+            .getElementById(
+                "endereco"
+            )
+            .value;
+
+        enviarWhatsApp(
+            pedidoAtual
+        );
+    }
+);
+
+document
+.getElementById(
+    "tamanho"
+)
+.addEventListener(
+    "change",
+    carregarSabores
+);
+
+document
+.getElementById(
+    "tipoPizza"
+)
+.addEventListener(
+    "change",
+    atualizarVisualPedido
+);
+
+carregarSabores();
+
+</script>
 </body>
 
 </html>
