@@ -197,5 +197,168 @@ document
 .style.display = "none";
 
 </script>
-</body>
+<script>
+ 
+function carregarSabores(){
+ 
+const tamanho =
+document.getElementById(
+"tamanho"
+).value;
+ 
+const sabor1 =
+document.getElementById(
+"sabor1"
+);
+ 
+const sabor2 =
+document.getElementById(
+"sabor2"
+);
+ 
+sabor1.innerHTML = "";
+ 
+sabor2.innerHTML = "";
+ 
+Object.keys(
+SABORES
+).forEach(
+nome => {
+ 
+const preco =
+tamanho === "brotinho"
+?
+SABORES[nome]
+.brotinho
+:
+SABORES[nome]
+.grande;
+ 
+const texto =
+nome +
+" - R$ " +
+preco.toFixed(2);
+ 
+sabor1.innerHTML +=
+`<option value="${nome}">
+${texto}
+</option>`;
+ 
+sabor2.innerHTML +=
+`<option value="${nome}">
+${texto}
+</option>`;
+}
+);
+ 
+atualizarVisualPedido();
+}
+ 
+function atualizarVisualPedido(){
+ 
+const tamanho =
+document.getElementById(
+"tamanho"
+).value;
+ 
+const tipo =
+document.getElementById(
+"tipoPizza"
+).value;
+ 
+const labelSabor2 =
+document.getElementById(
+"labelSabor2"
+);
+ 
+const sabor2 =
+document.getElementById(
+"sabor2"
+);
+ 
+if(
+tamanho ===
+"brotinho"
+){
+ 
+document
+.getElementById(
+"tipoPizza"
+)
+.value =
+"inteira";
+ 
+document
+.getElementById(
+"tipoPizza"
+)
+.disabled = true;
+ 
+labelSabor2
+.style.display =
+"none";
+ 
+sabor2
+.style.display =
+"none";
+ 
+}
+else{
+ 
+document
+.getElementById(
+"tipoPizza"
+)
+.disabled = false;
+ 
+if(
+tipo ===
+"meio"
+){
+ 
+labelSabor2
+.style.display =
+"block";
+ 
+sabor2
+.style.display =
+"block";
+ 
+}
+else{
+ 
+labelSabor2
+.style.display =
+"none";
+ 
+sabor2
+.style.display =
+"none";
+ 
+}
+}
+}
+ 
+document
+.getElementById(
+"tamanho"
+)
+.addEventListener(
+"change",
+carregarSabores
+);
+ 
+document
+.getElementById(
+"tipoPizza"
+)
+.addEventListener(
+"change",
+atualizarVisualPedido
+);
+ 
+carregarSabores();
+ 
+</script>
+Console</body>
 </html>
