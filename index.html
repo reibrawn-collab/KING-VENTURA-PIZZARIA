@@ -432,7 +432,10 @@ document
 
         pedidoAtual.observacao =
             document.getElementById("observacao").value;
-
+        
+        pedidoAtual.taxaEntrega =
+            taxaEntrega;
+        
         enviarWhatsApp(
             pedidoAtual
         );
