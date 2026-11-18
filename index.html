@@ -479,13 +479,53 @@ document
                 bebida.value
             );
 
-        adicionarItem({
-    descricao,
-    valor,
-    ingredientes:
-        SABORES[sabor1]
+let ingredientesTexto = "";
+
+if(
+    tamanho === "grande"
+    &&
+    tipo === "meio"
+){
+
+    ingredientesTexto =
+        "50% "
+        + sabor1
+        + ": "
+        + SABORES[sabor1]
         .ingredientes
         .join(", ")
+
+        +
+
+        " | 50% "
+
+        + sabor2
+
+        + ": "
+
+        + SABORES[sabor2]
+        .ingredientes
+        .join(", ");
+
+}
+else{
+
+    ingredientesTexto =
+        SABORES[sabor1]
+        .ingredientes
+        .join(", ");
+}
+
+adicionarItem({
+
+    descricao,
+
+    valor,
+
+    ingredientes:
+        ingredientesTexto
+
+});
         });
 
     }
