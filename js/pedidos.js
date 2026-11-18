@@ -56,27 +56,33 @@ function atualizarCarrinho(){
             
             total += item.valor;
 
-            html += `
-            <div class="item">
+html += `
+<div class="item">
 
-                <b>
-                ${item.descricao}
-                </b>
+    <b>
+    ${item.descricao}
+    </b>
 
-                <br>
+    <br>
 
-                R$ ${item.valor.toFixed(2)}
+    ${item.ingredientes || ""}
 
-                <br>
+    <br><br>
 
-                <button
-                onclick="removerItem(${index})">
+    Valor:
 
-                Excluir
+    R$ ${item.valor.toFixed(2)}
 
-                </button>
+    <br><br>
 
-            </div>
+    <button
+    onclick="removerItem(${index})">
+
+    Excluir
+
+    </button>
+
+</div>
             `;
         }
     );
