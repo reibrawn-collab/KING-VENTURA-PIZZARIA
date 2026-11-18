@@ -359,6 +359,102 @@ atualizarVisualPedido
  
 carregarSabores();
  
-</script>
+document
+.getElementById(
+    "btnAdicionarPizza"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        const tamanho =
+            document
+            .getElementById(
+                "tamanho"
+            )
+            .value;
+
+        const tipo =
+            document
+            .getElementById(
+                "tipoPizza"
+            )
+            .value;
+
+        const sabor1 =
+            document
+            .getElementById(
+                "sabor1"
+            )
+            .value;
+
+        const sabor2 =
+            document
+            .getElementById(
+                "sabor2"
+            )
+            .value;
+
+        let descricao = "";
+
+        let valor = 0;
+
+        if(
+            tamanho ===
+            "brotinho"
+        ){
+
+            descricao =
+                "Brotinho 25cm - "
+                + sabor1;
+
+            valor =
+                SABORES[sabor1]
+                .brotinho;
+
+        }
+        else{
+
+            if(
+                tipo ===
+                "meio"
+            ){
+
+                descricao =
+                    "Grande 35cm Meio a Meio - "
+                    + sabor1
+                    + " / "
+                    + sabor2;
+
+                valor =
+                    Math.max(
+                        SABORES[sabor1]
+                        .grande,
+
+                        SABORES[sabor2]
+                        .grande
+                    );
+
+            }
+            else{
+
+                descricao =
+                    "Grande 35cm - "
+                    + sabor1;
+
+                valor =
+                    SABORES[sabor1]
+                    .grande;
+
+            }
+        }
+
+        adicionarItem({
+            descricao,
+            valor
+        });
+
+    }
+);</script>
 Console</body>
 </html>
