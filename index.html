@@ -455,6 +455,36 @@ document
         });
 
     }
+);document
+.getElementById(
+    "btnAdicionarBebida"
+)
+.addEventListener(
+    "click",
+    function(){
+
+        const bebida =
+            document
+            .getElementById(
+                "bebida"
+            );
+
+        const descricao =
+            bebida.options[
+                bebida.selectedIndex
+            ].text;
+
+        const valor =
+            Number(
+                bebida.value
+            );
+
+        adicionarItem({
+            descricao,
+            valor
+        });
+
+    }
 );</script>
 Console</body>
 </html>
