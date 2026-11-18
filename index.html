@@ -416,32 +416,28 @@ document
     function(){
 
         pedidoAtual.cliente =
-            document
-            .getElementById(
-                "nome"
-            )
-            .value;
+            document.getElementById("nome").value;
 
         pedidoAtual.telefone =
-            document
-            .getElementById(
-                "telefone"
-            )
-            .value;
+            document.getElementById("telefone").value;
+
+        pedidoAtual.cep =
+            document.getElementById("cep").value;
+
+        pedidoAtual.numero =
+            document.getElementById("numero").value;
 
         pedidoAtual.endereco =
-            document
-            .getElementById(
-                "endereco"
-            )
-            .value;
+            document.getElementById("endereco").value;
+
+        pedidoAtual.observacao =
+            document.getElementById("observacao").value;
 
         enviarWhatsApp(
             pedidoAtual
         );
     }
 );
-
 document
 .getElementById(
     "tamanho"
