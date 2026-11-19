@@ -404,41 +404,31 @@ document
                     ].ingredientes.join(", ");
             }
         }
-const adicionaisSelecionados = [];
- 
-let valorAdicionais = 0;
- 
-document
-.querySelectorAll(".adicional:checked")
-.forEach(item => {
- 
-adicionaisSelecionados.push(
-item.dataset.nome
+const adicional =
+document.getElementById(
+    "adicional"
 );
- 
-valorAdicionais += Number(
-item.dataset.valor
-);
- 
-});
-      if(adicionaisSelecionados.length){
 
-    descricao += " + " +
-    adicionaisSelecionados.join(", ");
-}
+const valorAdicionais =
+Number(adicional.value);
+
+const nomeAdicional =
+adicional.options[
+    adicional.selectedIndex
+].text;
 
 adicionarItem({
 
-    descricao,
+    descricao:
+        valorAdicionais > 0
+        ? descricao + " + " + nomeAdicional
+        : descricao,
 
     valor:
         valor +
         valorAdicionais,
 
     ingredientes,
-
-    adicionais:
-        adicionaisSelecionados,
 
     observacao:
         document
