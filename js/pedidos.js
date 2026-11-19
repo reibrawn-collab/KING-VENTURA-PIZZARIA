@@ -1,36 +1,3 @@
-let pedidoAtual = {
-    cliente: "",
-    telefone: "",
-    endereco: "",
-    observacao: "",
-    itens: [],
-    total: 0
-};
-
-function adicionarItem(item){
-
-    pedidoAtual.itens.push(item);
-
-    atualizarCarrinho();
-}
-
-function removerItem(indice){
-
-    pedidoAtual.itens.splice(
-        indice,
-        1
-    );
-
-    atualizarCarrinho();
-}
-
-function limparPedido(){
-
-    pedidoAtual.itens = [];
-
-    atualizarCarrinho();
-}
-
 function atualizarCarrinho(){
 
     const carrinho =
@@ -48,41 +15,64 @@ function atualizarCarrinho(){
     }
 
     let html = "";
-
     let total = 0;
 
     pedidoAtual.itens.forEach(
+
         (item,index)=>{
-            
+
             total += item.valor;
 
-html += `
-<div class="item">
+            html += `
+            <div class="item">
 
-    <b>
-    ${item.descricao}
-    </b>
+                <b>${item.descricao}</b>
 
-    <br>
+                <br>
 
-    ${item.ingredientes || ""}
+                ${item.ingredientes || ""}
 
-    <br><br>
+                <br>
+            `;
 
-    Valor:
+            if(
+                item.adicionais &&
+                item.adicionais.length
+            ){
 
-    R$ ${item.valor.toFixed(2)}
+                html += `
+                <br>
+                <b>Adicionais:</b>
+                <br>
+                ${item.adicionais.join("<br>")}
+                `;
+            }
 
-    <br><br>
+            if(
+                item.observacao
+            ){
 
-    <button
-    onclick="removerItem(${index})">
+                html += `
+                <br>
+                <b>Obs:</b>
+                ${item.observacao}
+                `;
+            }
 
-    Excluir
+            html += `
+                <br><br>
 
-    </button>
+                Valor:
+                R$ ${item.valor.toFixed(2)}
 
-</div>
+                <br><br>
+
+                <button
+                onclick="removerItem(${index})">
+                Excluir
+                </button>
+
+            </div>
             `;
         }
     );
@@ -97,40 +87,5 @@ html += `
 
         totalPedido.innerText =
             total.toFixed(2);
-
     }
-}
-function salvarPedidoAtual() {
- 
-pedidoAtual.cliente =
-document.getElementById(
-"nome"
-).value;
- 
-pedidoAtual.telefone =
-document.getElementById(
-"telefone"
-).value;
- 
-pedidoAtual.endereco =
-document.getElementById(
-"endereco"
-).value;
- 
-pedidoAtual.observacao =
-document.getElementById(
-"observacao"
-).value;
- 
-registrarPedido(
-JSON.parse(
-JSON.stringify(
-pedidoAtual
-)
-)
-);
- 
-alert(
-"Pedido salvo com sucesso."
-);
 }
