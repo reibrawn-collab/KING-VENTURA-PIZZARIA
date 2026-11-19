@@ -15,10 +15,30 @@ function enviarWhatsApp(pedido) {
         pedido.telefone +
         "\n";
 
-    mensagem +=
-        "Endereço: " +
-        pedido.endereco +
-        "\n\n";
+   mensagem +=
+"CEP: " +
+pedido.cep +
+"\n";
+ 
+mensagem +=
+"Endereço: " +
+pedido.endereco +
+"\n";
+ 
+mensagem +=
+"Número: " +
+pedido.numero +
+"\n";
+ 
+mensagem +=
+"Observação: " +
+pedido.observacao +
+"\n";
+ 
+mensagem +=
+"Taxa de Entrega: R$ " +
+pedido.taxaEntrega.toFixed(2) +
+"\n\n";
 
     mensagem +=
         "ITENS:\n";
