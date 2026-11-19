@@ -172,32 +172,26 @@ Adicionar Bebida
 
 <h2>Carrinho</h2>
 
-<div id="carrinho">
-</div>
+<div id="carrinho"></div>
 
 <h3>
-
 Taxa de Entrega:
-
 R$ <span id="taxaEntrega">0,00</span>
+</h3>
 
+<h3>
+Total do Pedido:
+R$ <span id="totalPedido">0,00</span>
 </h3>
 
 <div id="mensagemEntrega"></div>
-    
 
-<button
-id="btnWhatsApp">
-
+<button id="btnWhatsApp">
 Enviar WhatsApp
-
 </button>
 
-<button
-onclick="window.print()">
-
+<button onclick="window.print()">
 Imprimir Pedido
-
 </button>
 
 </div>
@@ -444,6 +438,7 @@ adicionarItem({
         .value
 
 });
+        atualizarTotal();
     }
 );
 
@@ -476,6 +471,7 @@ document
             ingredientes: ""
 
         });
+        atualizarTotal();
     }
 );
 
@@ -531,7 +527,27 @@ document
     atualizarVisualPedido
 );
 let taxaEntrega = 0;
+function atualizarTotal() {
 
+    let subtotal = 0;
+
+    pedidoAtual.itens.forEach(
+        item => {
+            subtotal += item.valor;
+        }
+    );
+
+    const total =
+        subtotal +
+        taxaEntrega;
+
+    document
+    .getElementById(
+        "totalPedido"
+    )
+    .innerText =
+        total.toFixed(2);
+}
 function calcularTaxaEntrega() {
 
     const cep =
@@ -585,26 +601,8 @@ function calcularTaxaEntrega() {
     )
     .innerText =
     taxaEntrega.toFixed(2);
-
-    const totalAtual =
-        parseFloat(
-            document
-            .getElementById(
-                "totalPedido"
-            )
-            .innerText
-            .replace(",", ".")
-        ) || 0;
-
-    document
-    .getElementById(
-        "totalPedido"
-    )
-    .innerText =
-    (
-        totalAtual +
-        taxaEntrega
-    ).toFixed(2);
+    
+atualizarTotal();
 }
 
 document
@@ -643,15 +641,11 @@ async function buscarCEP() {
 
     try {
 
-       const resposta =
-    await fetch(
-        "https://viacep.com.br/ws/"
-        +
-        cep
-        +
-        "/json/"
-
-            );
+      const resposta = await fetch(
+    "https://viacep.com.br/ws/" +
+    cep +
+    "/json/"
+);
 
         const dados =
             await resposta.json();
@@ -683,6 +677,6 @@ async function buscarCEP() {
 carregarSabores();
 
 </script>
-</div></body>
 
+</body>
 </html>
