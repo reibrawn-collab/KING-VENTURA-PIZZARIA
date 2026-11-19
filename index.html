@@ -82,7 +82,52 @@ Meio a Meio
 id="sabor2"
 style="display:none">
 </select>
-
+<h3>Adicionais</h3>
+ 
+<label>
+<input type="checkbox" class="adicional" data-nome="Milho Verde" data-valor="4">
+Milho Verde (+R$ 4,00)
+</label><br>
+ 
+<label>
+<input type="checkbox" class="adicional" data-nome="Ervilha" data-valor="4">
+Ervilha (+R$ 4,00)
+</label><br>
+ 
+<label>
+<input type="checkbox" class="adicional" data-nome="Cebola" data-valor="4">
+Cebola (+R$ 4,00)
+</label><br>
+ 
+<label>
+<input type="checkbox" class="adicional" data-nome="Calabresa" data-valor="4">
+Calabresa (+R$ 4,00)
+</label><br>
+ 
+<label>
+<input type="checkbox" class="adicional" data-nome="Presunto" data-valor="4">
+Presunto (+R$ 4,00)
+</label><br>
+ 
+<label>
+<input type="checkbox" class="adicional" data-nome="Catupiry" data-valor="4">
+Catupiry (+R$ 4,00)
+</label><br>
+ 
+<label>
+<input type="checkbox" class="adicional" data-nome="Muçarela Extra" data-valor="5">
+Muçarela Extra (+R$ 5,00)
+</label><br>
+ 
+<label>
+<input type="checkbox" class="adicional" data-nome="Bacon Extra" data-valor="5">
+Bacon Extra (+R$ 5,00)
+</label><br>
+ 
+<textarea
+id="obsPizza"
+placeholder="Ex: sem cebola, assar bem, borda crocante">
+</textarea>
 <div id="ingredientes">
 </div>
 
@@ -366,12 +411,44 @@ document
                     ].ingredientes.join(", ");
             }
         }
+const adicionaisSelecionados = [];
+ 
+let valorAdicionais = 0;
+ 
+document
+.querySelectorAll(".adicional:checked")
+.forEach(item => {
+ 
+adicionaisSelecionados.push(
+item.dataset.nome
+);
+ 
+valorAdicionais += Number(
+item.dataset.valor
+);
+ 
+});
+       adicionarItem({
 
-        adicionarItem({
-            descricao,
-            valor,
-            ingredientes
-        });
+    descricao,
+
+    valor:
+        valor +
+        valorAdicionais,
+
+    ingredientes,
+
+    adicionais:
+        adicionaisSelecionados,
+
+    observacao:
+        document
+        .getElementById(
+            "obsPizza"
+        )
+        .value
+
+});
     }
 );
 
@@ -388,7 +465,14 @@ document
             .getElementById(
                 "bebida"
             );
+if(
+    adicionaisSelecionados.length
+){
 
+    descricao +=
+        " + " +
+        adicionaisSelecionados.join(", ");
+}
         adicionarItem({
 
             descricao:
