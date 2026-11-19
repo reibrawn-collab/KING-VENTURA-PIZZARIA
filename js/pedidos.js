@@ -1,90 +1,71 @@
-function atualizarCarrinho(){
+let pedidoAtual = {
+    cliente: "",
+    telefone: "",
+    endereco: "",
+    observacao: "",
+    itens: [],
+    total: 0
+};
+
+function adicionarItem(item) {
+    pedidoAtual.itens.push(item);
+    atualizarCarrinho();
+}
+
+function removerItem(indice) {
+    pedidoAtual.itens.splice(indice, 1);
+    atualizarCarrinho();
+}
+
+function limparPedido() {
+    pedidoAtual.itens = [];
+    atualizarCarrinho();
+}
+
+function atualizarCarrinho() {
 
     const carrinho =
-        document.getElementById(
-            "carrinho"
-        );
+        document.getElementById("carrinho");
 
     const totalPedido =
-        document.getElementById(
-            "totalPedido"
-        );
+        document.getElementById("totalPedido");
 
-    if(!carrinho){
-        return;
-    }
+    if (!carrinho) return;
 
     let html = "";
     let total = 0;
 
     pedidoAtual.itens.forEach(
+        (item, index) => {
 
-        (item,index)=>{
-
-            total += item.valor;
+            total += Number(item.valor);
 
             html += `
             <div class="item">
+                <b>${item.descricao}</b><br>
 
-                <b>${item.descricao}</b>
+                ${item.ingredientes || ""}<br>
 
-                <br>
+                ${item.observacao || ""}<br><br>
 
-                ${item.ingredientes || ""}
-
-                <br>
-            `;
-
-            if(
-                item.adicionais &&
-                item.adicionais.length
-            ){
-
-                html += `
-                <br>
-                <b>Adicionais:</b>
-                <br>
-                ${item.adicionais.join("<br>")}
-                `;
-            }
-
-            if(
-                item.observacao
-            ){
-
-                html += `
-                <br>
-                <b>Obs:</b>
-                ${item.observacao}
-                `;
-            }
-
-            html += `
-                <br><br>
-
-                Valor:
-                R$ ${item.valor.toFixed(2)}
+                Valor: R$ ${Number(item.valor).toFixed(2)}
 
                 <br><br>
 
                 <button
-                onclick="removerItem(${index})">
-                Excluir
+                    onclick="removerItem(${index})">
+                    Excluir
                 </button>
-
             </div>
             `;
         }
     );
 
-    carrinho.innerHTML =
-        html;
+    carrinho.innerHTML = html;
 
-    pedidoAtual.total =
-        total;
+    pedidoAtual.total = total;
 
-    if(totalPedido){
-
+    if (totalPedido) {
         totalPedido.innerText =
             total.toFixed(2);
     }
