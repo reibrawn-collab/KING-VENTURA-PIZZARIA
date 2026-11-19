@@ -83,52 +83,45 @@ id="sabor2"
 style="display:none">
 </select>
 <h3>Adicionais</h3>
- 
+
 <label>
-<input type="checkbox" class="adicional" data-nome="Milho Verde" data-valor="4">
-Milho Verde (+R$ 4,00)
+  <input type="checkbox" class="adicional" data-nome="Borda Catupiry" data-valor="8">
+  Borda Catupiry (R$ 8,00)
 </label><br>
- 
+
 <label>
-<input type="checkbox" class="adicional" data-nome="Ervilha" data-valor="4">
-Ervilha (+R$ 4,00)
+  <input type="checkbox" class="adicional" data-nome="Borda Cheddar" data-valor="8">
+  Borda Cheddar (R$ 8,00)
 </label><br>
- 
+
 <label>
-<input type="checkbox" class="adicional" data-nome="Cebola" data-valor="4">
-Cebola (+R$ 4,00)
+  <input type="checkbox" class="adicional" data-nome="Presunto" data-valor="4">
+  Presunto (R$ 4,00)
 </label><br>
- 
+
 <label>
-<input type="checkbox" class="adicional" data-nome="Calabresa" data-valor="4">
-Calabresa (+R$ 4,00)
+  <input type="checkbox" class="adicional" data-nome="Catupiry" data-valor="4">
+  Catupiry (R$ 4,00)
 </label><br>
- 
+
 <label>
-<input type="checkbox" class="adicional" data-nome="Presunto" data-valor="4">
-Presunto (+R$ 4,00)
+  <input type="checkbox" class="adicional" data-nome="Muçarela Extra" data-valor="5">
+  Muçarela Extra (R$ 5,00)
 </label><br>
- 
+
 <label>
-<input type="checkbox" class="adicional" data-nome="Catupiry" data-valor="4">
-Catupiry (+R$ 4,00)
+  <input type="checkbox" class="adicional" data-nome="Bacon Extra" data-valor="5">
+  Bacon Extra (R$ 5,00)
 </label><br>
- 
-<label>
-<input type="checkbox" class="adicional" data-nome="Muçarela Extra" data-valor="5">
-Muçarela Extra (+R$ 5,00)
-</label><br>
- 
-<label>
-<input type="checkbox" class="adicional" data-nome="Bacon Extra" data-valor="5">
-Bacon Extra (+R$ 5,00)
-</label><br>
- 
+
+<h3>Observação</h3>
+
 <textarea
-id="obsPizza"
-placeholder="Ex: sem cebola, assar bem, borda crocante">
+  id="obsPizza"
+  placeholder="Ex: sem cebola, assar bem, borda crocante">
 </textarea>
-<div id="ingredientes">
+
+<div id="ingredientes"></div>
 </div>
 
 <button
@@ -428,7 +421,13 @@ item.dataset.valor
 );
  
 });
-       adicionarItem({
+      if(adicionaisSelecionados.length){
+
+    descricao += " + " +
+    adicionaisSelecionados.join(", ");
+}
+
+adicionarItem({
 
     descricao,
 
@@ -465,14 +464,7 @@ document
             .getElementById(
                 "bebida"
             );
-if(
-    adicionaisSelecionados.length
-){
 
-    descricao +=
-        " + " +
-        adicionaisSelecionados.join(", ");
-}
         adicionarItem({
 
             descricao:
