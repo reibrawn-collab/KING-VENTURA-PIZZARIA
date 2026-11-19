@@ -43,17 +43,39 @@ pedido.taxaEntrega.toFixed(2) +
     mensagem +=
         "ITENS:\n";
 
-    pedido.itens.forEach(
-        item => {
+   pedido.itens.forEach(
+    item => {
+
+        mensagem +=
+            item.descricao +
+            " - R$ " +
+            item.valor.toFixed(2) +
+            "\n";
+
+        if(
+            item.adicionais &&
+            item.adicionais.length
+        ){
 
             mensagem +=
-                item.descricao +
-                " - R$ " +
-                item.valor.toFixed(2) +
+                "Adicionais: " +
+                item.adicionais.join(", ") +
                 "\n";
-
         }
-    );
+
+        if(
+            item.observacao
+        ){
+
+            mensagem +=
+                "Obs: " +
+                item.observacao +
+                "\n";
+        }
+
+        mensagem += "\n";
+    }
+);
 
     mensagem +=
         "\nTOTAL: R$ " +
