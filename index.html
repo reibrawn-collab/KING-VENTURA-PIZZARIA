@@ -25,6 +25,20 @@ href="css/style.css">
 
 <div class="card">
 
+<h2>📥 Importar Pedido WhatsApp</h2>
+
+<textarea
+    id="pedidoWhats"
+    rows="8"
+    placeholder="Cole aqui a mensagem recebida no WhatsApp">
+</textarea>
+
+<button id="btnImportarWhats">
+    Importar Pedido
+</button>
+
+</div>
+    
 <h2>Cliente</h2>
 
 <label>Nome</label>
@@ -674,6 +688,67 @@ async function buscarCEP() {
     }
 }    
 carregarSabores();
+
+document
+.getElementById(
+    "btnImportarWhats"
+)
+.addEventListener(
+    "click",
+    importarPedidoWhats
+);
+
+function importarPedidoWhats(){
+
+    const texto =
+        document
+        .getElementById(
+            "pedidoWhats"
+        )
+        .value;
+
+    const nome =
+        texto.match(
+            /Nome:\s*(.*)/i
+        );
+
+    const telefone =
+        texto.match(
+            /Telefone:\s*(.*)/i
+        );
+
+    const cep =
+        texto.match(
+            /CEP:\s*(.*)/i
+        );
+
+    const numero =
+        texto.match(
+            /Número:\s*(.*)/i
+        );
+
+    document
+    .getElementById("nome")
+    .value =
+    nome ? nome[1].trim() : "";
+
+    document
+    .getElementById("telefone")
+    .value =
+    telefone ? telefone[1].trim() : "";
+
+    document
+    .getElementById("cep")
+    .value =
+    cep ? cep[1].trim() : "";
+
+    document
+    .getElementById("numero")
+    .value =
+    numero ? numero[1].trim() : "";
+
+    alert("Pedido importado!");
+}
 
 </script>
 
