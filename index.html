@@ -479,7 +479,9 @@ document
             .getElementById(
                 "bebida"
             );
-
+if (!bebida.value) {
+    return;
+}
         adicionarItem({
 
             descricao:
