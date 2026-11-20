@@ -206,7 +206,11 @@ Enviar WhatsApp
 <button onclick="window.print()">
 Imprimir Pedido
 </button>
-
+    
+<button onclick="novoPedido()">
+🆕 Novo Pedido
+</button>
+    
 </div>
 <script>
 
@@ -844,6 +848,14 @@ calcularTaxaEntrega();
     
 alert("Pedido importado!");
 
+}
+function novoPedido() {
+
+    if (!confirm("Deseja limpar o pedido atual e iniciar um novo pedido?")) {
+        return;
+    }
+
+    location.reload();
 }
 
 </script>
