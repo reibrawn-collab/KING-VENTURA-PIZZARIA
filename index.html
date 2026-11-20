@@ -296,9 +296,9 @@ function carregarSabores(){
             "sabor2"
         );
 
-    sabor1.innerHTML =
+sabor1.innerHTML =
 '<option value="">🍕 Selecione um sabor</option>';
- 
+
 sabor2.innerHTML =
 '<option value="">🍕 Selecione um sabor</option>';
 
@@ -503,7 +503,6 @@ adicional.options[
 ].text;
 
 adicionarItem({
-
     descricao:
         valorAdicionais > 0
         ? descricao + " + " + nomeAdicional
@@ -521,9 +520,13 @@ adicionarItem({
             "obsPizza"
         )
         .value
-
 });
-        atualizarTotal();
+
+document.getElementById("adicional").selectedIndex = 0;
+document.getElementById("obsPizza").value = "";
+
+atualizarTotal();
+
     }
 );
 
@@ -761,7 +764,7 @@ async function buscarCEP() {
 
     }
 }    
-nicializarPedido();
+inicializarPedido();
 carregarSabores();
 
 document
