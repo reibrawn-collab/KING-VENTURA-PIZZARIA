@@ -9,7 +9,17 @@
 content="width=device-width, initial-scale=1.0">
 
 <title>KING VENTURA PIZZARIA</title>
+<div class="card">
+    <h2 id="numeroPedido">
+        Pedido #0001
+    </h2>
 
+    <p id="dataPedido"></p>
+
+    <p id="statusPedido">
+        🟡 Aberto
+    </p>
+</div>
 <link rel="stylesheet"
 href="css/style.css">
 
@@ -217,6 +227,44 @@ Imprimir Pedido
     
 </div>
 <script>
+
+function inicializarPedido() {
+
+    let ultimoPedido =
+        localStorage.getItem(
+            "ultimoPedido"
+        ) || 0;
+
+    ultimoPedido++;
+
+    localStorage.setItem(
+        "ultimoPedido",
+        ultimoPedido
+    );
+
+    document
+    .getElementById(
+        "numeroPedido"
+    )
+    .innerText =
+        "Pedido #" +
+        String(
+            ultimoPedido
+        ).padStart(
+            4,
+            "0"
+        );
+
+    document
+    .getElementById(
+        "dataPedido"
+    )
+    .innerText =
+        new Date()
+        .toLocaleString(
+            "pt-BR"
+        );
+}
 
 function carregarSabores(){
 
@@ -700,6 +748,7 @@ async function buscarCEP() {
 
     }
 }    
+nicializarPedido();
 carregarSabores();
 
 document
