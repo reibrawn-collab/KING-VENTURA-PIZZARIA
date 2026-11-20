@@ -131,3 +131,50 @@ button:hover{
         overflow-wrap: break-word;
     }
 }
+/* IMPRESSÃO TÉRMICA */
+
+@media print {
+
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        margin: 0;
+        padding: 0;
+        font-size: 12px;
+    }
+
+    img {
+        display: none !important;
+    }
+
+    button {
+        display: none !important;
+    }
+
+    textarea {
+        border: none !important;
+    }
+
+    select {
+        border: none !important;
+    }
+
+    input {
+        border: none !important;
+    }
+
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #000 !important;
+        background: #fff !important;
+    }
+
+    #numeroPedido {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    #statusPedido {
+        color: #000 !important;
+    }
+}
