@@ -157,7 +157,11 @@ Adicionar Pizza
 <h2>Bebidas</h2>
 
 <select id="bebida">
-
+    
+<option value="">
+Nenhuma bebida
+</option>
+    
 <option value="16">
 Coca-Cola 2 Litros - R$ 16,00
 </option>
@@ -231,8 +235,11 @@ function carregarSabores(){
             "sabor2"
         );
 
-    sabor1.innerHTML = "";
-    sabor2.innerHTML = "";
+    sabor1.innerHTML =
+'<option value="">🍕 Selecione um sabor</option>';
+ 
+sabor2.innerHTML =
+'<option value="">🍕 Selecione um sabor</option>';
 
     Object.keys(
         SABORES
