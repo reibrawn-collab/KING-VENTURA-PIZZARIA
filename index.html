@@ -960,7 +960,55 @@ function novoPedido() {
 
     location.reload();
 }
+function salvarHistoricoPedido() {
 
+    const historico =
+        JSON.parse(
+            localStorage.getItem(
+                "historicoPedidos"
+            ) || "[]"
+        );
+
+    historico.push({
+
+        codigo:
+            document.getElementById(
+                "numeroPedido"
+            ).innerText,
+
+        data:
+            document.getElementById(
+                "dataPedido"
+            ).innerText,
+
+        cliente:
+            document.getElementById(
+                "nome"
+            ).value,
+
+        telefone:
+            document.getElementById(
+                "telefone"
+            ).value,
+
+        total:
+            document.getElementById(
+                "totalPedido"
+            ).innerText,
+
+        status:
+            "Aberto"
+
+    });
+
+    localStorage.setItem(
+        "historicoPedidos",
+        JSON.stringify(
+            historico
+        )
+    );
+
+}
 </script>
 
 </body>
