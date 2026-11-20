@@ -747,9 +747,97 @@ function importarPedidoWhats(){
 .value =
 numero ? numero[1].trim() : "";
 
-/* BLOCO PIZZA */
+const pizza =
+texto.match(
+    /Pizza:\s*(.*)/i
+);
 
-/* BLOCO BEBIDA */
+if (pizza) {
+
+    const saborPedido =
+        pizza[1].trim();
+
+    document
+    .getElementById("tamanho")
+    .value = "grande";
+
+    carregarSabores();
+
+    const selectSabor =
+        document
+        .getElementById("sabor1");
+
+    for (
+        let i = 0;
+        i < selectSabor.options.length;
+        i++
+    ) {
+
+        if (
+            selectSabor.options[i]
+            .value
+            .toLowerCase()
+            .includes(
+                saborPedido.toLowerCase()
+            )
+        ) {
+
+            selectSabor.selectedIndex =
+                i;
+
+            break;
+        }
+    }
+
+    document
+    .getElementById(
+        "btnAdicionarPizza"
+    )
+    .click();
+}
+
+const bebida =
+texto.match(
+    /Bebida:\s*(.*)/i
+);
+
+if (bebida) {
+
+    const bebidaPedido =
+        bebida[1].trim();
+
+    const selectBebida =
+        document
+        .getElementById("bebida");
+
+    for (
+        let i = 0;
+        i < selectBebida.options.length;
+        i++
+    ) {
+
+        if (
+            selectBebida.options[i]
+            .text
+            .toLowerCase()
+            .includes(
+                bebidaPedido.toLowerCase()
+            )
+        ) {
+
+            selectBebida.selectedIndex =
+                i;
+
+            break;
+        }
+    }
+
+    document
+    .getElementById(
+        "btnAdicionarBebida"
+    )
+    .click();
+}
 
 alert("Pedido importado!");
 
