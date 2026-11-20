@@ -898,48 +898,7 @@ if (texto.includes("Coca-Cola")) {
         "btnAdicionarBebida"
     ).click();
 }
-const bebida =
-texto.match(
-    /Bebida:\s*(.*)/i
-);
 
-if (bebida) {
-
-    const bebidaPedido =
-        bebida[1].trim();
-
-    const selectBebida =
-        document
-        .getElementById("bebida");
-
-    for (
-        let i = 0;
-        i < selectBebida.options.length;
-        i++
-    ) {
-
-        if (
-            selectBebida.options[i]
-            .text
-            .toLowerCase()
-            .includes(
-                bebidaPedido.toLowerCase()
-            )
-        ) {
-
-            selectBebida.selectedIndex =
-                i;
-
-            break;
-        }
-    }
-
-    document
-    .getElementById(
-        "btnAdicionarBebida"
-    )
-    .click();
-}
     
 buscarCEP();
 calcularTaxaEntrega();
