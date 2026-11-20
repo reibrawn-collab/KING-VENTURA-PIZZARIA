@@ -243,24 +243,51 @@ Imprimir Pedido
 
 function inicializarPedido() {
 
-    let ultimoPedido =
+    const hoje = new Date();
+
+    const dataKey =
+        hoje.getFullYear() +
+        String(
+            hoje.getMonth() + 1
+        ).padStart(2, "0") +
+        String(
+            hoje.getDate()
+        ).padStart(2, "0");
+
+    const ultimaData =
         localStorage.getItem(
-            "ultimoPedido"
-        ) || 0;
+            "dataPedidos"
+        );
+
+    let ultimoPedido = 0;
+
+    if (ultimaData === dataKey) {
+
+        ultimoPedido =
+            parseInt(
+                localStorage.getItem(
+                    "ultimoPedido"
+                )
+            ) || 0;
+
+    }
 
     ultimoPedido++;
+
+    localStorage.setItem(
+        "dataPedidos",
+        dataKey
+    );
 
     localStorage.setItem(
         "ultimoPedido",
         ultimoPedido
     );
 
-    document
-    .getElementById(
-        "numeroPedido"
-    )
-    .innerText =
-        "Pedido #" +
+    const codigoPedido =
+        "KV" +
+        dataKey +
+        "-" +
         String(
             ultimoPedido
         ).padStart(
@@ -268,13 +295,15 @@ function inicializarPedido() {
             "0"
         );
 
-    document
-    .getElementById(
+    document.getElementById(
+        "numeroPedido"
+    ).innerText =
+        codigoPedido;
+
+    document.getElementById(
         "dataPedido"
-    )
-    .innerText =
-        new Date()
-        .toLocaleString(
+    ).innerText =
+        hoje.toLocaleString(
             "pt-BR"
         );
 }
