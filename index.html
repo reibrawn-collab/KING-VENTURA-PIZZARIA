@@ -813,7 +813,12 @@ function importarPedidoWhats(){
             "pedidoWhats"
         )
         .value;
+pedidoAtual.itens = [];
 
+document.getElementById(
+    "carrinho"
+).innerHTML = "";
+    
     const nome =
         texto.match(
             /Nome:\s*(.*)/i
@@ -854,55 +859,45 @@ function importarPedidoWhats(){
 .value =
 numero ? numero[1].trim() : "";
 
-const pizza =
-texto.match(
-    /Pizza:\s*(.*)/i
-);
+if (texto.includes("Calabresa")) {
 
-if (pizza) {
-
-    const saborPedido =
-        pizza[1].trim();
-
-    document
-    .getElementById("tamanho")
-    .value = "grande";
+    document.getElementById("tamanho").value =
+        "grande";
 
     carregarSabores();
 
-    const selectSabor =
-        document
-        .getElementById("sabor1");
+    document.getElementById("sabor1").value =
+        "Calabresa";
 
-    for (
-        let i = 0;
-        i < selectSabor.options.length;
-        i++
-    ) {
-
-        if (
-            selectSabor.options[i]
-            .value
-            .toLowerCase()
-            .includes(
-                saborPedido.toLowerCase()
-            )
-        ) {
-
-            selectSabor.selectedIndex =
-                i;
-
-            break;
-        }
-    }
-
-    document
-    .getElementById(
+    document.getElementById(
         "btnAdicionarPizza"
-    )
-    .click();
+    ).click();
 }
 
+if (texto.includes("Portuguesa")) {
+
+    document.getElementById("tamanho").value =
+        "grande";
+
+    carregarSabores();
+
+    document.getElementById("sabor1").value =
+        "Portuguesa";
+
+    document.getElementById(
+        "btnAdicionarPizza"
+    ).click();
+}
+
+if (texto.includes("Coca-Cola")) {
+
+    document.getElementById("bebida")
+        .selectedIndex = 1;
+
+    document.getElementById(
+        "btnAdicionarBebida"
+    ).click();
+}
 const bebida =
 texto.match(
     /Bebida:\s*(.*)/i
