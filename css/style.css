@@ -19,8 +19,7 @@ body{
 }
 
 h1{
-    color:#b85c00;
-    margin-bottom:20px;
+    colo:#D4AF37;
 }
 
 h2{
@@ -55,16 +54,17 @@ button{
     width:100%;
     padding:12px;
     margin-top:8px;
-    background:#b85c00;
-    color:white;
+    background:#D4AF37;
+    color:#111111;
     border:none;
     border-radius:6px;
     cursor:pointer;
     font-size:16px;
+    font-weight:bold;
 }
 
 button:hover{
-    background:#9c4d00;
+    background:#F5C242;
 }
 
 .item{
