@@ -42,7 +42,9 @@ pedido.taxaEntrega.toFixed(2) +
 
     mensagem +=
         "ITENS:\n";
-
+mensagem +=
+    "[KV-ITENS]\n";
+    
    pedido.itens.forEach(
     item => {
 
