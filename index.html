@@ -859,36 +859,26 @@ document.getElementById(
 .value =
 numero ? numero[1].trim() : "";
 
-if (texto.includes("Calabresa")) {
+Object.keys(SABORES).forEach(sabor => {
 
-    document.getElementById("tamanho").value =
-        "grande";
+    if (texto.toLowerCase().includes(
+        sabor.toLowerCase()
+    )) {
 
-    carregarSabores();
+        document.getElementById("tamanho")
+            .value = "grande";
 
-    document.getElementById("sabor1").value =
-        "Calabresa";
+        carregarSabores();
 
-    document.getElementById(
-        "btnAdicionarPizza"
-    ).click();
-}
+        document.getElementById("sabor1")
+            .value = sabor;
 
-if (texto.includes("Portuguesa")) {
+        document.getElementById(
+            "btnAdicionarPizza"
+        ).click();
+    }
 
-    document.getElementById("tamanho").value =
-        "grande";
-
-    carregarSabores();
-
-    document.getElementById("sabor1").value =
-        "Portuguesa";
-
-    document.getElementById(
-        "btnAdicionarPizza"
-    ).click();
-}
-
+});
 if (texto.includes("Coca-Cola")) {
 
     document.getElementById("bebida")
