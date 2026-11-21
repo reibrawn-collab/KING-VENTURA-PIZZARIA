@@ -920,47 +920,81 @@ function importarPedidoWhats(){
 /* MEIO A MEIO */
 
 else if (
-    linha.startsWith(
-        "Grande 35cm Meio a Meio - "
+    linha.startsWith(*        "Grande 35cm Meio a Meio -*"
     )
 ) {
 
-    const descricaoPizza =
+    const descricaoPi*za =
         linha
-            .split(" - R$ ")[0]
-            .replace(
-                "Grande 35cm Meio a Meio - ",
+            .sp*it(" - R$ ")[0]
+            .repla*e(
+                "Grande 35cm Me*o a Meio - ",
                 ""
-            );
+ *          );
 
     const sabores =
-        descricaoPizza
-            .split(" + ")[0]
-            .split(" / ");
+*       descricaoPizza
+            *split(" + ")[0]
+            .split*" / ");
 
-    document.getElementById(
+    document.getElementBy*d(
         "tamanho"
-    ).value = "grande";
+    ).value =*"grande";
 
-    document.getElementById(
+    document.getElement*yId(
         "tipoPizza"
-    ).value = "meio";
+    ).val*e = "meio";
 
-    carregarSabores();
+    carregarSabores()*
 
     atualizarVisualPedido();
 
-    document.getElementById(
-        "sabor1"
-    ).value = sabores[0].trim();
+  * document.getElementById(
+        *sabor1"
+    ).value = sabores[0].t*im();
 
-    document.getElementById(
+    document.getElementById*
         "sabor2"
-    ).value = sabores[1].trim();
+    ).value = sa*ores[1].trim();
 
-    document.getElementById(
+    const adicion*lTexto =
+        descricaoPizza.in*ludes(" + ")
+        ? descricaoPi*za
+            .split(" + ")[1]
+  *         .trim()
+        : "";
+
+  * if (adicionalTexto) {
+
+        co*st selectAdicional =
+            d*cument.getElementById(
+           *    "adicional"
+            );
+
+  *     for (
+            let i = 0;
+*           i < selectAdicional.opt*ons.length;
+            i++
+      * ) {
+
+            if (
+           *    selectAdicional.options[i]
+   *                .text
+            *       .trim() === adicionalTexto
+*           ) {
+
+                se*ectAdicional.selectedIndex = i;
+  *             break;
+
+            }*
+        }
+
+    }
+
+    document.ge*ElementById(
         "btnAdicionarPizza"
     ).click();
+
 }
         /* GRANDE INTEIRA */
 
