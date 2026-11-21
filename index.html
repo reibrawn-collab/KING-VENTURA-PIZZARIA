@@ -813,15 +813,16 @@ function importarPedidoWhats(){
             "pedidoWhats"
         )
         .value;
-pedidoAtual.itens = [];
 
-document.getElementById(
-    "carrinho"
-).innerHTML = "";
-    
+    pedidoAtual.itens = [];
+
+    document.getElementById(
+        "carrinho"
+    ).innerHTML = "";
+
     const nome =
         texto.match(
-            /Nome:\s*(.*)/i
+            /Cliente:\s*(.*)/i
         );
 
     const telefone =
@@ -839,156 +840,201 @@ document.getElementById(
             /Número:\s*(.*)/i
         );
 
-    document
-    .getElementById("nome")
-    .value =
-    nome ? nome[1].trim() : "";
+    document.getElementById("nome")
+        .value =
+        nome ? nome[1].trim() : "";
 
-    document
-    .getElementById("telefone")
-    .value =
-    telefone ? telefone[1].trim() : "";
+    document.getElementById("telefone")
+        .value =
+        telefone ? telefone[1].trim() : "";
 
-    document
-    .getElementById("cep")
-    .value =
-    cep ? cep[1].trim() : "";
+    document.getElementById("cep")
+        .value =
+        cep ? cep[1].trim() : "";
 
-    document
-.getElementById("numero")
-.value =
-numero ? numero[1].trim() : "";
+    document.getElementById("numero")
+        .value =
+        numero ? numero[1].trim() : "";
 
-const linhas = texto.split("\n");
+    const linhas =
+        texto.split("\n");
 
-linhas.forEach(linha => {
+    linhas.forEach(linha => {
 
-    linha = linha.trim();
+        linha = linha.trim();
+
+        /* BROTINHO */
+
+        if (
+            linha.startsWith(
+                "Brotinho 25cm - "
+            )
+        ) {
+
+            const sabor =
+                linha
+                    .split(" - R$ ")[0]
+                    .replace(
+                        "Brotinho 25cm - ",
+                        ""
+                    )
+                    .split(" + ")[0]
+                    .trim();
+
+            document.getElementById(
+                "tamanho"
+            ).value = "brotinho";
+
+            carregarSabores();
+
+            document.getElementById(
+                "sabor1"
+            ).value = sabor;
+
+            document.getElementById(
+                "btnAdicionarPizza"
+            ).click();
+
+        }
+
+        /* MEIO A MEIO */
+
+        else if (
+            linha.startsWith(
+                "Grande 35cm Meio a Meio - "
+            )
+        ) {
+
+            const descricaoPizza =
+                linha
+                    .split(" - R$ ")[0]
+                    .replace(
+                        "Grande 35cm Meio a Meio - ",
+                        ""
+                    );
+
+            const sabores =
+                descricaoPizza
+                    .split(" + ")[0]
+                    .split(" / ");
+
+            document.getElementById(
+                "tamanho"
+            ).value = "grande";
+
+            document.getElementById(
+                "tipoPizza"
+            ).value = "meio";
+
+            carregarSabores();
+
+            atualizarVisualPedido();
+
+            document.getElementById(
+                "sabor1"
+            ).value = sabores[0].trim();
+
+            document.getElementById(
+                "sabor2"
+            ).value = sabores[1].trim();
+
+            document.getElementById(
+                "btnAdicionarPizza"
+            ).click();
+
+        }
+
+        /* GRANDE INTEIRA */
+
+        else if (
+            linha.startsWith(
+                "Grande 35cm - "
+            )
+        ) {
+
+            const sabor =
+                linha
+                    .split(" - R$ ")[0]
+                    .replace(
+                        "Grande 35cm - ",
+                        ""
+                    )
+                    .split(" + ")[0]
+                    .trim();
+
+            document.getElementById(
+                "tamanho"
+            ).value = "grande";
+
+            document.getElementById(
+                "tipoPizza"
+            ).value = "inteira";
+
+            carregarSabores();
+
+            document.getElementById(
+                "sabor1"
+            ).value = sabor;
+
+            document.getElementById(
+                "btnAdicionarPizza"
+            ).click();
+
+        }
+
+    });
+
+    /* BEBIDAS */
 
     if (
-        linha.startsWith(
-            "Brotinho 25cm - "
+        texto.includes(
+            "Coca-Cola 2 Litros"
         )
     ) {
 
-        const sabor =
-            linha.replace(
-                "Brotinho 25cm - ",
-                ""
-            )
-            .split(" + ")[0]
-            .trim();
+        document.getElementById(
+            "bebida"
+        ).selectedIndex = 1;
 
         document.getElementById(
-            "tamanho"
-        ).value = "brotinho";
-
-        carregarSabores();
-
-        document.getElementById(
-            "sabor1"
-        ).value = sabor;
-
-        document.getElementById(
-            "btnAdicionarPizza"
+            "btnAdicionarBebida"
         ).click();
-
     }
 
-    else if (
-        linha.startsWith(
-            "Grande 35cm Meio a Meio - "
+    if (
+        texto.includes(
+            "Guaraná Antarctica 1 Litro"
         )
     ) {
 
-        const sabores =
-            linha.replace(
-                "Grande 35cm Meio a Meio - ",
-                ""
-            )
-            .split(" + ")[0]
-            .split(" / ");
+        document.getElementById(
+            "bebida"
+        ).selectedIndex = 2;
 
         document.getElementById(
-            "tamanho"
-        ).value = "grande";
-
-        document.getElementById(
-            "tipoPizza"
-        ).value = "meio";
-
-        carregarSabores();
-
-        atualizarVisualPedido();
-
-        document.getElementById(
-            "sabor1"
-        ).value = sabores[0].trim();
-
-        document.getElementById(
-            "sabor2"
-        ).value = sabores[1].trim();
-
-        document.getElementById(
-            "btnAdicionarPizza"
+            "btnAdicionarBebida"
         ).click();
-
     }
 
-    else if (
-        linha.startsWith(
-            "Grande 35cm - "
+    if (
+        texto.includes(
+            "Coca-Cola Lata 310ml"
         )
     ) {
 
-  const descricaoPizza =
-    linha
-        .split(" - R$ ")[0]
-        .replace(
-            "Grande 35cm Meio a Meio - ",
-            ""
-        );
-
-const sabores =
-    descricaoPizza.split(" / ");
-
+        document.getElementById(
+            "bebida"
+        ).selectedIndex = 3;
 
         document.getElementById(
-            "tamanho"
-        ).value = "grande";
-
-        document.getElementById(
-            "tipoPizza"
-        ).value = "inteira";
-
-        carregarSabores();
-
-        document.getElementById(
-            "sabor1"
-        ).value = sabor;
-
-        document.getElementById(
-            "btnAdicionarPizza"
+            "btnAdicionarBebida"
         ).click();
-
     }
 
-});
-if (texto.includes("Coca-Cola")) {
+    buscarCEP();
+    calcularTaxaEntrega();
 
-    document.getElementById("bebida")
-        .selectedIndex = 1;
-
-    document.getElementById(
-        "btnAdicionarBebida"
-    ).click();
-}
-
-    
-buscarCEP();
-calcularTaxaEntrega();
-    
-alert("Pedido importado!");
+    alert("Pedido importado!");
 
 }
 function novoPedido() {
