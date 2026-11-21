@@ -867,6 +867,7 @@ function importarPedidoWhats(){
 
         if (
             linha.startsWith(
+            
                 "Brotinho 25cm - "
             )
         ) {
@@ -897,53 +898,51 @@ function importarPedidoWhats(){
 
         }
 
-        /* MEIO A MEIO */
+/* MEIO A MEIO */
 
-        else if (
-            linha.startsWith(
-                "Grande 35cm Meio a Meio - "
-            )
-        ) {
+else if (
+    linha.startsWith(
+        "Grande 35cm Meio a Meio - "
+    )
+) {
 
-            const descricaoPizza =
-                linha
-                    .split(" - R$ ")[0]
-                    .replace(
-                        "Grande 35cm Meio a Meio - ",
-                        ""
-                    );
+    const descricaoPizza =
+        linha
+            .split(" - R$ ")[0]
+            .replace(
+                "Grande 35cm Meio a Meio - ",
+                ""
+            );
 
-            const sabores =
-                descricaoPizza
-                    .split(" + ")[0]
-                    .split(" / ");
+    const sabores =
+        descricaoPizza
+            .split(" + ")[0]
+            .split(" / ");
 
-            document.getElementById(
-                "tamanho"
-            ).value = "grande";
+    document.getElementById(
+        "tamanho"
+    ).value = "grande";
 
-            document.getElementById(
-                "tipoPizza"
-            ).value = "meio";
+    document.getElementById(
+        "tipoPizza"
+    ).value = "meio";
 
-            carregarSabores();
+    carregarSabores();
 
-            atualizarVisualPedido();
+    atualizarVisualPedido();
 
-            document.getElementById(
-                "sabor1"
-            ).value = sabores[0].trim();
+    document.getElementById(
+        "sabor1"
+    ).value = sabores[0].trim();
 
-            document.getElementById(
-                "sabor2"
-            ).value = sabores[1].trim();
+    document.getElementById(
+        "sabor2"
+    ).value = sabores[1].trim();
 
-            document.getElementById(
-                "btnAdicionarPizza"
-            ).click();
-
-        }
-
+    document.getElementById(
+        "btnAdicionarPizza"
+    ).click();
+}
         /* GRANDE INTEIRA */
 
         else if (
