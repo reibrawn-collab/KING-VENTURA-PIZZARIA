@@ -941,13 +941,17 @@ linhas.forEach(linha => {
         )
     ) {
 
-        const sabor =
-            linha.replace(
-                "Grande 35cm - ",
-                ""
-            )
-            .split(" + ")[0]
-            .trim();
+  const descricaoPizza =
+    linha
+        .split(" - R$ ")[0]
+        .replace(
+            "Grande 35cm Meio a Meio - ",
+            ""
+        );
+
+const sabores =
+    descricaoPizza.split(" / ");
+
 
         document.getElementById(
             "tamanho"
