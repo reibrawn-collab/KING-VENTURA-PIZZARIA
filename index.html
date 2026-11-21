@@ -859,23 +859,114 @@ document.getElementById(
 .value =
 numero ? numero[1].trim() : "";
 
-Object.keys(SABORES).forEach(sabor => {
+const linhas = texto.split("\n");
 
-    if (texto.toLowerCase().includes(
-        sabor.toLowerCase()
-    )) {
+linhas.forEach(linha => {
 
-        document.getElementById("tamanho")
-            .value = "grande";
+    linha = linha.trim();
+
+    if (
+        linha.startsWith(
+            "Brotinho 25cm - "
+        )
+    ) {
+
+        const sabor =
+            linha.replace(
+                "Brotinho 25cm - ",
+                ""
+            )
+            .split(" + ")[0]
+            .trim();
+
+        document.getElementById(
+            "tamanho"
+        ).value = "brotinho";
 
         carregarSabores();
 
-        document.getElementById("sabor1")
-            .value = sabor;
+        document.getElementById(
+            "sabor1"
+        ).value = sabor;
 
         document.getElementById(
             "btnAdicionarPizza"
         ).click();
+
+    }
+
+    else if (
+        linha.startsWith(
+            "Grande 35cm Meio a Meio - "
+        )
+    ) {
+
+        const sabores =
+            linha.replace(
+                "Grande 35cm Meio a Meio - ",
+                ""
+            )
+            .split(" + ")[0]
+            .split(" / ");
+
+        document.getElementById(
+            "tamanho"
+        ).value = "grande";
+
+        document.getElementById(
+            "tipoPizza"
+        ).value = "meio";
+
+        carregarSabores();
+
+        atualizarVisualPedido();
+
+        document.getElementById(
+            "sabor1"
+        ).value = sabores[0].trim();
+
+        document.getElementById(
+            "sabor2"
+        ).value = sabores[1].trim();
+
+        document.getElementById(
+            "btnAdicionarPizza"
+        ).click();
+
+    }
+
+    else if (
+        linha.startsWith(
+            "Grande 35cm - "
+        )
+    ) {
+
+        const sabor =
+            linha.replace(
+                "Grande 35cm - ",
+                ""
+            )
+            .split(" + ")[0]
+            .trim();
+
+        document.getElementById(
+            "tamanho"
+        ).value = "grande";
+
+        document.getElementById(
+            "tipoPizza"
+        ).value = "inteira";
+
+        carregarSabores();
+
+        document.getElementById(
+            "sabor1"
+        ).value = sabor;
+
+        document.getElementById(
+            "btnAdicionarPizza"
+        ).click();
+
     }
 
 });
