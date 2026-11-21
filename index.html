@@ -550,6 +550,25 @@ adicionarItem({
         )
         .value
 });
+adicionarItem({
+    descricao:
+        valorAdicionais > 0
+        ? descricao + " + " + nomeAdicional
+        : descricao,
+
+    valor:
+        valor +
+        valorAdicionais,
+
+    ingredientes,
+
+    observacao:
+        document
+        .getElementById(
+            "obsPizza"
+        )
+        .value
+});
 
 document.getElementById("adicional").selectedIndex = 0;
 document.getElementById("obsPizza").value = "";
