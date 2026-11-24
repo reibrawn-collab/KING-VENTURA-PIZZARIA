@@ -223,4 +223,715 @@
 
     .summary-box {
       background: var(--surface-2);
-      border: 1px solid var(--
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--gold);
+      border-top: 1px solid var(--border);
+      padding-top: 8px;
+      margin-top: 6px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .kpi-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .kpi-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .kpi-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--gold);
+      margin-top: 4px;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: rgba(210, 153, 34, 0.18);
+      color: var(--amber);
+    }
+
+    .ingredients-preview {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    #cupomTermico {
+      display: none;
+    }
+
+    @media print {
+      @page {
+        margin: 0 !important;
+        size: auto;
+      }
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+        background: #fff !important;
+      }
+      body > *:not(#cupomTermico) {
+        display: none !important;
+      }
+      #cupomTermico {
+        display: block !important;
+        position: static !important;
+        width: 54mm !important;
+        max-width: 54mm !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        font-family: "Courier New", Courier, monospace !important;
+        font-size: 13px !important;
+        font-weight: 900 !important;
+        line-height: 1.12 !important;
+        color: #000 !important;
+        background: #fff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #cupomTermico * {
+        font-weight: 900 !important;
+        color: #000 !important;
+        background: #fff !important;
+        line-height: 1.12 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .cupom-linha {
+        border-top: 1px dashed #000 !important;
+        margin: 2px 0 !important;
+        height: 0 !important;
+      }
+      .cupom-item {
+        margin-bottom: 2px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="brand-header">
+      <img
+        src="logo01.jpeg"
+        alt="King Ventura Pizzaria"
+        class="brand-logo"
+        onerror="this.style.display='none'"
+      />
+      <div class="brand-top">
+        <div>
+          <h1 class="brand-title">KING VENTURA PIZZARIA</h1>
+          <p style="color: var(--muted); font-size: 0.88rem;">Sistema Operacional • WhatsApp: 5567991476156</p>
+        </div>
+        <span class="badge-version">V7.2 REBUILD</span>
+      </div>
+    </header>
+
+    <nav class="nav-tabs" aria-label="Navegação do sistema">
+      <button class="nav-tab active" data-tab="pedido">🍕 Pedido</button>
+      <button class="nav-tab" data-tab="sabores">📋 Sabores & Preços</button>
+      <button class="nav-tab" data-tab="clientes">👤 Clientes</button>
+      <button class="nav-tab" data-tab="historico">📊 Histórico & Caixa</button>
+      <button class="nav-tab" data-tab="relatorios">💾 Relatórios & Backup</button>
+    </nav>
+
+    <!-- ABA 1: PEDIDO -->
+    <section id="tab-pedido" class="tab-panel active">
+      <div class="card">
+        <div class="brand-top">
+          <h2 id="numeroPedido" style="margin-bottom: 0;">KV0001</h2>
+          <span id="statusPedido" class="status-pill">🟡 Aberto</span>
+        </div>
+        <p id="dataPedido" style="color: var(--muted); font-size: 0.88rem; margin-top: 6px;"></p>
+      </div>
+
+      <div id="cardImportarWhats" class="card">
+        <h2>📥 Importar Pedido WhatsApp</h2>
+        <textarea
+          id="pedidoWhats"
+          rows="6"
+          placeholder="Cole aqui a mensagem recebida no WhatsApp..."
+        ></textarea>
+        <div class="btn-row">
+          <button id="btnImportarWhats" class="secondary">Importar Pedido</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Cliente</h2>
+        <div class="grid-2">
+          <div>
+            <label for="nome">Nome</label>
+            <input id="nome" placeholder="Nome do cliente" />
+          </div>
+          <div>
+            <label for="telefone">Telefone</label>
+            <input id="telefone" placeholder="(67) 99999-9999" />
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div>
+            <label for="cep">CEP</label>
+            <input id="cep" placeholder="79097-000" />
+          </div>
+          <div>
+            <label for="numero">Número</label>
+            <input id="numero" placeholder="129" />
+          </div>
+          <div>
+            <label for="endereco">Endereço (Rua e Bairro)</label>
+            <textarea
+              id="endereco"
+              rows="2"
+              list="listaRuasCG"
+              placeholder="Digite a rua ou bairro..."
+              style="min-height: 54px;"
+            ></textarea>
+            <datalist id="listaRuasCG"></datalist>
+          </div>
+        </div>
+
+        <label for="observacao">Observação do Cliente</label>
+        <textarea id="observacao" placeholder="Ponto de referência, troco, etc."></textarea>
+
+        <div class="btn-row">
+          <button id="btnSalvarClienteRapido" class="secondary" type="button">Salvar Cliente na Base</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Montar Pizza</h2>
+        <div class="grid-2">
+          <div>
+            <label for="tamanho">Tamanho</label>
+            <select id="tamanho">
+              <option value="brotinho">Brotinho 25cm (Apenas 1 sabor)</option>
+              <option value="grande">Grande 35cm</option>
+            </select>
+          </div>
+          <div>
+            <label for="tipoPizza">Tipo</label>
+            <select id="tipoPizza">
+              <option value="inteira">Inteira</option>
+              <option value="meio">Meio a Meio</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label for="sabor1">Sabor 1</label>
+            <select id="sabor1"></select>
+          </div>
+          <div id="boxSabor2" style="display: none;">
+            <label for="sabor2">Sabor 2 (Meio a Meio)</label>
+            <select id="sabor2"></select>
+          </div>
+        </div>
+
+        <div id="ingredientes" class="ingredients-preview"></div>
+
+        <div class="grid-2">
+          <div>
+            <label for="adicional">Adicional</label>
+            <select id="adicional">
+              <option value="0">Nenhum adicional</option>
+              <option value="4">Catupiry Extra (+R$ 4,00)</option>
+              <option value="4">Presunto Extra (+R$ 4,00)</option>
+              <option value="4">Cebola Extra (+R$ 4,00)</option>
+              <option value="4">Milho Extra (+R$ 4,00)</option>
+              <option value="4">Ervilha Extra (+R$ 4,00)</option>
+              <option value="5">Muçarela Extra (+R$ 5,00)</option>
+              <option value="5">Bacon Extra (+R$ 5,00)</option>
+            </select>
+          </div>
+          <div>
+            <label for="obsPizza">Observação da Pizza</label>
+            <input id="obsPizza" placeholder="Ex: sem cebola, assar bem" />
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnAdicionarPizza" class="gold" type="button">Adicionar Pizza</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Bebidas</h2>
+        <div class="grid-2">
+          <div>
+            <label for="bebida">Selecionar Bebida</label>
+            <select id="bebida">
+              <option value="">Nenhuma bebida</option>
+              <option value="16">Coca-Cola 2 Litros - R$ 16,00</option>
+              <option value="10">Guaraná Antarctica 1 Litro - R$ 10,00</option>
+              <option value="6">Coca-Cola Lata 310ml - R$ 6,00</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: flex-end;">
+            <button id="btnAdicionarBebida" type="button" style="width: 100%;">Adicionar Bebida</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Carrinho</h2>
+        <div id="carrinho"></div>
+
+        <div class="summary-box">
+          <div class="summary-line">
+            <span>Taxa de Entrega:</span>
+            <span>R$ <span id="taxaEntrega">0.00</span></span>
+          </div>
+          <div id="mensagemEntrega" style="font-size: 0.85rem; color: var(--gold); margin-bottom: 6px;"></div>
+          <div class="summary-total">
+            <span>Total do Pedido:</span>
+            <span>R$ <span id="totalPedido">0.00</span></span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnWhatsApp" class="gold" type="button">Enviar WhatsApp</button>
+          <button id="btnRegistrarHistorico" type="button">Registrar no Histórico</button>
+          <button onclick="imprimirCupomTermico()" class="gold" type="button">🖨️ Imprimir Cupom Térmico</button>
+          <button onclick="novoPedido()" class="secondary" type="button">🆕 Novo Pedido</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 2: SABORES & PREÇOS -->
+    <section id="tab-sabores" class="tab-panel">
+      <div class="card">
+        <h2>Cadastrar / Editar Sabor</h2>
+        <input type="hidden" id="saborEditandoOriginal" />
+        <div class="grid-3">
+          <div>
+            <label for="cadNomeSabor">Nome do Sabor</label>
+            <input id="cadNomeSabor" placeholder="Ex: Portuguesa" />
+          </div>
+          <div>
+            <label for="cadPrecoBrotinho">Brotinho 25cm (R$)</label>
+            <input id="cadPrecoBrotinho" type="number" step="0.50" min="0" placeholder="20.00" />
+          </div>
+          <div>
+            <label for="cadPrecoGrande">Grande 35cm (R$)</label>
+            <input id="cadPrecoGrande" type="number" step="0.50" min="0" placeholder="40.00" />
+          </div>
+        </div>
+        <label for="cadIngredientes">Ingredientes (separados por vírgula)</label>
+        <input id="cadIngredientes" placeholder="Molho, Muçarela, Presunto, Ovo, Cebola, Azeitonas, Orégano" />
+
+        <div class="btn-row">
+          <button id="btnSalvarSabor" class="gold" type="button">Salvar Sabor</button>
+          <button id="btnCancelarEdicaoSabor" class="secondary" type="button">Limpar Campos</button>
+          <button id="btnRestaurarSabores" class="secondary" type="button">Restaurar Sabores Padrão</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Sabores Cadastrados</h2>
+        <div id="listaSabores"></div>
+      </div>
+    </section>
+
+    <!-- ABA 3: CLIENTES -->
+    <section id="tab-clientes" class="tab-panel">
+      <div class="card">
+        <h2>Cadastrar / Editar Cliente</h2>
+        <input type="hidden" id="clienteEditId" />
+        <div class="grid-2">
+          <div>
+            <label for="cliNome">Nome</label>
+            <input id="cliNome" placeholder="Nome completo" />
+          </div>
+          <div>
+            <label for="cliTelefone">Telefone</label>
+            <input id="cliTelefone" placeholder="(67) 99999-9999" />
+          </div>
+        </div>
+        <div class="grid-3">
+          <div>
+            <label for="cliCep">CEP</label>
+            <input id="cliCep" placeholder="79097-000" />
+          </div>
+          <div>
+            <label for="cliNumero">Número</label>
+            <input id="cliNumero" placeholder="129" />
+          </div>
+          <div>
+            <label for="cliEndereco">Endereço</label>
+            <input id="cliEndereco" placeholder="Rua / Bairro" />
+          </div>
+        </div>
+        <label for="cliObs">Observação</label>
+        <input id="cliObs" placeholder="Preferências ou ponto de referência" />
+        <div class="btn-row">
+          <button id="btnSalvarCliente" class="gold" type="button">Salvar Cliente</button>
+          <button id="btnLimparClienteForm" class="secondary" type="button">Limpar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Base de Clientes</h2>
+        <input id="buscaCliente" placeholder="Buscar cliente por nome, telefone ou endereço..." />
+        <div id="listaClientes" style="margin-top: 12px;"></div>
+      </div>
+    </section>
+
+    <!-- ABA 4: HISTÓRICO & CAIXA -->
+    <section id="tab-historico" class="tab-panel">
+      <div class="card">
+        <h2>Resumo do Caixa</h2>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Pedidos Registrados</div>
+            <div id="kpiQtdPedidos" class="kpi-value">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Faturamento Total</div>
+            <div class="kpi-value">R$ <span id="kpiFaturamento">0.00</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Ticket Médio</div>
+            <div class="kpi-value">R$ <span id="kpiTicketMedio">0.00</span></div>
+          </div>
+        </div>
+        <input id="buscaHistorico" placeholder="Buscar pedido por código (KV...), cliente ou status..." />
+      </div>
+
+      <div class="card">
+        <h2>Histórico de Pedidos</h2>
+        <div id="listaHistorico"></div>
+      </div>
+    </section>
+
+    <!-- ABA 5: RELATÓRIOS & BACKUP -->
+    <section id="tab-relatorios" class="tab-panel">
+      <div class="card">
+        <h2>Exportar Relatórios CSV</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 10px;">
+          Baixe planilhas CSV compatíveis com Excel para controle financeiro e de clientes.
+        </p>
+        <div class="btn-row">
+          <button id="btnExportarPedidosCSV" class="gold" type="button">Baixar Histórico de Pedidos (CSV)</button>
+          <button id="btnExportarSaboresCSV" class="secondary" type="button">Baixar Tabela de Sabores (CSV)</button>
+          <button id="btnExportarClientesCSV" class="secondary" type="button">Baixar Base de Clientes (CSV)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Backup e Restauração (JSON)</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 10px;">
+          Salve todo o sistema (sabores, preços, clientes, histórico e numeração) ou restaure um arquivo JSON.
+        </p>
+        <div class="btn-row">
+          <button id="btnExportarBackup" class="gold" type="button">Exportar Backup JSON</button>
+          <button id="btnImportarBackup" class="secondary" type="button">Restaurar Backup JSON</button>
+        </div>
+        <label for="inputBackupJson">Conteúdo JSON para Restauração</label>
+        <textarea id="inputBackupJson" rows="6" placeholder="Cole aqui o JSON de backup ou selecione um arquivo abaixo..."></textarea>
+        <label for="fileBackupJson">Ou escolher arquivo .json</label>
+        <input id="fileBackupJson" type="file" accept=".json,application/json" />
+      </div>
+    </section>
+    <!-- CUPOM TÉRMICO COMPACTO (SOMENTE IMPRESSÃO) -->
+    <div id="cupomTermico" aria-hidden="true"></div>
+  </div>
+
+  <script>
+    const NUMERO_WHATSAPP = "5567991476156";
+
+    const SABORES_PADRAO = {
+      "Muçarela": {
+        brotinho: 15,
+        grande: 35,
+        ingredientes: ["Molho", "Muçarela", "Azeitonas", "Orégano"]
+      },
+      "Calabresa": {
+        brotinho: 20,
+        grande: 35,
+        ingredientes: ["Molho", "Muçarela", "Calabresa", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Catupiry": {
+        brotinho: 20,
+        grande: 35,
+        ingredientes: ["Molho", "Muçarela", "Catupiry", "Azeitonas", "Orégano"]
+      },
+      "Calabresa com Catupiry": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Calabresa", "Catupiry", "Azeitonas", "Orégano"]
+      },
+      "Frango com Catupiry": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Frango Desfiado", "Catupiry", "Azeitonas", "Orégano"]
+      },
+      "Presunto": {
+        brotinho: 20,
+        grande: 35,
+        ingredientes: ["Molho", "Muçarela", "Presunto", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Presunto com Catupiry": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Presunto", "Catupiry", "Azeitonas", "Orégano"]
+      },
+      "Brasileira": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Milho Verde", "Ervilha", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Frango com Milho e Tomate": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Frango Desfiado", "Milho Verde", "Tomate", "Azeitonas", "Orégano"]
+      },
+      "Baiana": {
+        brotinho: 23,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Calabresa", "Bacon", "Molho de Pimenta", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Bacon": {
+        brotinho: 23,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Bacon", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Cremosa": {
+        brotinho: 23,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Catupiry", "Creme de Leite", "Azeitonas", "Orégano"]
+      },
+      "Lombo ao Creme": {
+        brotinho: 23,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Lombinho", "Creme de Leite", "Azeitonas", "Orégano"]
+      }
+    };
+
+    let SABORES = {};
+    let historicoPedidos = [];
+    let clientesBase = [];
+    let taxaEntrega = 0;
+
+    let pedidoAtual = {
+      numero: "",
+      data: "",
+      status: "Aberto",
+      cliente: "",
+      telefone: "",
+      cep: "",
+      endereco: "",
+      numeroCasa: "",
+      observacao: "",
+      taxaEntrega: 0,
+      itens: [],
+      total: 0
+    };
+
+    function carregarSaboresStorage() {
+      const salvo = localStorage.getItem("kv_sabores");
+      if (salvo) {
+        try {
+          SABORES = JSON.parse(salvo);
+          return;
+        } catch (e) {}
+      }
+      SABORES = JSON.parse(JSON.stringify(SABORES_PADRAO));
+      salvarSaboresStorage();
+    }
+
+    function salvarSaboresStorage() {
+      localStorage.setItem("kv_sabores", JSON.stringify(SABORES));
+    }
+
+    function carregarHistorico() {
+      const dados = localStorage.getItem("historicoPedidos");
+      if (dados) {
+        try {
+          historicoPedidos = JSON.parse(dados);
+        } catch (e) {
+          historicoPedidos = [];
+        }
+      }
+    }
+
+    function salvarHistorico() {
+      localStorage.setItem("historicoPedidos", JSON.stringify(historicoPedidos));
+    }
+
+    function carregarClientes() {
+      const dados = localStorage.getItem("kv_clientes");
+      if (dados) {
+        try {
+          clientesBase = JSON.parse(dados);
+        } catch (e) {
+          clientesBase = [];
+        }
+      }
+    }
+
+    function salvarClientes() {
+      localStorage.setItem("kv_clientes", JSON.stringify(clientesBase));
+    }
+
+    function gerarNumeroPedido() {
+      let numero = Number(localStorage.getItem("ultimoPedido") || 0);
+      numero++;
+      localStorage.setItem("ultimoPedido", numero);
+      return "KV" + String(numero).padStart(4, "0");
+    }
+
+    function registrarPedido(pedido) {
+      pedido.numero = pedido.numero || gerarNumeroPedido();
+      pedido.data = pedido.data || new Date().toLocaleString("pt-BR");
+      pedido.status = pedido.status || "Aberto";
+      historicoPedidos.unshift(pedido);
+      salvarHistorico();
+      renderizarHistorico();
+    popularDatalistRuas();
+    }
+
+    function inicializarPedido() {
+      const agora = new Date();
+      let proximoNum = Number(localStorage.getItem("ultimoPedido") || 0) + 1;
+      const codigo = "KV" + String(proximoNum).padStart(4, "0");
+
+      pedidoAtual.numero = codigo;
+      pedidoAtual.data = agora.toLocaleString("pt-BR");
+      pedidoAtual.status = "Aberto";
+
+      document.getElementById("numeroPedido").innerText = codigo;
+      document.getElementById("dataPedido").innerText = pedidoAtual.data;
+      document.getElementById("statusPedido").innerText = "🟡 Aberto";
+    }
+
+    function carregarSabores() {
+      const tamanho = document.getElementById("tamanho").value;
+      const sabor1 = document.getElementById("sabor1");
+      const sabor2 = document.getElementById("sabor2");
+
+      const prev1 = sabor1.value;
+      const prev2 = sabor2.value;
+
+      sabor1.innerHTML = '<option value="">🍕 Selecione um sabor</option>';
+      sabor2.innerHTML = '<option value="">🍕 Selecione um sabor</option>';
+
+      Object.keys(SABORES).forEach((nome) => {
+        const preco = tamanho === "brotinho" ? Number(SABORES[nome].brotinho) : Number(SABORES[nome].grande);
+        sabor1.innerHTML += `<option value="${nome}">${nome} - R$ ${preco.toFixed(2)}</option>`;
+        sabor2.innerHTML += `<option value="${nome}">${nome} - R$ ${preco.toFixed(2)}</option>`;
+      });
+
+      if (prev1 && SABORES[prev1]) sabor1.value = prev1;
+      if (prev2 && SABORES[prev2]) sabor2.value = prev2;
+
+      atualizarVisualPedido();
+      atualizarPreviewIngredientes();
+    }
+
+    function atualizarVisualPedido() {
+      const tamanho = document.getElementById("tamanho").value;
+      const tipoSelect = document.getElementById("tipoPizza");
+      const boxSabor2 = document.getElementById("boxSabor2");
+
+      if (tamanho === "brotinho") {
+        tipoSelect.disabled = true;
+        tipoSelect.value = "inteira";
+        boxSabor2.style.display = "none";
+      } else {
+        tipoSelect.disabled = false;
+        boxSabor2.style.display = tipoSelect.value === "meio" ? "block" : "none";
+      }
+
+      atualizarPreviewIngredientes();
+    }
+
+    function atualizarPreviewIngredientes() {
+      const el = document.getElementById("ingredientes");
+      const tamanho = document.getElementById("tamanho").value;
+      const tipo = document.getElementById("tipoPizza").value;
+      const s1 = document.getElementById("sabor1").value;
+      const s2 = document.getElementById("sabor2").value;
+
+      if (!s1 || !SABORES[s1]) {
+        el.innerText = "";
+        return;
+      }
+
+      if (tamanho === "grande" && tipo === "meio" && s2 && SABORES[s2]) {
+        el.innerText =
+          `Ingredientes — 50% ${s1}: ${SABORES[s1].ingredientes.join(", ")} | ` +
+          `50% ${s2}: ${SABORES[s2].ingredientes.join(", ")}`;
+      } else {
+        el.innerText = `Ingredientes: ${SABORES[s1].ingredientes.join(", ")}`;
+      }
+    }
+
+    function adicionarItem(item) {
+      pedidoAtual.itens.push(item);
+      atualizarCarrinho();
+    }
+
+    function removerItem(indice) {
+      pedidoAtual.itens.splice(indice, 1);
+      atualizarCarrinho();
+    }
+
+    function limparPedido() {
+      pedidoAtual.itens = [];
+      atualizarCarrinho();
+    }
+
+    function atualizarCarrinho() {
+      const carrinho = document.getElementById("carrinho");
+      if (!carrinho) return;
+
+      let html = "";
+      pedidoAtual.itens.forEach((item, index) => {
+        html += `
+          <div class="item">
+            <b>${item.descricao}</b><br />
+            ${item.ingredientes ? `<span style="color: var(--muted); font-size: 0.85rem;">${item.ingredientes}</span>
