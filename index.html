@@ -2673,16 +2673,48 @@
       ultimaGeo = Date.now();
 
       const termo = endereco + ", Campo Grande - MS, Brasil";
-      const url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q=" +
-        encodeURIComponent(termo);
 
-      const resposta = await fetch(url, { headers: { "Accept": "application/json" } });
-      if (!resposta.ok) throw new Error("Nao foi possivel localizar o endereco agora.");
-      const lista = await resposta.json();
-      if (!Array.isArray(lista) || !lista.length) {
-        throw new Error("Endereco nao encontrado. Tente incluir o bairro ou o CEP.");
+      // 1) Nominatim (sem chave)
+      const urlNominatim = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q=" +
+        encodeURIComponent(termo);
+      try {
+        const resposta = await fetch(urlNominatim, { headers: { "Accept": "application/json" } });
+        if (resposta.ok) {
+          const lista = await resposta.json();
+          if (Array.isArray(lista) && lista.length) {
+            return { lat: Number(lista[0].lat), lng: Number(lista[0].lon), achado: lista[0].display_name };
+          }
+        }
+      } catch (e) {
+        console.log("Nominatim falhou, tentando ViaCEP", e);
       }
-      return { lat: Number(lista[0].lat), lng: Number(lista[0].lon), achado: lista[0].display_name };
+
+      // 2) ViaCEP -> coordenadas pelo CEP (sem chave)
+      const cepNum = (String(endereco).match(/\d{8}/) || [])[0] ||
+        (String(endereco).match(/\d{5}-?\d{3}/) || [])[0];
+      if (cepNum) {
+        const so = String(cepNum).replace(/[^0-9]/g, "");
+        try {
+          const r = await fetch("https://viacep.com.br/ws/" + so + "/json/");
+          const d = await r.json();
+          if (!d.erro && d.localidade) {
+            const alvo = [d.logradouro, d.bairro, d.localidade, d.uf].filter(Boolean).join(", ");
+            const r2 = await fetch(
+              "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=" +
+              encodeURIComponent(alvo + ", Brasil"));
+            if (r2.ok) {
+              const l2 = await r2.json();
+              if (Array.isArray(l2) && l2.length) {
+                return { lat: Number(l2[0].lat), lng: Number(l2[0].lon), achado: l2[0].display_name };
+              }
+            }
+          }
+        } catch (e) {
+          console.log("Busca por CEP falhou", e);
+        }
+      }
+
+      throw new Error("Endereco nao encontrado. Confira o CEP e o numero.");
     }
 
     // Coordenadas -> distancia de rota em km
