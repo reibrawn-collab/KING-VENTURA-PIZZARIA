@@ -1,919 +1,1458 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KING VENTURA PIZZARIA — Sistema Operacional</title>
-  <style>
-    /* Paleta Grêmio: azul, preto e branco. Escuro (padrao) ou claro. */
-    :root,
-    body[data-tema="escuro"] {
-      --bg: #05080f;
-      --surface: #0b1526;
-      --surface-2: #132241;
-      --border: #1e3560;
-      --text: #ffffff;
-      --muted: #9fb4d6;
-      --gold: #4a90e2;
-      --terracotta: #1b4f9c;
-      --danger: #cf4638;
-      --azul-claro: #7fb8f5;
-      --placeholder: #6b86ad;
-      --sombra: rgba(0, 0, 0, 0.5);
-    }
-
-    body[data-tema="claro"] {
-      --bg: #eef3fb;
-      --surface: #ffffff;
-      --surface-2: #e3ecf9;
-      --border: #b9cdea;
-      --text: #08203f;
-      --muted: #4a6a94;
-      --gold: #1b4f9c;
-      --terracotta: #1b4f9c;
-      --danger: #b8302a;
-      --azul-claro: #4a90e2;
-      --placeholder: #8ba3c4;
-      --sombra: rgba(11, 21, 38, 0.12);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      padding: 16px;
-      line-height: 1.45;
-    }
-
-    ::selection {
-      background: var(--gold);
-      color: #ffffff;
-    }
-
-    body[data-tema="claro"] .card,
-    body[data-tema="claro"] .brand-header,
-    body[data-tema="claro"] .item,
-    body[data-tema="claro"] .list-card {
-      box-shadow: 0 1px 3px var(--sombra);
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: 2px solid var(--gold);
-      outline-offset: 1px;
-    }
-
-    .app-container {
-      max-width: 960px;
-      margin: 0 auto;
-    }
-
-    .brand-header {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .brand-logo {
-      display: block;
-      width: 100%;
-      max-height: 240px;
-      object-fit: cover;
-      border-radius: 12px;
-      margin-bottom: 14px;
-      border: 1px solid var(--border);
-    }
-
-    .brand-top {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .brand-title {
-      font-size: 1.5rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      color: var(--gold);
-    }
-
-    .badge-version {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    .nav-tabs {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .nav-tab {
-      background: var(--surface);
-      color: var(--muted);
-      border: 1px solid var(--border);
-      padding: 10px 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.9rem;
-      transition: 0.15s ease;
-    }
-
-    .nav-tab:hover {
-      border-color: var(--gold);
-      color: var(--text);
-    }
-
-    .nav-tab.active {
-      background: var(--terracotta);
-      color: #ffffff;
-      border-color: var(--gold);
-    }
-
-    .tab-panel {
-      display: none;
-    }
-
-    .tab-panel.active {
-      display: block;
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .card h2 {
-      font-size: 1.15rem;
-      margin-bottom: 12px;
-      color: var(--gold);
-    }
-
-    .card h3 {
-      font-size: 1rem;
-      margin: 12px 0 8px;
-      color: var(--text);
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-    }
-
-    label {
-      display: block;
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-bottom: 4px;
-      margin-top: 8px;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      background: var(--surface-2);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 0.95rem;
-    }
-
-    textarea {
-      min-height: 76px;
-      resize: vertical;
-    }
-
-    input::placeholder, textarea::placeholder {
-      color: var(--placeholder);
-    }
-
-    select option {
-      background: var(--surface-2);
-      color: var(--text);
-    }
-
-    button {
-      background: var(--terracotta);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-weight: 700;
-      font-size: 0.92rem;
-      cursor: pointer;
-      transition: 0.15s ease;
-    }
-
-    button:hover {
-      filter: brightness(1.08);
-    }
-
-    button.secondary {
-      background: var(--surface-2);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    button.gold {
-      background: var(--terracotta);
-      color: #ffffff;
-    }
-
-    button.danger {
-      background: var(--danger);
-      color: #fff;
-    }
-
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .item, .list-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 10px;
-      overflow-wrap: anywhere;
-    }
-
-    .list-card > div:first-child {
-      min-width: 0;
-    }
-
-    .summary-box {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      margin-top: 12px;
-    }
-
-    .summary-line {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      font-size: 0.95rem;
-    }
-
-    .summary-total {
-      display: flex;
-      justify-content: space-between;
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--gold);
-      border-top: 1px solid var(--border);
-      padding-top: 8px;
-      margin-top: 6px;
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .kpi-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-    }
-
-    .kpi-label {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .kpi-value {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--gold);
-      margin-top: 4px;
-    }
-
-    .status-pill {
-      display: inline-block;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      background: rgba(74, 144, 226, 0.18);
-      color: var(--azul-claro);
-    }
-
-    .ingredients-preview {
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-
-    
-    /* Etapas na paleta Grêmio: azul claro -> azul -> branco -> branco cheio */
-    .status-pill.status-feito {
-      background: rgba(127, 184, 245, 0.18);
-      color: var(--azul-claro);
-      border: 1px solid rgba(127, 184, 245, 0.45);
-    }
-    .status-pill.status-producao {
-      background: rgba(74, 144, 226, 0.22);
-      color: #a8cdf7;
-      border: 1px solid rgba(74, 144, 226, 0.55);
-    }
-    .status-pill.status-entrega {
-      background: rgba(11, 21, 38, 0.85);
-      color: #ffffff;
-      border: 1px solid rgba(127, 184, 245, 0.6);
-    }
-    .status-pill.status-finalizado {
-      background: #ffffff;
-      color: #05080f;
-      border: 1px solid #ffffff;
-    }
-    .status-stepper {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
-    .status-btn {
-      padding: 6px 10px;
-      font-size: 0.78rem;
-      border-radius: 7px;
-      background: var(--surface);
-      color: var(--muted);
-      border: 1px solid var(--border);
-      font-weight: 700;
-    }
-    .status-btn.active-feito {
-      background: var(--azul-claro);
-      color: #05080f;
-      border-color: var(--azul-claro);
-    }
-    .status-btn.active-producao {
-      background: var(--gold);
-      color: #ffffff;
-      border-color: var(--gold);
-    }
-    .status-btn.active-entrega {
-      background: var(--terracotta);
-      color: #ffffff;
-      border-color: var(--terracotta);
-    }
-    .status-btn.active-finalizado {
-      background: #ffffff;
-      color: #05080f;
-      border-color: #ffffff;
-    }
-
-    #cupomTermico {
-      display: none;
-    }
-
-    /* no papel, o cupom e o unico elemento visivel */
-    @media print {
-      @page {
-        margin: 0 !important;
-        size: 58mm auto;
-      }
-      html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 58mm !important;
-        height: auto !important;
-        min-height: 0 !important;
-        max-height: none !important;
-        overflow: visible !important;
-        background: #ffffff !important;
-      }
-      body > *:not(#cupomTermico) {
-        display: none !important;
-      }
-      #cupomTermico {
-        display: block !important;
-        position: static !important;
-        width: 52mm !important;
-        max-width: 52mm !important;
-        height: auto !important;
-        min-height: 0 !important;
-        overflow: visible !important;
-        page-break-after: avoid !important;
-        break-after: avoid !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        font-family: "Courier New", Courier, monospace !important;
-        font-size: 12px !important;
-        font-weight: 900 !important;
-        line-height: 1.15 !important;
-        color: #000000 !important;
-        background: #ffffff !important;
-        padding: 1mm 0 1mm 1mm !important;
-        margin: 0 !important;
-      }
-      #cupomTermico, #cupomTermico * {
-        font-weight: 900 !important;
-        color: #000000 !important;
-        background: #ffffff !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-      .cupom-linha {
-        border-top: 1px dashed #000000 !important;
-        margin: 3px 0 !important;
-        height: 0 !important;
-      }
-      .cupom-item {
-        margin-bottom: 3px !important;
-      }
-    }
-
-
-    /* ---------- AJUSTES PARA CELULAR ---------- */
-    @media (max-width: 720px) {
-      body { padding: 10px; font-size: 16px; }
-      .app-container { max-width: 100%; }
-      .brand-header, .card { padding: 12px; border-radius: 12px; margin-bottom: 12px; }
-      .brand-logo { max-height: 150px; }
-      .brand-title { font-size: 1.15rem; line-height: 1.25; }
-      .grid-2, .grid-3, .kpi-grid { grid-template-columns: 1fr; gap: 10px; }
-      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      input, select, textarea { font-size: 16px; padding: 12px; }
-      label { font-size: 0.9rem; }
-      button { font-size: 0.95rem; padding: 12px 14px; }
-      .nav-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .nav-tab { padding: 12px 10px; font-size: 0.85rem; text-align: center; line-height: 1.2; }
-      .btn-row { flex-direction: column; }
-      .btn-row button { width: 100%; }
-      .summary-line, .summary-total { font-size: 1rem; }
-      .summary-total { font-size: 1.1rem; }
-      .status-stepper button { flex: 1 1 auto; }
-      #cupomTermico { display: none; }
-    }
-
-    @media (max-width: 400px) {
-      .brand-title { font-size: 1rem; }
-      .kpi-grid { grid-template-columns: 1fr; }
-      .nav-tabs { grid-template-columns: 1fr; }
-    }
-  </style>
-</head>
-<body>
-  <div class="app-container">
-    <header class="brand-header">
-      <img
-        src="logo01.jpeg"
-        alt="King Ventura Pizzaria"
-        class="brand-logo"
-        onerror="this.style.display='none'"
-      />
-      <div class="brand-top">
-        <div>
-          <h1 class="brand-title">KING VENTURA PIZZARIA</h1>
-          <p style="color: var(--muted); font-size: 0.88rem;">Sistema Operacional • WhatsApp: 5567991476156</p>
-        </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <button id="btnTema" class="secondary" type="button" style="padding: 6px 12px;">🌙 Escuro</button>
-          <span class="badge-version">V7.2 REBUILD</span>
-        </div>
-      </div>
-    </header>
-
-    <nav class="nav-tabs" aria-label="Navegação do sistema">
-      <button class="nav-tab active" data-tab="pedido">🍕 Pedido</button>
-      <button class="nav-tab" data-tab="sabores">📋 Sabores & Preços</button>
-      <button class="nav-tab" data-tab="clientes">👤 Clientes</button>
-      <button class="nav-tab" data-tab="historico">📊 Histórico & Caixa</button>
-      <button class="nav-tab" data-tab="rotas">🛵 Rotas do Entregador</button>
-      <button class="nav-tab" data-tab="relatorios">💾 Relatórios & Backup</button>
-    </nav>
-
-    <!-- ABA 1: PEDIDO -->
-    <section id="tab-pedido" class="tab-panel active">
-      <div class="card">
-        <div class="brand-top">
-          <h2 id="numeroPedido" style="margin-bottom: 0;">KV0001</h2>
-          <span id="statusPedido" class="status-pill status-feito">📥 Gerado</span>
-        </div>
-        <p id="dataPedido" style="color: var(--muted); font-size: 0.88rem; margin-top: 6px;"></p>
-        <div id="botoesStatusPedidoAtual" class="status-stepper" aria-label="Etapas do pedido atual"></div>
-      </div>
-
-      <div id="cardImportarWhats" class="card">
-        <h2>📥 Importar Pedido WhatsApp</h2>
-        <textarea
-          id="pedidoWhats"
-          rows="6"
-          placeholder="Cole aqui a mensagem recebida no WhatsApp..."
-        ></textarea>
-        <div class="btn-row">
-          <button id="btnImportarWhats" class="secondary">Importar Pedido</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Cliente</h2>
-        <div class="grid-2">
-          <div>
-            <label for="nome">Nome</label>
-            <input id="nome" placeholder="Nome do cliente" />
-          </div>
-          <div>
-            <label for="telefone">Telefone</label>
-            <input id="telefone" placeholder="(67) 99999-9999" />
-          </div>
-        </div>
-
-        <div class="grid-3">
-          <div>
-            <label for="cep">CEP</label>
-            <input id="cep" placeholder="79097-000" />
-            <button id="btnBuscarCepDaRua" class="secondary" type="button"
-                    style="width: 100%; margin-top: 6px; font-size: 0.85rem; padding: 8px;">
-              🔍 Buscar CEP pela rua
-            </button>
-          </div>
-          <div>
-            <label for="numero">Número</label>
-            <input id="numero" placeholder="129" />
-          </div>
-          <div>
-            <label for="endereco">Endereço (Rua e Bairro)</label>
-            <textarea
-              id="endereco"
-              rows="2"
-              list="listaRuasCG"
-              placeholder="Digite a rua ou bairro..."
-              style="min-height: 54px;"
-            ></textarea>
-            <datalist id="listaRuasCG"></datalist>
-          </div>
-        </div>
-
-        <label for="observacao">Observação do Cliente</label>
-        <textarea id="observacao" placeholder="Ponto de referência, troco, etc."></textarea>
-
-        <div class="btn-row">
-          <button id="btnSalvarClienteRapido" class="secondary" type="button">Salvar Cliente na Base</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Montar Pizza</h2>
-        <div class="grid-2">
-          <div>
-            <label for="tamanho">Tamanho</label>
-            <select id="tamanho">
-              <option value="brotinho">Brotinho 25cm (Apenas 1 sabor)</option>
-              <option value="grande">Grande 35cm</option>
-            </select>
-          </div>
-          <div>
-            <label for="tipoPizza">Tipo</label>
-            <select id="tipoPizza">
-              <option value="inteira">Inteira</option>
-              <option value="meio">Meio a Meio</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <div>
-            <label for="sabor1">Sabor 1</label>
-            <select id="sabor1"></select>
-          </div>
-          <div id="boxSabor2" style="display: none;">
-            <label for="sabor2">Sabor 2 (Meio a Meio)</label>
-            <select id="sabor2"></select>
-          </div>
-        </div>
-
-        <div id="ingredientes" class="ingredients-preview"></div>
-
-        <div class="grid-2">
-          <div>
-            <label for="adicional">Adicional</label>
-            <select id="adicional">
-              <option value="0">Nenhum adicional</option>
-              <option value="4">Catupiry Extra (+R$ 4,00)</option>
-              <option value="4">Presunto Extra (+R$ 4,00)</option>
-              <option value="4">Cebola Extra (+R$ 4,00)</option>
-              <option value="4">Milho Extra (+R$ 4,00)</option>
-              <option value="4">Ervilha Extra (+R$ 4,00)</option>
-              <option value="5">Muçarela Extra (+R$ 5,00)</option>
-              <option value="5">Bacon Extra (+R$ 5,00)</option>
-            </select>
-          </div>
-          <div>
-            <label for="obsPizza">Observação da Pizza</label>
-            <input id="obsPizza" placeholder="Ex: sem cebola, assar bem" />
-          </div>
-        </div>
-
-        <div class="btn-row">
-          <button id="btnAdicionarPizza" class="gold" type="button">Adicionar Pizza</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Bebidas</h2>
-        <div class="grid-2">
-          <div>
-            <label for="bebida">Selecionar Bebida</label>
-            <select id="bebida">
-              <option value="">Nenhuma bebida</option>
-              <option value="16">Coca-Cola 2 Litros - R$ 16,00</option>
-              <option value="10">Guaraná Antarctica 1 Litro - R$ 10,00</option>
-              <option value="6">Coca-Cola Lata 310ml - R$ 6,00</option>
-            </select>
-          </div>
         // O ViaCEP exige o logradouro SEM o tipo (Rua, Avenida, Travessa...)
         // e com no minimo 3 caracteres.
-        const semTipo = ruaLimpa.replace(/^(rua|avenida|av\.?|travessa|tv\.?|alameda|estrada|rodovia|praca|praça)\s+/i, "").trim();
-        const termo = semTipo.length >= 3 ? semTipo : ruaLimpa;
-        const url = "https://viacep.com.br/ws/MS/Campo%20Grande/" +
-          encodeURIComponent(termo) + "/json/";
+        const semTipo = ruaLimpa
+          .replace(/^(rua|r\.?|avenida|av\.?|travessa|tv\.?|alameda|al\.?|rodovia|rod\.?|praca|praca|estrada|est\.?)\s+/i, "")
+          .trim();
 
-        try {
-          const resp = await fetch(url);
-          const lista = await resp.json();
-          if (Array.isArray(lista) && lista.length > 0 && lista[0].cep) {
-            // se houver mais de um CEP para a mesma rua, escolhe o do bairro digitado
-            let escolhido = lista[0];
-            if (texto.includes(" - ")) {
-              const bairroDigitado = normalizarTexto(texto.split(" - ").slice(1).join(" - "));
-              const doBairro = lista.find(function (l) {
-                return normalizarTexto(l.bairro || "") === bairroDigitado;
-              });
-              if (doBairro) escolhido = doBairro;
+        const termoBusca = semTipo.length >= 3 ? semTipo : ruaLimpa;
+        const urlBusca = `https://viacep.com.br/ws/MS/Campo%20Grande/${encodeURIComponent(termoBusca)}/json/`;
+        const resposta = await fetch(urlBusca);
+        if (!resposta.ok) {
+          throw new Error("HTTP " + resposta.status);
+        }
+        const lista = await resposta.json();
+
+        if (Array.isArray(lista) && lista.length > 0) {
+          const ruaNorm = normalizarTexto(ruaLimpa);
+          const semTipoNorm = normalizarTexto(semTipo);
+          const item =
+            lista.find((x) => {
+              const logNorm = normalizarTexto(x.logradouro || "");
+              return (
+                logNorm === ruaNorm ||
+                logNorm === semTipoNorm ||
+                logNorm.endsWith(" " + semTipoNorm) ||
+                logNorm.includes(semTipoNorm)
+              );
+            }) || lista[0];
+
+          if (item && item.cep) {
+            campoCep.value = item.cep;
+            if (item.logradouro && !texto.includes(" - ")) {
+              campoEnd.value = item.bairro ? `${item.logradouro} - ${item.bairro}` : item.logradouro;
             }
-            campoCep.value = escolhido.cep;
-            const bai = escolhido.bairro || "";
-            const log = escolhido.logradouro || ruaLimpa;
-            campoEnd.value = bai ? `${log} - ${bai}` : log;
             avisarEndereco("");
             calcularTaxaEntrega();
-          } else {
-            avisarEndereco("CEP nao localizado para esta rua. Digite o CEP.");
+            return;
           }
-        } catch (err) {
-          console.log("Erro busca CEP por rua", err);
-          avisarEndereco("Sem conexao para buscar o CEP agora.");
         }
+      } catch (erro) {
+        console.log("Erro buscar CEP pela rua", erro);
+      }
+
+      // Tentativa secundaria via Nominatim (OpenStreetMap) caso o ViaCEP nao retorne
+      try {
+        const query = encodeURIComponent(`${ruaLimpa}, Campo Grande, Mato Grosso do Sul, Brazil`);
+        const respNom = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${query}&format=json&addressdetails=1&countrycodes=br&limit=1`
+        );
+        if (respNom.ok) {
+          const dadosNom = await respNom.json();
+          if (Array.isArray(dadosNom) && dadosNom.length > 0 && dadosNom[0].address) {
+            const addr = dadosNom[0].address;
+            if (addr.postcode) {
+              campoCep.value = addr.postcode;
+            }
+            const bairroNom = addr.suburb || addr.neighbourhood || addr.city_district || "";
+            if (!texto.includes(" - ") && bairroNom) {
+              campoEnd.value = `${ruaLimpa} - ${bairroNom}`;
+            }
+            if (addr.postcode || bairroNom) {
+              avisarEndereco("");
+              calcularTaxaEntrega();
+              return;
+            }
+          }
+        }
+      } catch (erroNom) {
+        console.log("Erro Nominatim buscar CEP pela rua", erroNom);
+      }
+
+      if (!campoCep.value.trim()) {
+        avisarEndereco("CEP nao localizado automaticamente. Digite o CEP ou confira o endereco.");
       }
     }
 
-    function imprimirCupomTermico() {
-      sincronizarDadosClientePedido();
-      const numeroPed = document.getElementById("numeroPedido").innerText || "KV";
-      const dataPed = document.getElementById("dataPedido").innerText || new Date().toLocaleString("pt-BR");
+    // ===== CALCULO DE ROTA (OpenRouteService) =====
+    // Busca coordenadas de um endereco de entrega via Nominatim e calcula
+    // a rota real de carro ate o ponto de partida via OpenRouteService.
+    // Se nao houver chave ORS salva, cai no calculo em linha reta (Haversine)
+    // com aviso claro para o usuario.
+    function obterChaveOrs() {
+      try {
+        return (localStorage.getItem(ORS_CHAVE_LOCAL) || "").trim();
+      } catch (e) {
+        return "";
+      }
+    }
 
-      const itensArr = Array.isArray(pedidoAtual.itens) ? pedidoAtual.itens : [];
-      const itensHtml = itensArr
-        .map((item) => {
-          const desc = String(item.descricao || "ITEM");
-          const val = Number(item.valor || 0).toFixed(2);
-          const obs = item.observacao ? `<div style="font-size:11px;margin-top:1px;">OBS: ${String(item.observacao)}</div>` : "";
+    function salvarChaveOrs(chave) {
+      const limpo = String(chave || "").trim();
+      if (!limpo) {
+        localStorage.removeItem(ORS_CHAVE_LOCAL);
+      } else {
+        localStorage.setItem(ORS_CHAVE_LOCAL, limpo);
+      }
+    }
+
+    function haversineKm(a, b) {
+      const R = 6371;
+      const toRad = (g) => (g * Math.PI) / 180;
+      const dLat = toRad(b.lat - a.lat);
+      const dLng = toRad(b.lng - a.lng);
+      const lat1 = toRad(a.lat);
+      const lat2 = toRad(b.lat);
+      const h =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      return 2 * R * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+    }
+
+    async function geocodificarEndereco(enderecoTexto) {
+      const limpo = String(enderecoTexto || "").trim();
+      if (!limpo) return null;
+
+      // Se houver um CEP de 8 digitos no texto ou no campo, busca primeiro por ele
+      // no ViaCEP para obter rua/bairro/cidade corretos e geocodificar com precisao.
+      const matchCep = limpo.match(/\b\d{5}-?\d{3}\b/);
+      let consulta = limpo;
+      if (matchCep) {
+        const cepDigitos = matchCep[0].replace(/\D/g, "");
+        try {
+          const rCep = await fetch(`https://viacep.com.br/ws/${cepDigitos}/json/`);
+          if (rCep.ok) {
+            const dCep = await rCep.json();
+            if (dCep && !dCep.erro) {
+              const partes = [dCep.logradouro, dCep.bairro, dCep.localidade, dCep.uf, "Brasil"].filter(Boolean);
+              if (partes.length >= 2) {
+                consulta = partes.join(", ");
+              }
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (!/campo grande/i.test(consulta)) {
+        consulta = `${consulta}, Campo Grande - MS, Brasil`;
+      }
+
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(consulta)}&format=json&countrycodes=br&limit=1`;
+      const resp = await fetch(url, {
+        headers: { "Accept": "application/json" }
+      });
+      if (!resp.ok) {
+        throw new Error("Falha ao localizar endereco (" + resp.status + ")");
+      }
+      const dados = await resp.json();
+      if (!Array.isArray(dados) || dados.length === 0) {
+        return null;
+      }
+      return {
+        lat: parseFloat(dados[0].lat),
+        lng: parseFloat(dados[0].lon),
+        label: dados[0].display_name || consulta
+      };
+    }
+
+    async function consultarRotaOrs(origem, destino, chave) {
+      // OpenRouteService espera [lng, lat]
+      const url = `${ORS_ENDPOINT}/v2/directions/${ORS_PROFILE}?api_key=${encodeURIComponent(chave)}&start=${origem.lng},${origem.lat}&end=${destino.lng},${destino.lat}`;
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        let detalhe = "";
+        try {
+          const errJson = await resp.json();
+          detalhe = errJson?.error?.message || errJson?.message || "";
+        } catch (e) {}
+        throw new Error(`OpenRouteService HTTP ${resp.status}${detalhe ? ": " + detalhe : ""}`);
+      }
+      const data = await resp.json();
+      const seg = data?.features?.[0]?.properties?.segments?.[0];
+      if (!seg || typeof seg.distance !== "number") {
+        throw new Error("Resposta do OpenRouteService sem distancia.");
+      }
+      return {
+        distanciaKm: seg.distance / 1000,
+        duracaoMin: typeof seg.duration === "number" ? Math.round(seg.duration / 60) : null,
+        modo: "ors"
+      };
+    }
+
+    async function calcularRotaEntrega(enderecoTexto) {
+      const origem = obterOrigemReal();
+      const destino = await geocodificarEndereco(enderecoTexto);
+      if (!destino) {
+        throw new Error("Endereco nao encontrado no mapa. Confira rua, numero ou CEP.");
+      }
+
+      const chave = obterChaveOrs();
+      if (chave) {
+        try {
+          const rota = await consultarRotaOrs(origem, destino, chave);
+          return { ...rota, destinoLabel: destino.label };
+        } catch (errOrs) {
+          // Se a chave for invalida/sem cota, avisa e usa estimativa em linha reta
+          const distLinhaReta = haversineKm(origem, destino);
+          return {
+            distanciaKm: distLinhaReta,
+            duracaoMin: Math.max(3, Math.round((distLinhaReta / 25) * 60)),
+            modo: "fallback_ors",
+            aviso: errOrs.message,
+            destinoLabel: destino.label
+          };
+        }
+      }
+
+      const distLinhaReta = haversineKm(origem, destino);
+      return {
+        distanciaKm: distLinhaReta,
+        duracaoMin: Math.max(3, Math.round((distLinhaReta / 25) * 60)),
+        modo: "sem_chave",
+        destinoLabel: destino.label
+      };
+    }
+
+    function montarUrlMapsRota(destinoTexto) {
+      const origem = encodeURIComponent(ORIGEM_ENTREGA.endereco);
+      const destino = encodeURIComponent(destinoTexto);
+      return `https://www.google.com/maps/dir/?api=1&origin=${origem}&destination=${destino}&travelmode=driving`;
+    }
+
+    function atualizarStatusChaveUi() {
+      const input = document.getElementById("inputChaveRota");
+      const status = document.getElementById("statusChaveRota");
+      if (!input || !status) return;
+      const chave = obterChaveOrs();
+      if (!input.value && chave) {
+        input.value = chave;
+      }
+      if (chave) {
+        status.innerHTML = "✅ Chave salva neste aparelho (rota real por ruas habilitada).";
+      } else {
+        status.innerHTML = "⚠️ Nenhuma chave salva — usando estimativa em linha reta. Cole sua chave acima para rota real por ruas.";
+      }
+    }
+
+    async function renderizarRotaNaTela(enderecoTexto, clienteRotulo) {
+      const box = document.getElementById("resultadoRota");
+      if (!box) return;
+      const limpo = String(enderecoTexto || "").trim();
+      if (!limpo) {
+        box.style.display = "block";
+        box.innerHTML = '<span style="color: var(--danger);">Informe um endereco de entrega.</span>';
+        return;
+      }
+
+      box.style.display = "block";
+      box.innerHTML = "Calculando rota a partir da Rua Delamare, 129...";
+
+      try {
+        const res = await calcularRotaEntrega(limpo);
+        const kmArred = Math.round(res.distanciaKm * 10) / 10;
+        const taxaSugerida = calcularTaxaPorDistancia(kmArred);
+        const dentroArea = dentroDaAreaDeEntrega(kmArred);
+        const urlMaps = montarUrlMapsRota(limpo);
+
+        let badgeModo = "";
+        if (res.modo === "ors") {
+          badgeModo = '<span class="status-pill status-feito">Rota real (OpenRouteService)</span>';
+        } else if (res.modo === "sem_chave") {
+          badgeModo = '<span class="status-pill status-producao">Estimativa em linha reta (sem chave ORS)</span>';
+        } else {
+          badgeModo = '<span class="status-pill status-producao">Estimativa em linha reta (falha na chave ORS)</span>';
+        }
+
+        const avisoExtra = res.aviso
+          ? `<div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Detalhe: ${res.aviso}</div>`
+          : "";
+
+        box.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+            <strong>${clienteRotulo ? clienteRotulo + " — " : ""}${limpo}</strong>
+            ${badgeModo}
+          </div>
+          <div class="summary-line"><span>Distancia:</span><strong>${kmArred.toFixed(1)} km</strong></div>
+          <div class="summary-line"><span>Tempo estimado:</span><strong>${res.duracaoMin} min</strong></div>
+          <div class="summary-line"><span>Area de entrega (max ${RAIO_MAXIMO_KM} km):</span><strong>${dentroArea ? "✅ Dentro" : "🚫 Fora"}</strong></div>
+          <div class="summary-line"><span>Taxa pela distancia:</span><strong>R$ ${taxaSugerida.toFixed(2)}</strong></div>
+          <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Destino localizado: ${res.destinoLabel}</div>
+          ${avisoExtra}
+          <div class="btn-row">
+            <a href="${urlMaps}" target="_blank" rel="noopener" style="text-decoration: none;">
+              <button class="gold" type="button">🗺️ Abrir no Google Maps</button>
+            </a>
+          </div>
+        `;
+      } catch (err) {
+        box.innerHTML = `<span style="color: var(--danger);">Erro ao calcular rota: ${err.message}</span>`;
+      }
+    }
+
+    function usarEnderecoPedidoAtual() {
+      const end = (document.getElementById("endereco").value || "").trim();
+      const num = (document.getElementById("numero").value || "").trim();
+      const cep = (document.getElementById("cep").value || "").trim();
+      const cli = (document.getElementById("nome").value || "").trim();
+      const cod = (document.getElementById("numeroPedido").innerText || "").trim();
+
+      const completo = [end, num ? `nº ${num}` : "", cep ? `CEP ${cep}` : ""].filter(Boolean).join(", ");
+      document.getElementById("rotaEndereco").value = completo || end;
+      document.getElementById("rotaCliente").value = [cod, cli].filter(Boolean).join(" - ");
+      if (completo || end) {
+        renderizarRotaNaTela(completo || end, [cod, cli].filter(Boolean).join(" - "));
+      }
+    }
+
+    function listarRotasPedidosHoje() {
+      const container = document.getElementById("listaRotasDia");
+      if (!container) return;
+      const hojeData = new Date().toLocaleDateString("pt-BR");
+      const pedidosHoje = (historicoPedidos || []).filter((p) =>
+        String(p.data || "").startsWith(hojeData)
+      );
+
+      if (!pedidosHoje.length) {
+        container.innerHTML = '<p style="color: var(--muted);">Nenhum pedido registrado hoje ate o momento.</p>';
+        return;
+      }
+
+      container.innerHTML = pedidosHoje
+        .map((p) => {
+          const endMontado = [p.endereco, p.numeroCasa ? `nº ${p.numeroCasa}` : "", p.cep ? `CEP ${p.cep}` : ""]
+            .filter(Boolean)
+            .join(", ");
+          const rotulo = `${p.numero || ""} - ${p.cliente || "Cliente"}`.trim();
+          const endEsc = encodeURIComponent(endMontado);
+          const rotEsc = encodeURIComponent(rotulo);
+          const mapsUrl = montarUrlMapsRota(endMontado);
+          return `
+            <div class="list-card">
+              <div>
+                <b>${rotulo}</b> <span class="status-pill status-feito">${p.status || "Gerado"}</span><br />
+                <span style="color: var(--muted); font-size: 0.85rem;">${endMontado || "Endereco nao informado"}</span><br />
+                <strong style="color: var(--gold);">Total: R$ ${Number(p.total || 0).toFixed(2)}</strong>
+              </div>
+              <div class="btn-row">
+                <button type="button" class="gold" onclick="selecionarRotaDoDia(decodeURIComponent('${endEsc}'), decodeURIComponent('${rotEsc}'))">Calcular Rota</button>
+                <a href="${mapsUrl}" target="_blank" rel="noopener" style="text-decoration: none;">
+                  <button type="button" class="secondary">🗺️ Maps</button>
+                </a>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function selecionarRotaDoDia(endereco, rotulo) {
+      document.getElementById("rotaEndereco").value = endereco;
+      document.getElementById("rotaCliente").value = rotulo;
+      renderizarRotaNaTela(endereco, rotulo);
+    }
+
+    async function testarConexaoApis() {
+      const box = document.getElementById("resultadoTesteApis");
+      if (!box) return;
+      box.innerHTML = "Testando conexoes com ViaCEP, Nominatim e OpenRouteService...";
+
+      const resultados = [];
+
+      // 1. ViaCEP
+      try {
+        const r1 = await fetch("https://viacep.com.br/ws/79097240/json/");
+        const d1 = await r1.json();
+        if (r1.ok && d1 && !d1.erro) {
+          resultados.push(`✅ <b>ViaCEP:</b> OK (${d1.logradouro || "CEP valido"} - ${d1.localidade || ""})`);
+        } else {
+          resultados.push(`⚠️ <b>ViaCEP:</b> Respondeu com erro`);
+        }
+      } catch (e) {
+        resultados.push(`❌ <b>ViaCEP:</b> Falhou (${e.message})`);
+      }
+
+      // 2. Nominatim
+      try {
+        const r2 = await fetch("https://nominatim.openstreetmap.org/search?q=Rua+Delamare+129+Campo+Grande+MS&format=json&limit=1");
+        const d2 = await r2.json();
+        if (r2.ok && Array.isArray(d2) && d2.length > 0) {
+          resultados.push(`✅ <b>Nominatim (Mapa/Geo):</b> OK (${parseFloat(d2[0].lat).toFixed(4)}, ${parseFloat(d2[0].lon).toFixed(4)})`);
+        } else {
+          resultados.push(`⚠️ <b>Nominatim:</b> Sem resultados no teste`);
+        }
+      } catch (e) {
+        resultados.push(`❌ <b>Nominatim:</b> Falhou (${e.message})`);
+      }
+
+      // 3. OpenRouteService
+      const chave = obterChaveOrs();
+      if (!chave) {
+        resultados.push(`⚠️ <b>OpenRouteService:</b> Chave nao configurada neste aparelho.`);
+      } else {
+        try {
+          const orig = obterOrigemReal();
+          const resOrs = await consultarRotaOrs(orig, { lat: -20.538, lng: -54.668 }, chave);
+          resultados.push(`✅ <b>OpenRouteService:</b> OK (rota teste ${resOrs.distanciaKm.toFixed(1)} km)`);
+        } catch (e) {
+          resultados.push(`❌ <b>OpenRouteService:</b> Falhou (${e.message})`);
+        }
+      }
+
+      box.innerHTML = resultados.map((linha) => `<div style="margin-bottom: 6px;">${linha}</div>`).join("");
+    }
+
+    function agendarBuscaCepPorRua() {
+      clearTimeout(timerBuscaRua);
+      const texto = (document.getElementById("endereco").value || "").trim();
+      if (texto.length < 4) return;
+      timerBuscaRua = setTimeout(() => {
+        buscarCEPPorRua();
+      }, 650);
+    }
+
+    function agendarCalculoTaxaReal() {
+      clearTimeout(timerTaxaReal);
+      timerTaxaReal = setTimeout(() => {
+        calcularTaxaEntrega();
+      }, 250);
+    }
+
+    function adicionarPizza() {
+      const tamanho = document.getElementById("tamanho").value;
+      const tipo = document.getElementById("tipoPizza").value;
+      const s1 = document.getElementById("sabor1").value;
+      const s2 = document.getElementById("sabor2").value;
+      const adicional = Number(document.getElementById("adicional").value) || 0;
+      const selectAdicional = document.getElementById("adicional");
+      const nomeAdicional = adicional > 0 ? selectAdicional.options[selectAdicional.selectedIndex].text : "";
+      const obsPizza = document.getElementById("obsPizza").value.trim();
+
+      if (!s1 || !SABORES[s1]) {
+        alert("Selecione o Sabor 1.");
+        return;
+      }
+
+      const p1 = tamanho === "brotinho" ? Number(SABORES[s1].brotinho) : Number(SABORES[s1].grande);
+      let valor = p1;
+      let descricao = "";
+      let ingredientesTexto = "";
+
+      if (tamanho === "grande" && tipo === "meio") {
+        if (!s2 || !SABORES[s2]) {
+          alert("Selecione o Sabor 2 para pizza Meio a Meio.");
+          return;
+        }
+        const p2 = Number(SABORES[s2].grande);
+        valor = Math.max(p1, p2);
+        descricao = `Pizza Grande 35cm (Meio a Meio: ${s1} / ${s2})`;
+        ingredientesTexto = `50% ${s1}: ${SABORES[s1].ingredientes.join(", ")} | 50% ${s2}: ${SABORES[s2].ingredientes.join(", ")}`;
+      } else {
+        const nomeTam = tamanho === "brotinho" ? "Brotinho 25cm" : "Pizza Grande 35cm";
+        descricao = `${nomeTam} - ${s1}`;
+        ingredientesTexto = `Ingredientes: ${SABORES[s1].ingredientes.join(", ")}`;
+      }
+
+      if (adicional > 0) {
+        valor += adicional;
+        descricao += ` + ${nomeAdicional}`;
+      }
+
+      adicionarItem({
+        tipo: "pizza",
+        descricao,
+        ingredientes: ingredientesTexto,
+        observacao: obsPizza,
+        valor
+      });
+
+      document.getElementById("obsPizza").value = "";
+      document.getElementById("adicional").value = "0";
+    }
+
+    function adicionarBebida() {
+      const sel = document.getElementById("bebida");
+      const valor = Number(sel.value);
+      if (!valor) {
+        alert("Selecione uma bebida.");
+        return;
+      }
+      const nomeBebida = sel.options[sel.selectedIndex].text.split(" - ")[0];
+      adicionarItem({
+        tipo: "bebida",
+        descricao: nomeBebida,
+        ingredientes: "",
+        observacao: "",
+        valor
+      });
+      sel.value = "";
+    }
+
+    function sincronizarCamposPedido() {
+      pedidoAtual.cliente = document.getElementById("nome").value.trim();
+      pedidoAtual.telefone = document.getElementById("telefone").value.trim();
+      pedidoAtual.cep = document.getElementById("cep").value.trim();
+      pedidoAtual.numeroCasa = document.getElementById("numero").value.trim();
+      pedidoAtual.endereco = document.getElementById("endereco").value.trim();
+      pedidoAtual.observacao = document.getElementById("observacao").value.trim();
+      pedidoAtual.taxaEntrega = taxaEntrega;
+      atualizarTotal();
+    }
+
+    function gerarMensagemWhatsApp() {
+      sincizarCamposPedido();
+
+      if (pedidoAtual.itens.length === 0) {
+        alert("Adicione pelo menos um item ao carrinho antes de enviar.");
+        return null;
+      }
+
+      let linhas = [];
+      linhas.push(`*KING VENTURA PIZZARIA*`);
+      linhas.push(`Pedido: *${pedidoAtual.numero}*`);
+      linhas.push(`Data: ${pedidoAtual.data}`);
+      linhas.push(`Status: *${normalizarStatusPedido(pedidoAtual.status)}*`);
+      linhas.push(``);
+
+      if (pedidoAtual.cliente) linhas.push(`*Cliente:* ${pedidoAtual.cliente}`);
+      if (pedidoAtual.telefone) linhas.push(`*Telefone:* ${pedidoAtual.telefone}`);
+      if (pedidoAtual.endereco || pedidoAtual.numeroCasa || pedidoAtual.cep) {
+        linhas.push(
+          `*Endereço:* ${pedidoAtual.endereco}${pedidoAtual.numeroCasa ? ", nº " + pedidoAtual.numeroCasa : ""}${pedidoAtual.cep ? " (CEP: " + pedidoAtual.cep + ")" : ""}`
+        );
+      }
+      if (pedidoAtual.observacao) linhas.push(`*Obs Cliente:* ${pedidoAtual.observacao}`);
+
+      linhas.push(``);
+      linhas.push(`*Itens do Pedido:*`);
+      pedidoAtual.itens.forEach((item, idx) => {
+        linhas.push(`${idx + 1}. ${item.descricao} — R$ ${Number(item.valor).toFixed(2)}`);
+        if (item.observacao) {
+          linhas.push(`   _Obs item: ${item.observacao}_`);
+        }
+      });
+
+      linhas.push(``);
+      linhas.push(`Taxa de Entrega: R$ ${Number(pedidoAtual.taxaEntrega).toFixed(2)}`);
+      linhas.push(`*TOTAL: R$ ${Number(pedidoAtual.total).toFixed(2)}*`);
+
+      return linhas.join("\n");
+    }
+
+    function enviarWhatsApp() {
+      const msg = gerarMensagemWhatsApp();
+      if (!msg) return;
+      const url = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(msg)}`;
+      window.open(url, "_blank");
+    }
+
+    function registrarPedidoAtualNoHistorico() {
+      sincronizarCamposPedido();
+
+      if (pedidoAtual.itens.length === 0) {
+        alert("Adicione pelo menos um item ao carrinho antes de registrar.");
+        return;
+      }
+
+      const copia = JSON.parse(JSON.stringify(pedidoAtual));
+      copia.status = normalizarStatusPedido(pedidoAtual.status || "Gerado");
+      registrarPedido(copia);
+      alert(`Pedido ${copia.numero} registrado no histórico!`);
+    }
+
+    function novoPedido() {
+      if (pedidoAtual.itens.length > 0) {
+        const confirmar = confirm("Iniciar um novo pedido? Os itens atuais do carrinho serão limpos.");
+        if (!confirmar) return;
+      }
+
+      pedidoAtual = {
+        numero: "",
+        data: "",
+        status: "Gerado",
+        cliente: "",
+        telefone: "",
+        cep: "",
+        endereco: "",
+        numeroCasa: "",
+        observacao: "",
+        taxaEntrega: 0,
+        itens: [],
+        total: 0
+      };
+
+      taxaEntrega = 0;
+      document.getElementById("nome").value = "";
+      document.getElementById("telefone").value = "";
+      document.getElementById("cep").value = "";
+      document.getElementById("numero").value = "";
+      document.getElementById("endereco").value = "";
+      document.getElementById("observacao").value = "";
+      document.getElementById("obsPizza").value = "";
+      document.getElementById("mensagemEntrega").innerHTML = "";
+
+      atualizarCarrinho();
+      inicializarPedido();
+    }
+
+    function montarHtmlCupomTermico(pedido) {
+      const itensHtml = (pedido.itens || [])
+        .map((item, i) => {
+          const obsLinha = item.observacao
+            ? `<div>OBS: ${escaparHtml(item.observacao)}</div>`
+            : "";
           return `
             <div class="cupom-item">
-              <div style="font-size:12px;">${desc} - R$ ${val}</div>
-              ${obs}
+              <div>${i + 1}. ${escaparHtml(item.descricao)}</div>
+              <div>R$ ${Number(item.valor || 0).toFixed(2)}</div>
+              ${obsLinha}
             </div>
           `;
         })
         .join("");
 
-      const cupomEl = document.getElementById("cupomTermico");
-      cupomEl.innerHTML = `
-        <div style="text-align:center;font-size:13px;">KING VENTURA PIZZARIA</div>
-        <div style="font-size:11px;">PED: ${numeroPed} | ${dataPed}</div>
+      const enderecoLinha = [
+        pedido.endereco,
+        pedido.numeroCasa ? `N. ${pedido.numeroCasa}` : "",
+        pedido.cep ? `CEP ${pedido.cep}` : ""
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      return `
+        <div style="text-align: center;">KING VENTURA PIZZARIA</div>
+        <div>PEDIDO: ${escaparHtml(pedido.numero || "")}</div>
+        <div>DATA: ${escaparHtml(pedido.data || "")}</div>
+        <div>STATUS: ${escaparHtml(normalizarStatusPedido(pedido.status))}</div>
         <div class="cupom-linha"></div>
-        <div style="font-size:11px;">CLI: ${pedidoAtual.cliente || "-"}</div>
-        <div style="font-size:11px;">FONE: ${pedidoAtual.telefone || "-"}</div>
-        <div style="font-size:11px;">END: ${pedidoAtual.endereco || "-"}, ${pedidoAtual.numeroCasa || "-"}</div>
-        <div style="font-size:11px;">CEP: ${pedidoAtual.cep || "-"}</div>
-        ${pedidoAtual.observacao ? `<div style="font-size:11px;">OBS: ${pedidoAtual.observacao}</div>` : ""}
+        ${pedido.cliente ? `<div>CLI: ${escaparHtml(pedido.cliente)}</div>` : ""}
+        ${pedido.telefone ? `<div>TEL: ${escaparHtml(pedido.telefone)}</div>` : ""}
+        ${enderecoLinha ? `<div>END: ${escaparHtml(enderecoLinha)}</div>` : ""}
+        ${pedido.observacao ? `<div>OBS: ${escaparHtml(pedido.observacao)}</div>` : ""}
         <div class="cupom-linha"></div>
-        ${itensHtml || '<div style="font-size:12px;">SEM ITENS NO CARRINHO</div>'}
+        ${itensHtml || "<div>SEM ITENS</div>"}
         <div class="cupom-linha"></div>
-        <div style="font-size:11px;">TAXA ENTREGA: R$ ${Number(pedidoAtual.taxaEntrega || 0).toFixed(2)}</div>
-        <div style="font-size:13px;margin-top:2px;">TOTAL: R$ ${Number(pedidoAtual.total || 0).toFixed(2)}</div>
-        <div class="cupom-linha"></div>
-        <div style="text-align:center;font-size:11px;margin-top:2px;">OBRIGADO PELA PREFERENCIA!</div>
+        <div>TAXA: R$ ${Number(pedido.taxaEntrega || 0).toFixed(2)}</div>
+        <div>TOTAL: R$ ${Number(pedido.total || 0).toFixed(2)}</div>
       `;
-
-      // so imprime depois que o conteudo do cupom esta no DOM e pintado
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () {
-          setTimeout(function () {
-            window.print();
-          }, 250);
-        });
-      });
     }
 
-    function sincronizarDadosClientePedido() {
-      pedidoAtual.cliente = document.getElementById("nome").value.trim();
-      pedidoAtual.telefone = document.getElementById("telefone").value.trim();
-      pedidoAtual.cep = document.getElementById("cep").value.trim();
-      pedidoAtual.endereco = document.getElementById("endereco").value.trim();
-      pedidoAtual.numeroCasa = document.getElementById("numero").value.trim();
-      pedidoAtual.observacao = document.getElementById("observacao").value.trim();
-      pedidoAtual.taxaEntrega = taxaEntrega;
-    }
-
-    function enviarWhatsApp(pedido) {
-      let mensagem = "KING VENTURA PIZZARIA\n\n";
-      mensagem += "Pedido: " + (pedido.numero || document.getElementById("numeroPedido").innerText) + "\n";
-      mensagem += "Status: " + normalizarStatusPedido(pedido.status || pedidoAtual.status || "Gerado") + "\n";
-      mensagem += "Cliente: " + (pedido.cliente || "") + "\n";
-      mensagem += "Telefone: " + (pedido.telefone || "") + "\n";
-      mensagem += "CEP: " + (pedido.cep || "") + "\n";
-      mensagem += "Endereço: " + (pedido.endereco || "") + "\n";
-      mensagem += "Número: " + (pedido.numeroCasa || "") + "\n";
-      mensagem += "Observação: " + (pedido.observacao || "") + "\n";
-      mensagem += "Taxa de Entrega: R$ " + Number(pedido.taxaEntrega || 0).toFixed(2) + "\n\n";
-      mensagem += "ITENS:\n[KV-ITENS]\n";
-
-      (pedido.itens || []).forEach((item) => {
-        mensagem += item.descricao + " - R$ " + Number(item.valor).toFixed(2) + "\n";
-        if (item.adicionais && item.adicionais.length) {
-          mensagem += "Adicionais: " + item.adicionais.join(", ") + "\n";
-        }
-        if (item.observacao) {
-          mensagem += "Obs: " + item.observacao + "\n";
-        }
-        mensagem += "\n";
-      });
-
-      mensagem += "\nTOTAL: R$ " + Number(pedido.total || 0).toFixed(2);
-
-      window.open(
-        "https://wa.me/" + NUMERO_WHATSAPP + "?text=" + encodeURIComponent(mensagem),
-        "_blank"
-      );
-    }
-
-    function importarPedidoWhats() {
-      const texto = document.getElementById("pedidoWhats").value;
-      if (!texto.trim()) return;
-
-      limparPedido();
-
-      const nome = texto.match(/Cliente:\s*(.*)/i);
-      const telefone = texto.match(/Telefone:\s*(.*)/i);
-      const cep = texto.match(/CEP:\s*(.*)/i);
-      const numero = texto.match(/N[uú]mero:\s*(.*)/i);
-      const endereco = texto.match(/Endere[cç]o:\s*(.*)/i);
-      const obs = texto.match(/Observa[cç][aã]o:\s*(.*)/i);
-
-      document.getElementById("nome").value = nome ? nome[1].trim() : "";
-      document.getElementById("telefone").value = telefone ? telefone[1].trim() : "";
-      document.getElementById("cep").value = cep ? cep[1].trim() : "";
-      document.getElementById("numero").value = numero ? numero[1].trim() : "";
-      if (endereco && endereco[1].trim()) {
-        document.getElementById("endereco").value = endereco[1].trim();
-      }
-      if (obs && obs[1].trim()) {
-        document.getElementById("observacao").value = obs[1].trim();
-      }
-
-      const linhas = texto.split("\n");
-      linhas.forEach((rawLinha) => {
-        const linha = rawLinha.trim();
-
-        if (linha.startsWith("Brotinho 25cm - ")) {
-          const sabor = linha
-            .split(" - R$ ")[0]
-            .replace("Brotinho 25cm - ", "")
-            .split(" + ")[0]
-            .trim();
-
-          if (SABORES[sabor]) {
-            document.getElementById("tamanho").value = "brotinho";
-            carregarSabores();
-            document.getElementById("sabor1").value = sabor;
-            document.getElementById("btnAdicionarPizza").click();
-          }
-        } else if (linha.startsWith("Grande 35cm Meio a Meio - ")) {
-          const descricaoPizza = linha
-            .split(" - R$ ")[0]
-            .replace("Grande 35cm Meio a Meio - ", "");
-          const partes = descricaoPizza.split(" + ")[0].split(" / ");
-
-          if (partes.length === 2 && SABORES[partes[0].trim()] && SABORES[partes[1].trim()]) {
-            document.getElementById("tamanho").value = "grande";
-            document.getElementById("tipoPizza").value = "meio";
-            carregarSabores();
-            atualizarVisualPedido();
-            document.getElementById("sabor1").value = partes[0].trim();
-            document.getElementById("sabor2").value = partes[1].trim();
-            document.getElementById("btnAdicionarPizza").click();
-          }
-        } else if (linha.startsWith("Grande 35cm - ")) {
-          const sabor = linha
-            .split(" - R$ ")[0]
-            .replace("Grande 35cm - ", "")
-            .split(" + ")[0]
-            .trim();
-
-          if (SABORES[sabor]) {
-            document.getElementById("tamanho").value = "grande";
-            document.getElementById("tipoPizza").value = "inteira";
-            carregarSabores();
-            document.getElementById("sabor1").value = sabor;
-            document.getElementById("btnAdicionarPizza").click();
-          }
-        }
-      });
-
-      const bebidaSelect = document.getElementById("bebida");
-      for (let i = 1; i < bebidaSelect.options.length; i++) {
-        const optText = bebidaSelect.options[i].text.split(" - R$ ")[0];
-        if (texto.includes(optText)) {
-          bebidaSelect.selectedIndex = i;
-          document.getElementById("btnAdicionarBebida").click();
-        }
-      }
-
-      buscarCEP();
-      calcularTaxaEntrega();
-      alert("Pedido importado!");
-    }
-
-    function novoPedido() {
-      if (!confirm("Deseja limpar o pedido atual e iniciar um novo pedido?")) {
+    function imprimirCupomTermico() {
+      sincronizarCamposPedido();
+      if (!pedidoAtual.itens || pedidoAtual.itens.length === 0) {
+        alert("Adicione pelo menos um item ao carrinho antes de imprimir o cupom.");
         return;
       }
-      location.reload();
+      const cupom = document.getElementById("cupomTermico");
+      if (!cupom) return;
+      cupom.innerHTML = montarHtmlCupomTermico(pedidoAtual);
+      window.print();
     }
 
-    /* GESTÃO DE SABORES & PREÇOS */
+    function imprimirPedidoHistorico(index) {
+      const pedido = historicoPedidos[index];
+      if (!pedido) return;
+      const cupom = document.getElementById("cupomTermico");
+      if (!cupom) return;
+      cupom.innerHTML = montarHtmlCupomTermico(pedido);
+      window.print();
+    }
+
+    function importarPedidoWhatsApp() {
+      const texto = document.getElementById("pedidoWhats").value.trim();
+      if (!texto) {
+        alert("Cole a mensagem do WhatsApp primeiro.");
+        return;
+      }
+
+      const linhas = texto.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+      pedidoAtual.itens = [];
+
+      linhas.forEach((linha) => {
+        const matchPreco = linha.match(/R\$\s*([\d.,]+)/i);
+        const valorItem = matchPreco ? parseFloat(matchPreco[1].replace(",", ".")) : 0;
+
+        if (/^nome\s*:/i.test(linha)) {
+          document.getElementById("nome").value = linha.replace(/^nome\s*:/i, "").trim();
+        } else if (/^(telefone|fone|zap|whatsapp)\s*:/i.test(linha)) {
+          document.getElementById("telefone").value = linha.replace(/^(telefone|fone|zap|whatsapp)\s*:/i, "").trim();
+        } else if (/^cep\s*:/i.test(linha)) {
+          document.getElementById("cep").value = linha.replace(/^cep\s*:/i, "").trim();
+        } else if (/^(endereço|endereco|rua)\s*:/i.test(linha)) {
+          document.getElementById("endereco").value = linha.replace(/^(endereço|endereco|rua)\s*:/i, "").trim();
+        } else if (/^(obs|observação|observacao)\s*:/i.test(linha)) {
+          document.getElementById("observacao").value = linha.replace(/^(obs|observação|observacao)\s*:/i, "").trim();
+        } else if (/pizza|brotinho|coca|guaraná|guarana|bebida/i.test(linha) || matchPreco) {
+          const descLimpa = linha.replace(/[-–—]?\s*R\$\s*[\d.,]+/i, "").trim();
+          let precoFinal = valorItem;
+          if (!precoFinal) {
+            const saborEncontrado = Object.keys(SABORES).find((s) =>
+              descLimpa.toLowerCase().includes(s.toLowerCase())
+            );
+            if (saborEncontrado) {
+              precoFinal = /brotinho/i.test(descLimpa)
+                ? Number(SABORES[saborEncontrado].brotinho)
+                : Number(SABORES[saborEncontrado].grande);
+            }
+          }
+          adicionarItem({
+            tipo: /coca|guaraná|guarana|bebida|lata|litros/i.test(descLimpa) ? "bebida" : "pizza",
+            descricao: descLimpa || linha,
+            ingredientes: "",
+            observacao: "",
+            valor: precoFinal || 0
+          });
+        }
+      });
+
+      buscarCEP();
+      atualizarCarrinho();
+      alert("Mensagem importada! Confira os campos e o carrinho.");
+    }
+
     function renderizarListaSabores() {
       const container = document.getElementById("listaSabores");
-      const nomes = Object.keys(SABORES);
+      if (!container) return;
 
-      if (!nomes.length) {
+      const nomes = Object.keys(SABORES);
+      if (nomes.length === 0) {
         container.innerHTML = '<p style="color: var(--muted);">Nenhum sabor cadastrado.</p>';
         return;
       }
 
       container.innerHTML = nomes
         .map((nome) => {
-          const s = SABORES[nome];
+          const info = SABORES[nome];
+          const ing = Array.isArray(info.ingredientes) ? info.ingredientes.join(", ") : "";
+          const nomeEsc = encodeURIComponent(nome);
           return `
             <div class="list-card">
-              <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-                <div>
-                  <strong>${nome}</strong><br />
-                  <span style="color: var(--gold); font-size: 0.9rem;">
-                    Brotinho 25cm: R$ ${Number(s.brotinho).toFixed(2)} | Grande 35cm: R$ ${Number(s.grande).toFixed(2)}
-                  </span><br />
-                  <span style="color: var(--muted); font-size: 0.85rem;">
-                    Ingredientes: ${(s.ingredientes || []).join(", ")}
-                  </span>
-                </div>
-                <div class="btn-row" style="margin-top: 0;">
-                  <button class="secondary btn-editar-sabor" data-sabor="${nome.replace(/"/g, '&quot;')}" type="button">Editar</button>
-                  <button class="danger btn-excluir-sabor" data-sabor="${nome.replace(/"/g, '&quot;')}" type="button">Excluir</button>
-                </div>
+              <div>
+                <b>${nome}</b><br />
+                <span style="color: var(--gold); font-size: 0.9rem;">
+                  Brotinho: R$ ${Number(info.brotinho).toFixed(2)} | Grande: R$ ${Number(info.grande).toFixed(2)}
+                </span><br />
+                <span style="color: var(--muted); font-size: 0.85rem;">Ingredientes: ${ing}</span>
+              </div>
+              <div class="btn-row">
+                <button type="button" class="secondary" onclick="prepararEdicaoSabor(decodeURIComponent('${nomeEsc}'))">Editar</button>
+                <button type="button" class="danger" onclick="excluirSabor(decodeURIComponent('${nomeEsc}'))">Excluir</button>
               </div>
             </div>
           `;
         })
         .join("");
+    }
 
-      container.querySelectorAll(".btn-editar-sabor").forEach((btn) => {
-        btn.addEventListener("click", () => prepararEdicaoSabor(btn.dataset.sabor));
+    function prepararEdicaoSabor(nome) {
+      const info = SABORES[nome];
+      if (!info) return;
+      document.getElementById("saborEditandoOriginal").value = nome;
+      document.getElementById("cadNomeSabor").value = nome;
+      document.getElementById("cadPrecoBrotinho").value = info.brotinho;
+      document.getElementById("cadPrecoGrande").value = info.grande;
+      document.getElementById("cadIngredientes").value = (info.ingredientes || []).join(", ");
+    }
+
+    function limparFormSabor() {
+      document.getElementById("saborEditandoOriginal").value = "";
+      document.getElementById("cadNomeSabor").value = "";
+      document.getElementById("cadPrecoBrotinho").value = "";
+      document.getElementById("cadPrecoGrande").value = "";
+      document.getElementById("cadIngredientes").value = "";
+    }
+
+    function salvarSaborForm() {
+      const original = document.getElementById("saborEditandoOriginal").value.trim();
+      const nome = document.getElementById("cadNomeSabor").value.trim();
+      const brotinho = parseFloat(document.getElementById("cadPrecoBrotinho").value);
+      const grande = parseFloat(document.getElementById("cadPrecoGrande").value);
+      const ingRaw = document.getElementById("cadIngredientes").value;
+
+      if (!nome) {
+        alert("Informe o nome do sabor.");
+        return;
+      }
+      if (isNaN(brotinho) || brotinho < 0 || isNaN(grande) || grande < 0) {
+        alert("Informe preços válidos para Brotinho e Grande.");
+        return;
+      }
+
+      const ingredientes = ingRaw
+        .split(",")
+        .map((i) => i.trim())
+        .filter(Boolean);
+
+      if (original && original !== nome && SABORES[original]) {
+        delete SABORES[original];
+      }
+
+      SABORES[nome] = {
+        brotinho,
+        grande,
+        ingredientes: ingredientes.length ? ingredientes : ["Molho", "Muçarela", "Orégano"]
+      };
+
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+      limparFormSabor();
+      alert(`Sabor "${nome}" salvo!`);
+    }
+
+    function excluirSabor(nome) {
+      if (!SABORES[nome]) return;
+      if (!confirm(`Excluir o sabor "${nome}"?`)) return;
+      delete SABORES[nome];
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+    }
+
+    function restaurarSaboresPadrao() {
+      if (!confirm("Restaurar todos os sabores e preços padrão da King Ventura?")) return;
+      SABORES = JSON.parse(JSON.stringify(SABORES_PADRAO));
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+      limparFormSabor();
+    }
+
+    function salvarClienteNaBase(dados) {
+      if (!dados.nome) {
+        alert("Informe o nome do cliente.");
+        return false;
+      }
+
+      const existenteIdx = clientesBase.findIndex(
+        (c) =>
+          (dados.id && c.id === dados.id) ||
+          c.nome.toLowerCase() === dados.nome.toLowerCase() ||
+          (dados.telefone && c.telefone && c.telefone.replace(/\D/g, "") === dados.telefone.replace(/\D/g, ""))
+      );
+
+      if (existenteIdx >= 0) {
+        clientesBase[existenteIdx] = {
+          ...clientesBase[existenteIdx],
+          ...dados,
+          id: clientesBase[existenteIdx].id
+        };
+      } else {
+        clientesBase.unshift({
+          id: "CLI_" + Date.now(),
+          ...dados
+        });
+      }
+
+      salvarClientes();
+      renderizarClientes();
+      popularDatalistRuas();
+      return true;
+    }
+
+    function salvarClienteDoPedido() {
+      const ok = salvarClienteNaBase({
+        nome: document.getElementById("nome").value.trim(),
+        telefone: document.getElementById("telefone").value.trim(),
+        cep: document.getElementById("cep").value.trim(),
+        numero: document.getElementById("numero").value.trim(),
+        endereco: document.getElementById("endereco").value.trim(),
+        observacao: document.getElementById("observacao").value.trim()
+      });
+      if (ok) alert("Cliente salvo na base!");
+    }
+
+    function salvarClienteDaAba() {
+      const ok = salvarClienteNaBase({
+        id: document.getElementById("clienteEditId").value.trim(),
+        nome: document.getElementById("cliNome").value.trim(),
+        telefone: document.getElementById("cliTelefone").value.trim(),
+        cep: document.getElementById("cliCep").value.trim(),
+        numero: document.getElementById("cliNumero").value.trim(),
+        endereco: document.getElementById("cliEndereco").value.trim(),
+        observacao: document.getElementById("cliObs").value.trim()
+      });
+      if (ok) {
+        limparFormCliente();
+        alert("Cliente salvo!");
+      }
+    }
+
+    function limparFormCliente() {
+      document.getElementById("clienteEditId").value = "";
+      document.getElementById("cliNome").value = "";
+      document.getElementById("cliTelefone").value = "";
+      document.getElementById("cliCep").value = "";
+      document.getElementById("cliNumero").value = "";
+      document.getElementById("cliEndereco").value = "";
+      document.getElementById("cliObs").value = "";
+    }
+
+    function usarClienteNoPedido(id) {
+      const c = clientesBase.find((item) => item.id === id);
+      if (!c) return;
+      document.getElementById("nome").value = c.nome || "";
+      document.getElementById("telefone").value = c.telefone || "";
+      document.getElementById("cep").value = c.cep || "";
+      document.getElementById("numero").value = c.numero || "";
+      document.getElementById("endereco").value = c.endereco || "";
+      document.getElementById("observacao").value = c.observacao || "";
+      calcularTaxaEntrega();
+      ativarAba("pedido");
+    }
+
+    function editarCliente(id) {
+      const c = clientesBase.find((item) => item.id === id);
+      if (!c) return;
+      document.getElementById("clienteEditId").value = c.id;
+      document.getElementById("cliNome").value = c.nome || "";
+      document.getElementById("cliTelefone").value = c.telefone || "";
+      document.getElementById("cliCep").value = c.cep || "";
+      document.getElementById("cliNumero").value = c.numero || "";
+      document.getElementById("cliEndereco").value = c.endereco || "";
+      document.getElementById("cliObs").value = c.observacao || "";
+    }
+
+    function excluirCliente(id) {
+      if (!confirm("Remover este cliente da base?")) return;
+      clientesBase = clientesBase.filter((item) => item.id !== id);
+      salvarClientes();
+      renderizarClientes();
+    }
+
+    function renderizarClientes() {
+      const container = document.getElementById("listaClientes");
+      if (!container) return;
+      const termo = (document.getElementById("buscaCliente")?.value || "").toLowerCase().trim();
+
+      const filtrados = clientesBase.filter((c) => {
+        if (!termo) return true;
+        return (
+          (c.nome || "").toLowerCase().includes(termo) ||
+          (c.telefone || "").toLowerCase().includes(termo) ||
+          (c.endereco || "").toLowerCase().includes(termo)
+        );
       });
 
-      container.querySelectorAll(".btn-excluir-sabor").forEach((btn
+      if (filtrados.length === 0) {
+        container.innerHTML = '<p style="color: var(--muted);">Nenhum cliente encontrado.</p>';
+        return;
+      }
+
+      container.innerHTML = filtrados
+        .map(
+          (c) => `
+          <div class="list-card">
+            <div>
+              <b>${c.nome}</b> ${c.telefone ? `• <span style="color: var(--gold);">${c.telefone}</span>` : ""}<br />
+              <span style="color: var(--muted); font-size: 0.85rem;">
+                ${c.endereco || ""}${c.numero ? ", nº " + c.numero : ""}${c.cep ? " • CEP " + c.cep : ""}
+              </span>
+              ${c.observacao ? `<br /><span style="font-size: 0.85rem;">Obs: ${c.observacao}</span>` : ""}
+            </div>
+            <div class="btn-row">
+              <button type="button" class="gold" onclick="usarClienteNoPedido('${c.id}')">Usar no Pedido</button>
+              <button type="button" class="secondary" onclick="editarCliente('${c.id}')">Editar</button>
+              <button type="button" class="danger" onclick="excluirCliente('${c.id}')">Excluir</button>
+            </div>
+          </div>
+        `
+        )
+        .join("");
+    }
+
+
+    let filtroStatusHistorico = "Todos";
+    let indicePedidoEditando = null;
+    let rascunhoItensEdicao = [];
+
+    function selecionarFiltroHistorico(status) {
+      filtroStatusHistorico = status || "Todos";
+      const botoes = document.querySelectorAll("#filtrosStatusHistorico [data-filtro-status]");
+      botoes.forEach((btn) => {
+        const ativo = btn.dataset.filtroStatus === filtroStatusHistorico;
+        btn.className = "status-btn " + (ativo ? "active-feito" : "");
+      });
+      renderizarHistorico();
+    }
+
+    function alterarStatusPedidoHistorico(index, novoStatus) {
+      const pedido = historicoPedidos[index];
+      if (!pedido) return;
+      pedido.status = normalizarStatusPedido(novoStatus);
+      salvarHistorico();
+      renderizarHistorico();
+    }
+
+    function escaparHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function abrirEditorPedidoHistorico(index) {
+      const pedido = historicoPedidos[index];
+      if (!pedido) return;
+      indicePedidoEditando = index;
+      rascunhoItensEdicao = JSON.parse(JSON.stringify(pedido.itens || []));
+
+      document.getElementById("editarPedidoNumero").innerText = pedido.numero || "";
+      document.getElementById("editarTaxaEntrega").value = Number(pedido.taxaEntrega || 0).toFixed(2);
+      document.getElementById("editarClienteHistorico").value = pedido.cliente || "";
+      document.getElementById("editarObservacaoHistorico").value = pedido.observacao || "";
+      document.getElementById("cardEditarPedido").style.display = "block";
+      renderizarItensEdicao();
+      document.getElementById("cardEditarPedido").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function fecharEditorPedidoHistorico() {
+      indicePedidoEditando = null;
+      rascunhoItensEdicao = [];
+      const card = document.getElementById("cardEditarPedido");
+      if (card) card.style.display = "none";
+    }
+
+    function atualizarTotaisEdicao() {
+      let subtotal = 0;
+      rascunhoItensEdicao.forEach((it) => {
+        subtotal += Number(it.valor) || 0;
+      });
+      const taxa = Math.max(0, parseFloat(document.getElementById("editarTaxaEntrega")?.value) || 0);
+      const total = subtotal + taxa;
+      document.getElementById("editarSubtotal").innerText = subtotal.toFixed(2);
+      document.getElementById("editarTaxaMostrada").innerText = taxa.toFixed(2);
+      document.getElementById("editarTotal").innerText = total.toFixed(2);
+    }
+
+    function renderizarItensEdicao() {
+      const lista = document.getElementById("editarItensLista");
+      if (!lista) return;
+      if (!rascunhoItensEdicao.length) {
+        lista.innerHTML = '<p style="color: var(--muted);">Sem itens neste pedido. Clique em "+ Adicionar Item".</p>';
+        atualizarTotaisEdicao();
+        return;
+      }
+
+      lista.innerHTML = rascunhoItensEdicao
+        .map(
+          (item, idx) => `
+          <div class="item">
+            <div class="grid-2">
+              <div>
+                <label>Descrição do Item</label>
+                <input type="text" value="${escaparHtml(item.descricao)}" onchange="alterarCampoItemEdicao(${idx}, 'descricao', this.value)" />
+              </div>
+              <div>
+                <label>Valor (R$)</label>
+                <input type="number" step="0.50" min="0" value="${Number(item.valor || 0).toFixed(2)}" onchange="alterarCampoItemEdicao(${idx}, 'valor', this.value)" />
+              </div>
+            </div>
+            <div style="margin-top: 8px; display: flex; justify-content: flex-end;">
+              <button type="button" class="danger" onclick="removerItemEdicao(${idx})">Remover Item</button>
+            </div>
+          </div>
+        `
+        )
+        .join("");
+
+      atualizarTotaisEdicao();
+    }
+
+    function alterarCampoItemEdicao(idx, campo, valor) {
+      if (!rascunhoItensEdicao[idx]) return;
+      if (campo === "valor") {
+        rascunhoItensEdicao[idx].valor = Math.max(0, parseFloat(valor) || 0);
+      } else {
+        rascunhoItensEdicao[idx][campo] = valor;
+      }
+      atualizarTotaisEdicao();
+    }
+
+    function removerItemEdicao(idx) {
+      rascunhoItensEdicao.splice(idx, 1);
+      renderizarItensEdicao();
+    }
+
+    function adicionarItemEdicao() {
+      rascunhoItensEdicao.push({
+        tipo: "pizza",
+        descricao: "Novo Item",
+        ingredientes: "",
+        observacao: "",
+        valor: 0
+      });
+      renderizarItensEdicao();
+    }
+
+    function salvarEdicaoPedidoHistorico() {
+      if (indicePedidoEditando === null || !historicoPedidos[indicePedidoEditando]) return;
+      const pedido = historicoPedidos[indicePedidoEditando];
+      const taxa = Math.max(0, parseFloat(document.getElementById("editarTaxaEntrega").value) || 0);
+      let subtotal = 0;
+      rascunhoItensEdicao.forEach((it) => {
+        subtotal += Number(it.valor) || 0;
+      });
+
+      pedido.itens = JSON.parse(JSON.stringify(rascunhoItensEdicao));
+      pedido.taxaEntrega = taxa;
+      pedido.total = subtotal + taxa;
+      pedido.cliente = document.getElementById("editarClienteHistorico").value.trim();
+      pedido.observacao = document.getElementById("editarObservacaoHistorico").value.trim();
+
+      salvarHistorico();
+      fecharEditorPedidoHistorico();
+      renderizarHistorico();
+      alert(`Pedido ${pedido.numero} atualizado!`);
+    }
+
+    function excluirPedidoHistorico(index) {
+      const pedido = historicoPedidos[index];
+      if (!pedido) return;
+      if (!confirm(`Excluir o pedido ${pedido.numero} do histórico?`)) return;
+      historicoPedidos.splice(index, 1);
+      salvarHistorico();
+      if (indicePedidoEditando === index) {
+        fecharEditorPedidoHistorico();
+      }
+      renderizarHistorico();
+    }
+
+    function renderizarHistorico() {
+      const container = document.getElementById("listaHistorico");
+      if (!container) return;
+
+      const termo = (document.getElementById("buscaHistorico")?.value || "").toLowerCase().trim();
+
+      let faturamento = 0;
+      historicoPedidos.forEach((p) => {
+        faturamento += Number(p.total) || 0;
+      });
+      const qtd = historicoPedidos.length;
+      const ticket = qtd > 0 ? faturamento / qtd : 0;
+
+      document.getElementById("kpiQtdPedidos").innerText = qtd;
+      document.getElementById("kpiFaturamento").innerText = faturamento.toFixed(2);
+      document.getElementById("kpiTicketMedio").innerText = ticket.toFixed(2);
+
+      const pedidosComIndice = historicoPedidos.map((p, idx) => ({ pedido: p, idx }));
+      const filtrados = pedidosComIndice.filter(({ pedido: p }) => {
+        const statusNorm = normalizarStatusPedido(p.status);
+        if (filtroStatusHistorico && filtroStatusHistorico !== "Todos" && statusNorm !== filtroStatusHistorico) {
+          return false;
+        }
+        if (!termo) return true;
+        return (
+          (p.numero || "").toLowerCase().includes(termo) ||
+          (p.cliente || "").toLowerCase().includes(termo) ||
+          statusNorm.toLowerCase().includes(termo)
+        );
+      });
+
+      if (filtrados.length === 0) {
+        container.innerHTML = '<p style="color: var(--muted);">Nenhum pedido encontrado neste filtro.</p>';
+        return;
+      }
+
+      container.innerHTML = filtrados
+        .map(({ pedido: p, idx }) => {
+          const statusNorm = normalizarStatusPedido(p.status);
+          const meta = obterMetaStatus(statusNorm);
+          const itensResumo = (p.itens || []).map((i) => i.descricao).join(" • ");
+          const stepperHtml = ETAPAS_PEDIDO.map((etapa) => {
+            const ativo = etapa.key === statusNorm;
+            return `<button type="button" class="status-btn ${ativo ? etapa.activeClass : ""}" onclick="alterarStatusPedidoHistorico(${idx}, '${etapa.key}')">${etapa.label}</button>`;
+          }).join("");
+
+          return `
+            <div class="list-card">
+              <div>
+                <b>${escaparHtml(p.numero)}</b> — ${escaparHtml(p.cliente || "Cliente não informado")}
+                <span class="status-pill ${meta.pillClass}">${meta.label}</span><br />
+                <span style="color: var(--muted); font-size: 0.82rem;">${escaparHtml(p.data || "")}</span><br />
+                <span style="font-size: 0.88rem;">${escaparHtml(itensResumo || "Sem itens")}</span><br />
+                <strong style="color: var(--gold);">Total: R$ ${Number(p.total || 0).toFixed(2)}</strong>
+                <div class="status-stepper" aria-label="Alterar etapa do pedido ${escaparHtml(p.numero)}">${stepperHtml}</div>
+              </div>
+              <div class="btn-row">
+                <button type="button" class="gold" onclick="imprimirPedidoHistorico(${idx})">🖨️ Imprimir</button>
+                <button type="button" class="secondary" onclick="abrirEditorPedidoHistorico(${idx})">✏️ Editar Itens</button>
+                <button type="button" class="danger" onclick="excluirPedidoHistorico(${idx})">Excluir</button>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function baixarArquivo(nomeArquivo, conteudo, mimeType) {
+      const blob = new Blob([conteudo], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = nomeArquivo;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportarPedidosCSV() {
+      const linhas = ["Numero;Data;Status;Cliente;Telefone;Endereco;TaxaEntrega;Total;Itens"];
+      historicoPedidos.forEach((p) => {
+        const itensTxt = (p.itens || []).map((i) => `${i.descricao} (R$ ${Number(i.valor).toFixed(2)})`).join(" | ");
+        const row = [
+          p.numero || "",
+          p.data || "",
+          normalizarStatusPedido(p.status),
+          p.cliente || "",
+          p.telefone || "",
+          `${p.endereco || ""} ${p.numeroCasa || ""}`.trim(),
+          Number(p.taxaEntrega || 0).toFixed(2),
+          Number(p.total || 0).toFixed(2),
+          itensTxt
+        ].map((v) => `"${String(v).replace(/"/g, '""')}"`);
+        linhas.push(row.join(";"));
+      });
+      baixarArquivo("king-ventura-pedidos.csv", "\uFEFF" + linhas.join("\n"), "text/csv;charset=utf-8;");
+    }
+
+    function exportarSaboresCSV() {
+      const linhas = ["Sabor;Brotinho;Grande;Ingredientes"];
+      Object.keys(SABORES).forEach((nome) => {
+        const s = SABORES[nome];
+        const row = [
+          nome,
+          Number(s.brotinho).toFixed(2),
+          Number(s.grande).toFixed(2),
+          (s.ingredientes || []).join(", ")
+        ].map((v) => `"${String(v).replace(/"/g, '""')}"`);
+        linhas.push(row.join(";"));
+      });
+      baixarArquivo("king-ventura-sabores.csv", "\uFEFF" + linhas.join("\n"), "text/csv;charset=utf-8;");
+    }
+
+    function exportarClientesCSV() {
+      const linhas = ["Nome;Telefone;CEP;Numero;Endereco;Observacao"];
+      clientesBase.forEach((c) => {
+        const row = [
+          c.nome || "",
+          c.telefone || "",
+          c.cep || "",
+          c.numero || "",
+          c.endereco || "",
+          c.observacao || ""
+        ].map((v) => `"${String(v).replace(/"/g, '""')}"`);
+        linhas.push(row.join(";"));
+      });
+      baixarArquivo("king-ventura-clientes.csv", "\uFEFF" + linhas.join("\n"), "text/csv;charset=utf-8;");
+    }
+
+    function exportarBackupJSON() {
+      const payload = {
+        sistema: "KING VENTURA PIZZARIA",
+        versao: "V7.2 REBUILD",
+        exportadoEm: new Date().toISOString(),
+        ultimoPedido: Number(localStorage.getItem("ultimoPedido") || 0),
+        sabores: SABORES,
+        clientes: clientesBase,
+        historicoPedidos: historicoPedidos
+      };
+      const jsonStr = JSON.stringify(payload, null, 2);
+      document.getElementById("inputBackupJson").value = jsonStr;
+      baixarArquivo("backup-king-ventura.json", jsonStr, "application/json");
+    }
+
+    function restaurarBackupJSON(conteudoTexto) {
+      const raw = (conteudoTexto || document.getElementById("inputBackupJson").value || "").trim();
+      if (!raw) {
+        alert("Cole um JSON de backup ou selecione um arquivo .json.");
+        return;
+      }
+
+      try {
+        const data = JSON.parse(raw);
+        if (!confirm("Restaurar este backup? Isso substituirá sabores, clientes e histórico atuais.")) {
+          return;
+        }
+
+        if (data.sabores && typeof data.sabores === "object") {
+          SABORES = data.sabores;
+          salvarSaboresStorage();
+        }
+        if (Array.isArray(data.clientes)) {
+          clientesBase = data.clientes;
+          salvarClientes();
+        }
+        if (Array.isArray(data.historicoPedidos)) {
+          historicoPedidos = data.historicoPedidos;
+          salvarHistorico();
+        }
+        if (typeof data.ultimoPedido === "number") {
+          localStorage.setItem("ultimoPedido", String(data.ultimoPedido));
+        }
+
+        carregarSabores();
+        renderizarListaSabores();
+        renderizarClientes();
+        renderizarHistorico();
+        inicializarPedido();
+        alert("Backup restaurado com sucesso!");
+      } catch (e) {
+        alert("JSON inválido. Verifique o conteúdo e tente novamente.");
+      }
+    }
+
+    function ativarAba(nomeAba) {
+      document.querySelectorAll(".nav-tab").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.tab === nomeAba);
+      });
+      document.querySelectorAll(".tab-panel").forEach((panel) => {
+        panel.classList.toggle("active", panel.id === "tab-" + nomeAba);
+      });
+      if (nomeAba === "rotas") {
+        atualizarStatusChaveUi();
+        listarRotasPedidosHoje();
+      }
+    }
+
+    function aplicarTema(tema) {
+      const escolhido = tema === "claro" ? "claro" : "escuro";
+      document.body.setAttribute("data-tema", escolhido);
+      try {
+        localStorage.setItem("kv_tema", escolhido);
+      } catch (e) {}
+      const btn = document.getElementById("btnTema");
+      if (btn) {
+        btn.innerText = escolhido === "escuro" ? "🌙 Escuro" : "☀️ Claro";
+      }
+    }
+
+    function inicializarEventos() {
+      document.getElementById("btnTema")?.addEventListener("click", () => {
+        const atual = document.body.getAttribute("data-tema") || "escuro";
+        aplicarTema(atual === "escuro" ? "claro" : "escuro");
+      });
+
+      document.querySelectorAll(".nav-tab").forEach((btn) => {
+        btn.addEventListener("click", () => ativarAba(btn.dataset.tab));
+      });
+
+      document.getElementById("tamanho").addEventListener("change", carregarSabores);
+      document.getElementById("tipoPizza").addEventListener("change", atualizarVisualPedido);
+      document.getElementById("sabor1").addEventListener("change", atualizarPreviewIngredientes);
+      document.getElementById("sabor2").addEventListener("change", atualizarPreviewIngredientes);
+
+      document.getElementById("btnAdicionarPizza").addEventListener("click", adicionarPizza);
+      document.getElementById("btnAdicionarBebida").addEventListener("click", adicionarBebida);
+      document.getElementById("btnWhatsApp").addEventListener("click", enviarWhatsApp);
+      document.getElementById("btnRegistrarHistorico").addEventListener("click", registrarPedidoAtualNoHistorico);
+      document.getElementById("btnImportarWhats").addEventListener("click", importarPedidoWhatsApp);
+      document.getElementById("btnSalvarClienteRapido").addEventListener("click", salvarClienteDoPedido);
+
+      document.getElementById("cep").addEventListener("input", () => {
+        const digitos = document.getElementById("cep").value.replace(/[^0-9]/g, "");
+        if (digitos.length === 8) {
+          buscarCEP();
+          agendarCalculoTaxaReal();
+        }
+      });
+      document.getElementById("cep").addEventListener("blur", () => {
+        buscarCEP();
+        agendarCalculoTaxaReal();
+      });
+      document.getElementById("endereco").addEventListener("input", () => {
+        agendarCalculoTaxaReal();
+        agendarBuscaCepPorRua();
+      });
+      document.getElementById("endereco").addEventListener("change", () => {
+        buscarCEPPorRua();
+        agendarCalculoTaxaReal();
+      });
+      document.getElementById("endereco").addEventListener("blur", () => {
+        buscarCEPPorRua();
+        agendarCalculoTaxaReal();
+      });
+      document.getElementById("numero").addEventListener("input", agendarCalculoTaxaReal);
+      document.getElementById("numero").addEventListener("blur", agendarCalculoTaxaReal);
+      document.getElementById("btnBuscarCepDaRua").addEventListener("click", buscarCEPPorRua);
+
+      document.getElementById("btnSalvarSabor").addEventListener("click", salvarSaborForm);
+      document.getElementById("btnCancelarEdicaoSabor").addEventListener("click", limparFormSabor);
+      document.getElementById("btnRestaurarSabores").addEventListener("click", restaurarSaboresPadrao);
+
+      document.getElementById("btnSalvarCliente").addEventListener("click", salvarClienteDaAba);
+      document.getElementById("btnLimparClienteForm").addEventListener("click", limparFormCliente);
+      document.getElementById("buscaCliente").addEventListener("input", renderizarClientes);
+
+      document.getElementById("buscaHistorico").addEventListener("input", renderizarHistorico);
+      document.getElementById("editarTaxaEntrega")?.addEventListener("input", atualizarTotaisEdicao);
+      document.getElementById("btnSalvarEdicaoPedido")?.addEventListener("click", salvarEdicaoPedidoHistorico);
+      document.getElementById("btnCancelarEdicaoPedido")?.addEventListener("click", fecharEditorPedidoHistorico);
+
+      // Rotas do Entregador
+      document.getElementById("btnCalcularRota")?.addEventListener("click", () => {
+        renderizarRotaNaTela(
+          document.getElementById("rotaEndereco").value,
+          document.getElementById("rotaCliente").value
+        );
+      });
+      document.getElementById("btnUsarEnderecoPedido")?.addEventListener("click", usarEnderecoPedidoAtual);
+      document.getElementById("btnRotasDoDia")?.addEventListener("click", listarRotasPedidosHoje);
+      document.getElementById("btnTestarApis")?.addEventListener("click", testarConexaoApis);
+      document.getElementById("btnSalvarChaveRota")?.addEventListener("click", () => {
+        salvarChaveOrs(document.getElementById("inputChaveRota").value);
+        atualizarStatusChaveUi();
+        alert("Chave salva neste aparelho!");
+      });
+      document.getElementById("btnTestarChaveRota")?.addEventListener("click", () => {
+        salvarChaveOrs(document.getElementById("inputChaveRota").value);
+        atualizarStatusChaveUi();
+        testarConexaoApis();
+      });
+      document.getElementById("btnApagarChaveRota")?.addEventListener("click", () => {
+        document.getElementById("inputChaveRota").value = "";
+        salvarChaveOrs("");
+        atualizarStatusChaveUi();
+      });
+
+      document.getElementById("btnExportarPedidosCSV").addEventListener("click", exportarPedidosCSV);
+      document.getElementById("btnExportarSaboresCSV").addEventListener("click", exportarSaboresCSV);
+      document.getElementById("btnExportarClientesCSV").addEventListener("click", exportarClientesCSV);
+      document.getElementById("btnExportarBackup").addEventListener("click", exportarBackupJSON);
+      document.getElementById("btnImportarBackup").addEventListener("click", () => restaurarBackupJSON());
+
+      document.getElementById("fileBackupJson").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          document.getElementById("inputBackupJson").value = ev.target.result;
+          restaurarBackupJSON(ev.target.result);
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    (function init() {
+      let temaSalvo = "escuro";
+      try {
+        temaSalvo = localStorage.getItem("kv_tema") || "escuro";
+      } catch (e) {}
+      aplicarTema(temaSalvo);
+      carregarSaboresStorage();
+      carregarHistorico();
+      carregarClientes();
+      inicializarEventos();
+      inicializarPedido();
+      carregarSabores();
+      popularDatalistRuas();
+      renderizarListaSabores();
+      renderizarClientes();
+      renderizarHistorico();
+      atualizarCarrinho();
+      atualizarStatusChaveUi();
+      listarRotasPedidosHoje();
+    })();
+  </script>
+</body>
+</html>
