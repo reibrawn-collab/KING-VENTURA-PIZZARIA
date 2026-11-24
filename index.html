@@ -831,6 +831,41 @@
         </div>
       </div>
 
+      <div class="card" id="cardEditarPedido" style="display: none;">
+        <h2>✏️ Editar Itens do Pedido <span id="editarPedidoNumero"></span></h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 10px;">
+          Altere os itens, o valor ou a taxa de entrega. Depois salve para atualizar o histórico e o caixa.
+        </p>
+        <div id="editarItensLista"></div>
+
+        <div class="grid-3" style="margin-top: 12px;">
+          <div>
+            <label for="editarTaxaEntrega">Taxa de Entrega (R$)</label>
+            <input id="editarTaxaEntrega" type="number" step="0.50" min="0" />
+          </div>
+          <div>
+            <label for="editarClienteHistorico">Cliente</label>
+            <input id="editarClienteHistorico" placeholder="Nome do cliente" />
+          </div>
+          <div>
+            <label for="editarObservacaoHistorico">Observação</label>
+            <input id="editarObservacaoHistorico" placeholder="Observação do pedido" />
+          </div>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-line"><span>Itens</span><span>R$ <span id="editarSubtotal">0.00</span></span></div>
+          <div class="summary-line"><span>Taxa de Entrega</span><span>R$ <span id="editarTaxaMostrada">0.00</span></span></div>
+          <div class="summary-total"><span>Total</span><span>R$ <span id="editarTotal">0.00</span></span></div>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnSalvarEdicaoPedido" class="gold" type="button">Salvar Alterações</button>
+          <button id="btnAdicionarItemEdicao" class="secondary" type="button" onclick="adicionarItemEdicao()">+ Adicionar Item</button>
+          <button id="btnCancelarEdicaoPedido" class="secondary" type="button">Cancelar</button>
+        </div>
+      </div>
+
       <div class="card">
         <h2>Histórico de Pedidos</h2>
         <div id="listaHistorico"></div>
@@ -936,12 +971,12 @@
       numero: "129"
     };
 
-    // Regra de taxa: até 3 km é grátis; de 3 a 4 km cobra R$ 5,00;
-    // a partir daí soma R$ 3,00 por km adicional.
-    const REPASSE_ATE_KM = 3;          // faixa gratuita (até 3 km)
-    const REPASSE_FIM_INICIAL = 4;     // até 4 km continua R$ 5,00
-    const REPASSE_INICIAL = 5;         // valor cobrado assim que passa dos 3 km
-    const REPASSE_POR_KM_EXTRA = 3;    // valor somado por km além dos 4 km
+    // Regra de taxa: até 3 km é grátis; a partir de 3 km começa em R$ 5,00
+    // e sobe R$ 1,50 por km adicional, até o teto de 10 km.
+    const REPASSE_ATE_KM = 3;            // faixa gratuita (até 3 km)
+    const REPASSE_FIM_INICIAL = 4;       // a partir de 3 km, o primeiro passo é 4 km
+    const REPASSE_INICIAL = 5;           // valor cobrado assim que passa dos 3 km
+    const REPASSE_POR_KM_EXTRA = 1.5;    // valor somado por km além dos 4 km
 
     // Área de atendimento: entrega somente até 10 km do ponto de partida.
     const RAIO_MAXIMO_KM = 10;
@@ -962,26 +997,25 @@
       cep: "79097-240"
     };
 
-    const ORIGEM_CACHE_LOCAL = "kv_origem_coords";
-
-    // Descobre a posicao da pizzaria pelo CEP e guarda no aparelho.
-    // Se o CEP nao responder, usa as coordenadas de referencia acima.
-    async function obterOrigemReal() {
-      const salvo = localStorage.getItem(ORIGEM_CACHE_LOCAL);
-      if (salvo) {
-        try {
-          const c = JSON.parse(salvo);
-          if (c && c.lat && c.lng) return c;
-        } catch (e) {}
-      }
+    // A pizzaria fica na Rua Delamare, 129 (nao em outro numero da mesma rua).
+    // A origem e FIXA: nada de busca por texto livre, que cai em qualquer ponto
+    // da rua (107, 172, 716...). Se precisar mudar, ajuste aqui.
+    function obterOrigemReal() {
+      // limpa o cache antigo que pudesse ter gravado uma posicao errada
       try {
-        const achado = await geocodificar(ORIGEM_COORDS.endereco);
-        const coords = { lat: achado.lat, lng: achado.lng };
-        localStorage.setItem(ORIGEM_CACHE_LOCAL, JSON.stringify(coords));
-        return coords;
+        const salvo = localStorage.getItem("kv_origem_coords");
+        if (salvo) {
+          const c = JSON.parse(salvo);
+          // descarta qualquer cache que nao seja exatamente este ponto
+          if (!c || Math.abs(c.lat - ORIGEM_COORDS.lat) > 0.0005 ||
+              Math.abs(c.lng - ORIGEM_COORDS.lng) > 0.0005) {
+            localStorage.removeItem("kv_origem_coords");
+          }
+        }
       } catch (e) {
-        return { lat: ORIGEM_COORDS.lat, lng: ORIGEM_COORDS.lng };
+        localStorage.removeItem("kv_origem_coords");
       }
+      return { lat: ORIGEM_COORDS.lat, lng: ORIGEM_COORDS.lng };
     }
 
     // Bairros com entrega grátis, custe o que custar em km.
@@ -1329,16 +1363,15 @@
       el.innerHTML = mensagem;
     }
 
+    let timerTaxaReal = null;
+    let ultimaTaxaBuscada = "";
+
     function calcularTaxaEntrega() {
       const cep = document.getElementById("cep").value.replace(/[^0-9]/g, "");
-      if (cep.length < 8) {
-        return;
-      }
-
       const bairro = obterBairroDoEndereco();
-      const chave = obterChaveEntrega(cep, bairro);
-      const bairroGratis = BAIRROS_ENTREGA_GRATIS.map(normalizarTexto);
 
+      // 1) bairro com entrega gratis: nao consulta nada
+      const bairroGratis = BAIRROS_ENTREGA_GRATIS.map(normalizarTexto);
       if (bairro && bairroGratis.includes(normalizarTexto(bairro))) {
         taxaEntrega = 0;
         document.getElementById("mensagemEntrega").innerHTML = "🎉 ENTREGA GRÁTIS para este bairro";
@@ -1346,15 +1379,54 @@
         return;
       }
 
+      // 2) tabela de bairros: instantanea, quando existir
+      const chave = obterChaveEntrega(cep, bairro);
       if (TABELA_DISTANCIAS_KM[chave] !== undefined) {
         aplicarTaxaPorKm(TABELA_DISTANCIAS_KM[chave], bairro ? bairro : chave);
         return;
       }
 
-      document.getElementById("mensagemEntrega").innerHTML =
-        "⚠️ Taxa a confirmar: endereço ainda não mapeado. A taxa provisória de R$ 5,00 está no total.";
-      promoverFreteParaConfirmar();
-      atualizarTotal();
+      // 3) distancia real pela API de rotas (espera o endereco ficar completo)
+      const enderecoEl = document.getElementById("endereco");
+      const numeroEl = document.getElementById("numero");
+      const endereco = (enderecoEl ? enderecoEl.value : "").trim();
+      const numero = (numeroEl ? numeroEl.value : "").trim();
+
+      if (!endereco || endereco.length < 5) {
+        document.getElementById("mensagemEntrega").innerHTML =
+          "Informe o endereço para calcular a taxa de entrega.";
+        return;
+      }
+
+      const completo = [endereco, numero].filter(Boolean).join(", ");
+      const assinatura = completo.toLowerCase();
+      if (assinatura === ultimaTaxaBuscada) return;
+
+      clearTimeout(timerTaxaReal);
+      document.getElementById("mensagemEntrega").innerHTML = "Calculando a taxa de entrega...";
+
+      timerTaxaReal = setTimeout(function () {
+        calcularTaxaPelaDistancia(completo, assinatura);
+      }, 900);
+    }
+
+    async function calcularTaxaPelaDistancia(enderecoCompleto, assinatura) {
+      if (!obterChaveRota()) {
+        document.getElementById("mensagemEntrega").innerHTML =
+          "⚠️ Cadastre a chave da API na aba Rotas para o cálculo automático.";
+        return;
+      }
+
+      try {
+        const ponto = await geocodificar(enderecoCompleto);
+        const rota = await calcularRotaAteOrigem(ponto.lat, ponto.lng);
+        ultimaTaxaBuscada = assinatura;
+        aplicarTaxaPorKm(rota.distanciaKm, enderecoCompleto);
+      } catch (erro) {
+        document.getElementById("mensagemEntrega").innerHTML =
+          "⚠️ Não foi possível calcular a distância agora. Confira a taxa manualmente.";
+        console.log("Erro taxa por distancia", erro);
+      }
     }
 
     function obterBairroDoEndereco() {
@@ -2024,9 +2096,10 @@
               </div>
               <div style="text-align: right;">
                 <strong style="color: var(--gold); font-size: 1.05rem;">R$ ${Number(p.total || 0).toFixed(2)}</strong><br />
-                <button class="secondary" style="margin-top: 6px;" onclick="alternarStatusPedido(${idx})" type="button">
-                  Próxima Etapa
-                </button>
+                <div class="btn-row" style="margin-top: 6px; justify-content: flex-end;">
+                  <button class="secondary" onclick="alternarStatusPedido(${idx})" type="button">Próxima Etapa</button>
+                  <button class="gold" onclick="editarPedidoHistorico(${idx})" type="button">✏️ Editar Itens</button>
+                </div>
               </div>
             </div>
             <div class="status-stepper" aria-label="Alterar status do pedido ${p.numero || ""}">
@@ -2038,6 +2111,144 @@
         )
         .join("");
     }
+
+    /* ===== EDITAR ITENS DO PEDIDO NO HISTORICO ===== */
+    let indiceEditandoPedido = -1;
+
+    function editarPedidoHistorico(indice) {
+      const p = historicoPedidos[indice];
+      if (!p) return;
+
+      indiceEditandoPedido = indice;
+      document.getElementById("editarPedidoNumero").innerText = p.numero || "";
+      document.getElementById("editarClienteHistorico").value = p.cliente || "";
+      document.getElementById("editarObservacaoHistorico").value = p.observacao || "";
+      document.getElementById("editarTaxaEntrega").value = Number(p.taxaEntrega || 0).toFixed(2);
+
+      desenharItensEdicao();
+      document.getElementById("cardEditarPedido").style.display = "block";
+      document.getElementById("cardEditarPedido").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function desenharItensEdicao() {
+      const p = historicoPedidos[indiceEditandoPedido];
+      const box = document.getElementById("editarItensLista");
+      if (!p) return;
+
+      const itens = Array.isArray(p.itens) ? p.itens : [];
+
+      if (!itens.length) {
+        box.innerHTML = '<p style="color: var(--muted);">Este pedido não tem itens salvos.</p>';
+        recalcularEdicaoPedido();
+        return;
+      }
+
+      box.innerHTML = itens.map(function (item, i) {
+        return `
+          <div class="item">
+            <label for="editDesc${i}">Item ${i + 1} — descrição</label>
+            <input id="editDesc${i}" value="${String(item.descricao || "").replace(/"/g, "&quot;")}"
+                   oninput="recalcularEdicaoPedido()" />
+            <div class="grid-2">
+              <div>
+                <label for="editValor${i}">Valor (R$)</label>
+                <input id="editValor${i}" type="number" step="0.50" min="0"
+                       value="${Number(item.valor || 0).toFixed(2)}"
+                       oninput="recalcularEdicaoPedido()" />
+              </div>
+              <div>
+                <label for="editObs${i}">Observação do item</label>
+                <input id="editObs${i}" value="${String(item.observacao || "").replace(/"/g, "&quot;")}" />
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="danger" type="button" onclick="removerItemEdicao(${i})">Excluir item</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recalcularEdicaoPedido();
+    }
+
+    function coletarItensEdicao() {
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (!p) return [];
+      const itens = Array.isArray(p.itens) ? p.itens : [];
+      const novos = [];
+
+      itens.forEach(function (item, i) {
+        const campoDesc = document.getElementById("editDesc" + i);
+        const campoValor = document.getElementById("editValor" + i);
+        const campoObs = document.getElementById("editObs" + i);
+        if (!campoDesc) return;
+        novos.push({
+          descricao: campoDesc.value,
+          ingredientes: item.ingredientes || "",
+          observacao: campoObs ? campoObs.value : "",
+          valor: Number(campoValor ? campoValor.value : 0) || 0
+        });
+      });
+      return novos;
+    }
+
+    function recalcularEdicaoPedido() {
+      const itens = coletarItensEdicao();
+      const subtotal = itens.reduce(function (s, i) { return s + (Number(i.valor) || 0); }, 0);
+      const taxa = Number(document.getElementById("editarTaxaEntrega").value) || 0;
+
+      document.getElementById("editarSubtotal").innerText = subtotal.toFixed(2);
+      document.getElementById("editarTaxaMostrada").innerText = taxa.toFixed(2);
+      document.getElementById("editarTotal").innerText = (subtotal + taxa).toFixed(2);
+
+      // mantem a lista editada na memoria do pedido em edicao
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (p) p.itens = itens;
+    }
+
+    function removerItemEdicao(i) {
+      const itens = coletarItensEdicao();
+      itens.splice(i, 1);
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (p) p.itens = itens;
+      desenharItensEdicao();
+    }
+
+    function adicionarItemEdicao() {
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (!p) return;
+      if (!Array.isArray(p.itens)) p.itens = [];
+      p.itens.push({ descricao: "Novo item", ingredientes: "", observacao: "", valor: 0 });
+      desenharItensEdicao();
+    }
+
+    function salvarEdicaoPedido() {
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (!p) return;
+
+      const itens = coletarItensEdicao();
+      const subtotal = itens.reduce(function (s, i) { return s + (Number(i.valor) || 0); }, 0);
+      const taxa = Number(document.getElementById("editarTaxaEntrega").value) || 0;
+
+      p.itens = itens;
+      p.taxaEntrega = taxa;
+      p.total = subtotal + taxa;
+      p.cliente = document.getElementById("editarClienteHistorico").value.trim();
+      p.observacao = document.getElementById("editarObservacaoHistorico").value.trim();
+
+      salvarHistorico();
+      renderizarHistorico();
+      fecharEdicaoPedido();
+      alert("Pedido " + (p.numero || "") + " atualizado. Total: R$ " + p.total.toFixed(2));
+    }
+
+    function fecharEdicaoPedido() {
+      indiceEditandoPedido = -1;
+      document.getElementById("cardEditarPedido").style.display = "none";
+    }
+
+    document.getElementById("btnSalvarEdicaoPedido").addEventListener("click", salvarEdicaoPedido);
+    document.getElementById("btnCancelarEdicaoPedido").addEventListener("click", fecharEdicaoPedido);
 
     /* EXPORTAÇÃO CSV & BACKUP JSON */
     function baixarCSV(nomeArquivo, linhas) {
@@ -2252,6 +2463,11 @@
     });
 
     campoCepPedido.addEventListener("blur", buscarCEP);
+
+    document.getElementById("numero").addEventListener("input", function () {
+      clearTimeout(timerTaxaReal);
+      timerTaxaReal = setTimeout(function () { calcularTaxaEntrega(); }, 700);
+    });
 
     campoEnderecoPedido.addEventListener("input", function () {
       clearTimeout(timerBuscaRua);
