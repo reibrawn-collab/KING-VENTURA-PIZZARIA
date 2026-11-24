@@ -457,6 +457,34 @@
       }
     }
 
+
+    /* ---------- AJUSTES PARA CELULAR ---------- */
+    @media (max-width: 720px) {
+      body { padding: 10px; font-size: 16px; }
+      .app-container { max-width: 100%; }
+      .brand-header, .card { padding: 12px; border-radius: 12px; margin-bottom: 12px; }
+      .brand-logo { max-height: 150px; }
+      .brand-title { font-size: 1.15rem; line-height: 1.25; }
+      .grid-2, .grid-3, .kpi-grid { grid-template-columns: 1fr; gap: 10px; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      input, select, textarea { font-size: 16px; padding: 12px; }
+      label { font-size: 0.9rem; }
+      button { font-size: 0.95rem; padding: 12px 14px; }
+      .nav-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .nav-tab { padding: 12px 10px; font-size: 0.85rem; text-align: center; line-height: 1.2; }
+      .btn-row { flex-direction: column; }
+      .btn-row button { width: 100%; }
+      .summary-line, .summary-total { font-size: 1rem; }
+      .summary-total { font-size: 1.1rem; }
+      .status-stepper button { flex: 1 1 auto; }
+      #cupomTermico { display: none; }
+    }
+
+    @media (max-width: 400px) {
+      .brand-title { font-size: 1rem; }
+      .kpi-grid { grid-template-columns: 1fr; }
+      .nav-tabs { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -529,6 +557,10 @@
           <div>
             <label for="cep">CEP</label>
             <input id="cep" placeholder="79097-000" />
+            <button id="btnBuscarCepDaRua" class="secondary" type="button"
+                    style="width: 100%; margin-top: 6px; font-size: 0.85rem; padding: 8px;">
+              🔍 Buscar CEP pela rua
+            </button>
           </div>
           <div>
             <label for="numero">Número</label>
@@ -967,11 +999,19 @@
     ];
 
     // Distância de rota (km) do ponto de partida até cada CEP/bairro.
-    // Enquanto estiver vazia, o sistema ainda NÃO cobra por km: ele pede confirmação.
+    // Preencha aqui com os CEPs/bairros que voce atende. Exemplo:
+    //   "79097-240": 0.5,
+    //   "79006-000": 6.2
     const TABELA_DISTANCIAS_KM = {
-      // "79097-240": 0,5,
-      // "79006-000": 6,2
     };
+
+    // Faixas por inicio do CEP: funciona sem cadastrar rua por rua.
+    // Ajuste os km conforme a realidade dos bairros.
+    const FAIXAS_CEP_ENTREGA = [
+      // { prefixo: "79097", km: 1.5,  nome: "Jardim Tarumã" },
+      // { prefixo: "79006", km: 6.5,  nome: "Vila Bandeirante" },
+      // { prefixo: "79002", km: 7.5,  nome: "Centro" }
+    ];
 
     const SABORES_PADRAO = {
       "Muçarela": {
@@ -1306,14 +1346,15 @@
       el.innerHTML = mensagem;
     }
 
-    let timerTaxaReal = null;
-    let ultimaTaxaBuscada = "";
-
     function calcularTaxaEntrega() {
       const cep = document.getElementById("cep").value.replace(/[^0-9]/g, "");
       const bairro = obterBairroDoEndereco();
 
-      // 1) bairro com entrega gratis: nao consulta nada
+      if (cep.length < 8 && !bairro) {
+        return;
+      }
+
+      // 1) bairro com entrega gratis
       const bairroGratis = BAIRROS_ENTREGA_GRATIS.map(normalizarTexto);
       if (bairro && bairroGratis.includes(normalizarTexto(bairro))) {
         taxaEntrega = 0;
@@ -1322,59 +1363,43 @@
         return;
       }
 
-      // 2) tabela de bairros: instantanea, quando existir
+      // 2) tabela de CEP / bairro
       const chave = obterChaveEntrega(cep, bairro);
       if (TABELA_DISTANCIAS_KM[chave] !== undefined) {
         aplicarTaxaPorKm(TABELA_DISTANCIAS_KM[chave], bairro ? bairro : chave);
         return;
       }
 
-      // 3) distancia real pela API de rotas, a partir do CEP e do numero
-      const enderecoEl = document.getElementById("endereco");
-      const numeroEl = document.getElementById("numero");
-      const endereco = (enderecoEl ? enderecoEl.value : "").trim();
-      const numero = (numeroEl ? numeroEl.value : "").trim();
-
-      let completo = "";
+      // 3) CEP conhecido na lista de referencia: usa a distancia dele
       if (cep.length === 8) {
-        // com CEP, a busca fica precisa e nao depende da rua estar preenchida
-        completo = endereco + (numero ? ", " + numero : "") + ", CEP " + cep + ", Campo Grande - MS";
-      } else if (endereco.length >= 5) {
-        completo = [endereco, numero].filter(Boolean).join(", ");
-      } else {
+        const ref = RUAS_REFERENCIA_CG.find(function (r) {
+          return String(r.cep).replace(/[^0-9]/g, "") === cep;
+        });
+        if (ref && ref.km !== undefined) {
+          aplicarTaxaPorKm(ref.km, ref.bairro || ref.rua);
+          return;
+        }
+
+        // 4) mesmo sem km cadastrado, decide pela faixa do CEP
+        if (FAIXAS_CEP_ENTREGA.length) {
+          const faixa = FAIXAS_CEP_ENTREGA.find(function (f) {
+            return cep.startsWith(f.prefixo);
+          });
+          if (faixa) {
+            aplicarTaxaPorKm(faixa.km, faixa.nome);
+            return;
+          }
+        }
+
         document.getElementById("mensagemEntrega").innerHTML =
-          "Informe o CEP ou o endereço para calcular a taxa de entrega.";
+          "⚠️ Taxa a confirmar: bairro ainda não cadastrado. Fale com a pizzaria.";
+        taxaEntrega = 5;
+        atualizarTotal();
         return;
       }
 
-      const assinatura = completo.toLowerCase();
-      if (assinatura === ultimaTaxaBuscada) return;
-
-      clearTimeout(timerTaxaReal);
-      document.getElementById("mensagemEntrega").innerHTML = "Calculando a taxa de entrega...";
-
-      timerTaxaReal = setTimeout(function () {
-        calcularTaxaPelaDistancia(completo, assinatura);
-      }, 900);
-    }
-
-    async function calcularTaxaPelaDistancia(enderecoCompleto, assinatura) {
-      if (!obterChaveRota()) {
-        document.getElementById("mensagemEntrega").innerHTML =
-          "⚠️ Cadastre a chave da API na aba Rotas para o cálculo automático.";
-        return;
-      }
-
-      try {
-        const ponto = await geocodificar(enderecoCompleto);
-        const rota = await calcularRotaAteOrigem(ponto.lat, ponto.lng);
-        ultimaTaxaBuscada = assinatura;
-        aplicarTaxaPorKm(rota.distanciaKm, enderecoCompleto);
-      } catch (erro) {
-        document.getElementById("mensagemEntrega").innerHTML =
-          "⚠️ Não foi possível calcular a distância agora. Confira a taxa manualmente.";
-        console.log("Erro taxa por distancia", erro);
-      }
+      document.getElementById("mensagemEntrega").innerHTML =
+        "Informe o CEP para calcular a taxa de entrega.";
     }
 
     function obterBairroDoEndereco() {
@@ -2439,15 +2464,65 @@
       timerTaxaReal = setTimeout(function () { calcularTaxaEntrega(); }, 700);
     });
 
+    // Quem digita decide: busca no espaco, na virgula e ao sair do campo.
+    // (no celular o teclado nem sempre envia o espaco, por isso o blur tambem conta)
+    let ultimaRuaBuscada = "";
+    let buscandoRua = false;
+
+    async function tentarBuscarCepDaRua(forcar) {
+      const texto = (campoEnderecoPedido.value || "").trim();
+      if (texto.length < 4) return;
+      if (buscandoRua) return;
+
+      const assinatura = texto.toLowerCase();
+      if (!forcar && assinatura === ultimaRuaBuscada) return;
+
+      buscandoRua = true;
+      try {
+        await buscarCEPPorRua();
+        ultimaRuaBuscada = (campoEnderecoPedido.value || "").trim().toLowerCase();
+      } finally {
+        buscandoRua = false;
+      }
+    }
+
     campoEnderecoPedido.addEventListener("input", function () {
       clearTimeout(timerBuscaRua);
-      const texto = campoEnderecoPedido.value.trim();
-      if (texto.length < 4) return;
-      if (texto.includes(" - ") && texto.split(" - ")[1].trim().length >= 3) {
-        buscarCEPPorRua();
+      const texto = campoEnderecoPedido.value;
+
+      // digitou espaco, virgula, hifen ou o endereco ja tem o bairro
+      const terminouPalavra = /[\s,-]$/.test(texto);
+      const temBairro = texto.includes(" - ") && texto.split(" - ")[1].trim().length >= 3;
+
+      if (temBairro || terminouPalavra) {
+        timerBuscaRua = setTimeout(function () { tentarBuscarCepDaRua(false); }, 250);
         return;
       }
-      timerBuscaRua = setTimeout(buscarCEPPorRua, 700);
+
+      if (texto.trim().length >= 6) {
+        timerBuscaRua = setTimeout(function () { tentarBuscarCepDaRua(false); }, 1200);
+      }
+    });
+
+    // ao sair do campo (tocar fora, apertar Voltar, trocar de aba) sempre busca
+    campoEnderecoPedido.addEventListener("blur", function () {
+      clearTimeout(timerBuscaRua);
+      tentarBuscarCepDaRua(false);
+    });
+
+    campoEnderecoPedido.addEventListener("change", function () {
+      clearTimeout(timerBuscaRua);
+      tentarBuscarCepDaRua(false);
+    });
+
+    document.getElementById("btnBuscarCepDaRua").addEventListener("click", function () {
+      const botao = this;
+      botao.disabled = true;
+      botao.innerText = "Buscando...";
+      tentarBuscarCepDaRua(true).finally(function () {
+        botao.disabled = false;
+        botao.innerText = "🔍 Buscar CEP pela rua";
+      });
     });
 
     /* ENDERECO: mesmo comportamento na aba Clientes */
