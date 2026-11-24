@@ -1,1745 +1,1974 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KING VENTURA PIZZARIA — Sistema Operacional</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>King Ventura Pizzaria - Sistema de Gestão</title>
+  <link rel="preconnect" href="[fonts.googleapis.com](https://fonts.googleapis.com)">
+  <link rel="preconnect" href="[fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
+  <link href="[fonts.googleapis.com](https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap)" rel="stylesheet">
   <style>
     :root {
-      --bg: #120d0a;
-      --surface: #1d1510;
-      --surface-2: #271c16;
-      --border: #3d2c22;
-      --text: #f7efe8;
-      --muted: #c2aea0;
-      --gold: #e09f3e;
-      --terracotta: #c84b31;
-      --green: #2ea043;
-      --amber: #d29922;
-      --danger: #cf4638;
+      --primary: #d92323;
+      --primary-hover: #b51c1c;
+      --primary-light: #fbe9e9;
+      --secondary: #1a1a1a;
+      --bg: #f5f6fa;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --danger: #ef4444;
+      --radius: 12px;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
 
     body {
-      background: var(--bg);
+      background-color: var(--bg);
       color: var(--text);
-      padding: 16px;
-      line-height: 1.45;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    .app-container {
-      max-width: 960px;
-      margin: 0 auto;
-    }
-
-    .brand-header {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-
-    .brand-logo {
-      display: block;
-      width: 100%;
-      max-height: 240px;
-      object-fit: cover;
-      border-radius: 12px;
-      margin-bottom: 14px;
-      border: 1px solid var(--border);
-    }
-
-    .brand-top {
+    header {
+      background: #111;
+      color: #fff;
+      padding: 1rem 1.5rem;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 10px;
+      border-bottom: 3px solid var(--primary);
+      gap: 1rem;
     }
 
-    .brand-title {
-      font-size: 1.5rem;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      font-size: 1.8rem;
+    }
+
+    .brand h1 {
+      font-size: 1.25rem;
       font-weight: 800;
-      letter-spacing: 0.5px;
-      color: var(--gold);
+      letter-spacing: -0.5px;
     }
 
-    .badge-version {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 4px 10px;
+    .brand span {
+      color: var(--primary);
+    }
+
+    .order-status-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #222;
+      padding: 0.4rem 0.8rem;
       border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 600;
+      font-size: 0.85rem;
     }
 
     .nav-tabs {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 16px;
+      background: #1e293b;
+      padding: 0.5rem 1.5rem 0;
+      gap: 0.4rem;
+      overflow-x: auto;
+      border-bottom: 1px solid #334155;
     }
 
-    .nav-tab {
-      background: var(--surface);
-      color: var(--muted);
-      border: 1px solid var(--border);
-      padding: 10px 14px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      padding: 0.75rem 1.2rem;
       font-size: 0.9rem;
-      transition: 0.15s ease;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      white-space: nowrap;
     }
 
-    .nav-tab:hover {
-      border-color: var(--gold);
-      color: var(--text);
+    .tab-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
     }
 
-    .nav-tab.active {
-      background: var(--gold);
-      color: #160f0a;
-      border-color: var(--gold);
+    .tab-btn.active {
+      background: var(--bg);
+      color: var(--primary);
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
     }
 
-    .tab-panel {
+    .main-container {
+      flex: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    .tab-content {
       display: none;
+      animation: fadeIn 0.2s ease-in-out;
     }
 
-    .tab-panel.active {
+    .tab-content.active {
       display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Grid Layouts */
+    .grid-order {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 980px) {
+      .grid-order {
+        grid-template-columns: 1fr;
+      }
     }
 
     .card {
       background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1.25rem;
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
     }
 
-    .card h2 {
-      font-size: 1.15rem;
-      margin-bottom: 12px;
-      color: var(--gold);
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--secondary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.6rem;
     }
 
-    .card h3 {
-      font-size: 1rem;
-      margin: 12px 0 8px;
-      color: var(--text);
+    .form-group {
+      margin-bottom: 0.9rem;
     }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 12px;
-    }
-
-    label {
+    .form-group label {
       display: block;
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-bottom: 4px;
-      margin-top: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .form-row > * {
+      flex: 1;
     }
 
     input, select, textarea {
       width: 100%;
-      background: var(--surface-2);
-      color: var(--text);
-      border: 1px solid var(--border);
+      padding: 0.65rem 0.85rem;
+      border: 1.5px solid var(--border);
       border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
     }
 
-    textarea {
-      min-height: 76px;
-      resize: vertical;
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
     }
 
-    button {
-      background: var(--terracotta);
-      color: #fff;
+    /* Botões */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.65rem 1rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: 8px;
       border: none;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-weight: 700;
-      font-size: 0.92rem;
       cursor: pointer;
-      transition: 0.15s ease;
+      transition: all 0.2s;
+      text-decoration: none;
     }
 
-    button:hover {
-      filter: brightness(1.08);
-    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #64748b; color: #fff; }
+    .btn-secondary:hover { background: #475569; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-success:hover { background: #059669; }
+    .btn-warning { background: var(--warning); color: #fff; }
+    .btn-warning:hover { background: #d97706; }
+    .btn-info { background: var(--info); color: #fff; }
+    .btn-info:hover { background: #2563eb; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-sm { padding: 0.35rem 0.6rem; font-size: 0.8rem; }
+    .btn-full { width: 100%; }
 
-    button.secondary {
-      background: var(--surface-2);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    button.gold {
-      background: var(--gold);
-      color: #160f0a;
-    }
-
-    button.danger {
-      background: var(--danger);
-      color: #fff;
-    }
-
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .item, .list-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 10px;
-    }
-
-    .summary-box {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      margin-top: 12px;
-    }
-
-    .summary-line {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      font-size: 0.95rem;
-    }
-
-    .summary-total {
-      display: flex;
-      justify-content: space-between;
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--gold);
-      border-top: 1px solid var(--border);
-      padding-top: 8px;
-      margin-top: 6px;
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .kpi-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-    }
-
-    .kpi-label {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .kpi-value {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--gold);
-      margin-top: 4px;
-    }
-
-    .status-pill {
-      display: inline-block;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      background: rgba(210, 153, 34, 0.18);
-      color: var(--amber);
-    }
-
-    .ingredients-preview {
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-
-    
-    .status-pill.status-feito {
-      background: rgba(210, 153, 34, 0.2);
-      color: #f0b429;
-      border: 1px solid rgba(240, 180, 41, 0.45);
-    }
-    .status-pill.status-producao {
-      background: rgba(224, 159, 62, 0.22);
-      color: #ff9f1c;
-      border: 1px solid rgba(255, 159, 28, 0.5);
-    }
-    .status-pill.status-entrega {
-      background: rgba(56, 139, 253, 0.2);
-      color: #58a6ff;
-      border: 1px solid rgba(88, 166, 255, 0.45);
-    }
-    .status-pill.status-finalizado {
-      background: rgba(46, 160, 67, 0.22);
-      color: #3fb950;
-      border: 1px solid rgba(63, 185, 80, 0.5);
-    }
+    /* Estágios de Status */
     .status-stepper {
       display: flex;
+      gap: 0.5rem;
+      background: #f1f5f9;
+      padding: 0.5rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
       flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
-    .status-btn {
-      padding: 6px 10px;
-      font-size: 0.78rem;
-      border-radius: 7px;
-      background: var(--surface);
-      color: var(--muted);
-      border: 1px solid var(--border);
-      font-weight: 700;
-    }
-    .status-btn.active-feito {
-      background: #d29922;
-      color: #160f0a;
-      border-color: #d29922;
-    }
-    .status-btn.active-producao {
-      background: #e09f3e;
-      color: #160f0a;
-      border-color: #e09f3e;
-    }
-    .status-btn.active-entrega {
-      background: #2f81f7;
-      color: #fff;
-      border-color: #2f81f7;
-    }
-    .status-btn.active-finalizado {
-      background: #2ea043;
-      color: #fff;
-      border-color: #2ea043;
     }
 
+    .status-btn {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      min-width: 120px;
+    }
+
+    .status-btn.active {
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .status-btn[data-status="Gerado"].active { background: #3b82f6; }
+    .status-btn[data-status="Em produção"].active { background: #f59e0b; }
+    .status-btn[data-status="Saiu para entrega"].active { background: #8b5cf6; }
+    .status-btn[data-status="Concluído"].active { background: #10b981; }
+
+    /* Badge de status */
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .badge-gerado { background: #dbeafe; color: #1e40af; }
+    .badge-producao { background: #fef3c7; color: #92400e; }
+    .badge-entrega { background: #ede9fe; color: #5b21b6; }
+    .badge-concluido { background: #d1fae5; color: #065f46; }
+
+    /* Tabela e Listas */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    table th {
+      background: #f8fafc;
+      padding: 0.75rem 1rem;
+      border-bottom: 2px solid var(--border);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    table tbody tr:hover {
+      background: #fdfdfe;
+    }
+
+    /* Alerta de Estoque */
+    .stock-alert {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #f87171;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+
+    /* Cards de Estatísticas */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: #fff;
+      padding: 1.25rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card .label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-card .value {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--secondary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Lista Carrinho */
+    .cart-items {
+      max-height: 280px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+      background: #fafafa;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem;
+      border-bottom: 1px solid #eee;
+      font-size: 0.85rem;
+    }
+
+    .cart-item:last-child {
+      border-bottom: none;
+    }
+
+    .cart-totals {
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .cart-totals .row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.3rem;
+    }
+
+    .cart-totals .total {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary);
+      border-top: 1px dashed var(--border);
+      padding-top: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    /* CUPOM TÉRMICO 58mm (oculto em tela normal) */
     #cupomTermico {
       display: none;
     }
 
+    /* REGRAS DE IMPRESSÃO TÉRMICA 58mm */
     @media print {
       @page {
         margin: 0 !important;
         size: 58mm auto;
       }
-      html, body {
+
+      body {
+        background: #fff !important;
+        color: #000 !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 58mm !important;
-        height: auto !important;
-        min-height: 0 !important;
-        max-height: none !important;
-        overflow: visible !important;
-        background: #ffffff !important;
       }
+
+      /* Oculta tudo que não for o cupom */
       body > *:not(#cupomTermico) {
         display: none !important;
       }
+
       #cupomTermico {
         display: block !important;
-        position: static !important;
         width: 52mm !important;
-        max-width: 52mm !important;
-        height: auto !important;
-        min-height: 0 !important;
-        overflow: visible !important;
-        page-break-after: avoid !important;
-        break-after: avoid !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        font-family: "Courier New", Courier, monospace !important;
-        font-size: 12px !important;
-        font-weight: 900 !important;
-        line-height: 1.15 !important;
-        color: #000000 !important;
-        background: #ffffff !important;
-        padding: 1mm 0 1mm 1mm !important;
-        margin: 0 !important;
+        margin: 0 auto !important;
+        padding: 2mm 0 !important;
+        font-family: 'JetBrains Mono', 'Courier New', monospace !important;
+        font-size: 10px !important;
+        line-height: 1.25 !important;
+        color: #000 !important;
+        background: #fff !important;
+        word-break: break-all;
+        page-break-after: avoid;
+        page-break-inside: avoid;
       }
-      #cupomTermico, #cupomTermico * {
-        font-weight: 900 !important;
-        color: #000000 !important;
-        background: #ffffff !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+
+      #cupomTermico .c-center {
+        text-align: center;
       }
-      .cupom-linha {
-        border-top: 1px dashed #000000 !important;
-        margin: 3px 0 !important;
-        height: 0 !important;
+
+      #cupomTermico .c-bold {
+        font-weight: bold;
       }
-      .cupom-item {
-        margin-bottom: 3px !important;
+
+      #cupomTermico .c-divider {
+        border-top: 1px dashed #000;
+        margin: 3px 0;
+      }
+
+      #cupomTermico .c-flex {
+        display: flex;
+        justify-content: space-between;
       }
     }
   </style>
 </head>
 <body>
-  <div class="app-container">
-    <header class="brand-header">
-      <img
-        src="logo01.jpeg"
-        alt="King Ventura Pizzaria"
-        class="brand-logo"
-        onerror="this.style.display='none'"
-      />
-      <div class="brand-top">
-        <div>
-          <h1 class="brand-title">KING VENTURA PIZZARIA</h1>
-          <p style="color: var(--muted); font-size: 0.88rem;">Sistema Operacional • WhatsApp: 5567991476156</p>
-        </div>
-        <span class="badge-version">V7.2 REBUILD</span>
+
+  <!-- CABEÇALHO -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">🍕</div>
+      <div>
+        <h1>KING VENTURA <span>PIZZARIA</span></h1>
       </div>
-    </header>
+    </div>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div class="order-status-badge">
+        <span style="color:#aaa;">Pedido Atual:</span>
+        <strong id="headerOrderId" style="color: #fff;">#KV0001</strong>
+        <span id="headerOrderStatusBadge" class="badge badge-gerado">📥 Gerado</span>
+      </div>
+    </div>
+  </header>
 
-    <nav class="nav-tabs" aria-label="Navegação do sistema">
-      <button class="nav-tab active" data-tab="pedido">🍕 Pedido</button>
-      <button class="nav-tab" data-tab="sabores">📋 Sabores & Preços</button>
-      <button class="nav-tab" data-tab="clientes">👤 Clientes</button>
-      <button class="nav-tab" data-tab="historico">📊 Histórico & Caixa</button>
-      <button class="nav-tab" data-tab="relatorios">💾 Relatórios & Backup</button>
-    </nav>
+  <!-- NAVEGAÇÃO DE ABAS -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('pedido')">🍕 Pedido</button>
+    <button class="tab-btn" onclick="switchTab('sabores')">📋 Sabores & Preços</button>
+    <button class="tab-btn" onclick="switchTab('clientes')">👥 Clientes</button>
+    <button class="tab-btn" onclick="switchTab('historico')">💰 Histórico & Caixa</button>
+    <button class="tab-btn" onclick="switchTab('estoque')">📦 Estoque</button>
+    <button class="tab-btn" onclick="switchTab('relatorios')">💾 Relatórios & Backup</button>
+  </nav>
 
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="main-container">
+
+    <!-- ========================================== -->
     <!-- ABA 1: PEDIDO -->
-    <section id="tab-pedido" class="tab-panel active">
-      <div class="card">
-        <div class="brand-top">
-          <h2 id="numeroPedido" style="margin-bottom: 0;">KV0001</h2>
-          <span id="statusPedido" class="status-pill status-feito">📥 Gerado</span>
+    <!-- ========================================== -->
+    <div id="tab-pedido" class="tab-content active">
+      
+      <!-- Stepper de Status do Pedido Atual -->
+      <div class="card" style="margin-bottom: 1rem; padding: 0.8rem 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Etapa do Pedido Atual</span>
+          <span id="currentStatusText" style="font-weight: 800; color: var(--primary);">📥 Gerado</span>
         </div>
-        <p id="dataPedido" style="color: var(--muted); font-size: 0.88rem; margin-top: 6px;"></p>
-        <div id="botoesStatusPedidoAtual" class="status-stepper" aria-label="Etapas do pedido atual"></div>
-      </div>
-
-      <div id="cardImportarWhats" class="card">
-        <h2>📥 Importar Pedido WhatsApp</h2>
-        <textarea
-          id="pedidoWhats"
-          rows="6"
-          placeholder="Cole aqui a mensagem recebida no WhatsApp..."
-        ></textarea>
-        <div class="btn-row">
-          <button id="btnImportarWhats" class="secondary">Importar Pedido</button>
+        <div class="status-stepper">
+          <button class="status-btn active" data-status="Gerado" onclick="setCurrentOrderStatus('Gerado')">📥 Gerado</button>
+          <button class="status-btn" data-status="Em produção" onclick="setCurrentOrderStatus('Em produção')">🔥 Em produção</button>
+          <button class="status-btn" data-status="Saiu para entrega" onclick="setCurrentOrderStatus('Saiu para entrega')">🛵 Saiu p/ entrega</button>
+          <button class="status-btn" data-status="Concluído" onclick="setCurrentOrderStatus('Concluído')">✅ Concluído</button>
         </div>
       </div>
 
-      <div class="card">
-        <h2>Cliente</h2>
-        <div class="grid-2">
-          <div>
-            <label for="nome">Nome</label>
-            <input id="nome" placeholder="Nome do cliente" />
+      <div class="grid-order">
+        <!-- Coluna Esquerda: Cliente, Pizza e Bebidas -->
+        <div>
+          <!-- Importação WhatsApp -->
+          <div class="card">
+            <h2 class="card-title">📥 Importar Pedido WhatsApp</h2>
+            <div class="form-group">
+              <textarea id="txtImportWhats" rows="2" placeholder="Cole o texto de pedido do WhatsApp aqui para preencher os dados automaticamente..."></textarea>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="importWhatsAppOrder()">⚡ Processar Texto</button>
           </div>
-          <div>
-            <label for="telefone">Telefone</label>
-            <input id="telefone" placeholder="(67) 99999-9999" />
+
+          <!-- Dados do Cliente -->
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center;" class="card-title">
+              <span>👤 Cliente</span>
+              <select id="selectClienteSalvo" style="width: auto; padding: 0.3rem 0.6rem; font-size: 0.8rem;" onchange="loadSavedClient(this.value)">
+                <option value="">-- Carregar Cliente Cadastrado --</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nome</label>
+                <input type="text" id="cliNome" placeholder="Nome completo">
+              </div>
+              <div class="form-group">
+                <label>Telefone</label>
+                <input type="text" id="cliTelefone" placeholder="(00) 00000-0000">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group" style="flex: 0.5;">
+                <label>CEP</label>
+                <input type="text" id="cliCep" placeholder="00000-000">
+              </div>
+              <div class="form-group" style="flex: 0.3;">
+                <label>Número</label>
+                <input type="text" id="cliNumero" placeholder="123">
+              </div>
+              <div class="form-group">
+                <label>Endereço (Rua e Bairro)</label>
+                <input type="text" id="cliEndereco" placeholder="Rua das Flores, Bairro Central">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Observação do Cliente / Ponto de Referência</label>
+              <input type="text" id="cliObs" placeholder="Ex: Casa com portão preto, interfone 12">
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="saveClientFromOrder()">💾 Salvar Cliente na Base</button>
+          </div>
+
+          <!-- Montar Pizza -->
+          <div class="card">
+            <h2 class="card-title">🍕 Montar Pizza</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Tamanho</label>
+                <select id="pizzaTamanho" onchange="updatePizzaSizeOptions()">
+                  <option value="Grande 35cm">Grande 35cm</option>
+                  <option value="Brotinho 25cm">Brotinho 25cm (Apenas 1 sabor)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Tipo</label>
+                <select id="pizzaTipo" onchange="togglePizzaHalfOption()">
+                  <option value="Inteira">Inteira</option>
+                  <option value="Meio a Meio">Meio a Meio</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Sabor 1</label>
+                <select id="pizzaSabor1"></select>
+              </div>
+              <div class="form-group" id="groupSabor2" style="display: none;">
+                <label>Sabor 2 (Meio a Meio)</label>
+                <select id="pizzaSabor2"></select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Adicional</label>
+                <select id="pizzaAdicional">
+                  <option value="Nenhum|0">Nenhum adicional</option>
+                  <option value="Catupiry Extra|4.00">Catupiry Extra (+R$ 4,00)</option>
+                  <option value="Muçarela Extra|5.00">Muçarela Extra (+R$ 5,00)</option>
+                  <option value="Bacon Extra|5.00">Bacon Extra (+R$ 5,00)</option>
+                  <option value="Presunto Extra|4.00">Presunto Extra (+R$ 4,00)</option>
+                  <option value="Cebola Extra|4.00">Cebola Extra (+R$ 4,00)</option>
+                  <option value="Milho Extra|4.00">Milho Extra (+R$ 4,00)</option>
+                  <option value="Ervilha Extra|4.00">Ervilha Extra (+R$ 4,00)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Observação da Pizza</label>
+                <input type="text" id="pizzaObs" placeholder="Ex: Sem cebola, bem assada">
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="addPizzaToCart()">➕ Adicionar Pizza ao Carrinho</button>
+          </div>
+
+          <!-- Bebidas -->
+          <div class="card">
+            <h2 class="card-title">🥤 Bebidas</h2>
+            <div class="form-row">
+              <div class="form-group" style="flex: 2;">
+                <label>Selecionar Bebida</label>
+                <select id="selectBebida">
+                  <option value="Nenhuma|0">Nenhuma bebida</option>
+                  <option value="Coca-Cola 2 Litros|16.00">Coca-Cola 2 Litros - R$ 16,00</option>
+                  <option value="Guaraná Antarctica 1 Litro|10.00">Guaraná Antarctica 1 Litro - R$ 10,00</option>
+                  <option value="Coca-Cola Lata 310ml|6.00">Coca-Cola Lata 310ml - R$ 6,00</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label>Quantidade</label>
+                <input type="number" id="qtdBebida" value="1" min="1">
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="addDrinkToCart()">➕ Adicionar Bebida</button>
           </div>
         </div>
 
-        <div class="grid-3">
-          <div>
-            <label for="cep">CEP</label>
-            <input id="cep" placeholder="79097-000" />
-          </div>
-          <div>
-            <label for="numero">Número</label>
-            <input id="numero" placeholder="129" />
-          </div>
-          <div>
-            <label for="endereco">Endereço (Rua e Bairro)</label>
-            <textarea
-              id="endereco"
-              rows="2"
-              list="listaRuasCG"
-              placeholder="Digite a rua ou bairro..."
-              style="min-height: 54px;"
-            ></textarea>
-            <datalist id="listaRuasCG"></datalist>
-          </div>
-        </div>
+        <!-- Coluna Direita: Carrinho e Fechamento -->
+        <div>
+          <div class="card" style="position: sticky; top: 1rem;">
+            <h2 class="card-title">🛒 Carrinho do Pedido</h2>
+            
+            <div id="cartList" class="cart-items">
+              <div style="text-align: center; color: var(--text-muted); padding: 1rem;">Nenhum item adicionado ainda.</div>
+            </div>
 
-        <label for="observacao">Observação do Cliente</label>
-        <textarea id="observacao" placeholder="Ponto de referência, troco, etc."></textarea>
+            <div class="form-group">
+              <label>Taxa de Entrega (R$)</label>
+              <input type="number" id="taxaEntrega" value="5.00" step="0.50" min="0" onchange="renderCartTotals()">
+            </div>
 
-        <div class="btn-row">
-          <button id="btnSalvarClienteRapido" class="secondary" type="button">Salvar Cliente na Base</button>
+            <div class="form-group">
+              <label>Forma de Pagamento</label>
+              <select id="formaPagamento">
+                <option value="PIX">PIX</option>
+                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                <option value="Cartão de Débito">Cartão de Débito</option>
+                <option value="Dinheiro">Dinheiro</option>
+              </select>
+            </div>
+
+            <div class="cart-totals">
+              <div class="row">
+                <span>Subtotal Itens:</span>
+                <span id="cartSubtotal">R$ 0,00</span>
+              </div>
+              <div class="row">
+                <span>Taxa de Entrega:</span>
+                <span id="cartTaxa">R$ 0,00</span>
+              </div>
+              <div class="row total">
+                <span>Total do Pedido:</span>
+                <span id="cartTotal">R$ 0,00</span>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+              <button class="btn btn-success btn-full" onclick="sendOrderWhatsApp()">📱 Enviar Pedido via WhatsApp</button>
+              <button class="btn btn-primary btn-full" onclick="registerOrderHistory()">💾 Registrar no Histórico & Baixar Estoque</button>
+              <button class="btn btn-info btn-full" onclick="printThermalCupom()">🖨️ Imprimir Cupom Térmico (58mm)</button>
+              <button class="btn btn-secondary btn-full" onclick="resetNewOrder()">🆕 Iniciar Novo Pedido</button>
+            </div>
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="card">
-        <h2>Montar Pizza</h2>
-        <div class="grid-2">
-          <div>
-            <label for="tamanho">Tamanho</label>
-            <select id="tamanho">
-              <option value="brotinho">Brotinho 25cm (Apenas 1 sabor)</option>
-              <option value="grande">Grande 35cm</option>
-            </select>
-          </div>
-          <div>
-            <label for="tipoPizza">Tipo</label>
-            <select id="tipoPizza">
-              <option value="inteira">Inteira</option>
-              <option value="meio">Meio a Meio</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <div>
-            <label for="sabor1">Sabor 1</label>
-            <select id="sabor1"></select>
-          </div>
-          <div id="boxSabor2" style="display: none;">
-            <label for="sabor2">Sabor 2 (Meio a Meio)</label>
-            <select id="sabor2"></select>
-          </div>
-        </div>
-
-        <div id="ingredientes" class="ingredients-preview"></div>
-
-        <div class="grid-2">
-          <div>
-            <label for="adicional">Adicional</label>
-            <select id="adicional">
-              <option value="0">Nenhum adicional</option>
-              <option value="4">Catupiry Extra (+R$ 4,00)</option>
-              <option value="4">Presunto Extra (+R$ 4,00)</option>
-              <option value="4">Cebola Extra (+R$ 4,00)</option>
-              <option value="4">Milho Extra (+R$ 4,00)</option>
-              <option value="4">Ervilha Extra (+R$ 4,00)</option>
-              <option value="5">Muçarela Extra (+R$ 5,00)</option>
-              <option value="5">Bacon Extra (+R$ 5,00)</option>
-            </select>
-          </div>
-          <div>
-            <label for="obsPizza">Observação da Pizza</label>
-            <input id="obsPizza" placeholder="Ex: sem cebola, assar bem" />
-          </div>
-        </div>
-
-        <div class="btn-row">
-          <button id="btnAdicionarPizza" class="gold" type="button">Adicionar Pizza</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Bebidas</h2>
-        <div class="grid-2">
-          <div>
-            <label for="bebida">Selecionar Bebida</label>
-            <select id="bebida">
-              <option value="">Nenhuma bebida</option>
-              <option value="16">Coca-Cola 2 Litros - R$ 16,00</option>
-              <option value="10">Guaraná Antarctica 1 Litro - R$ 10,00</option>
-              <option value="6">Coca-Cola Lata 310ml - R$ 6,00</option>
-            </select>
-          </div>
-          <div style="display: flex; align-items: flex-end;">
-            <button id="btnAdicionarBebida" type="button" style="width: 100%;">Adicionar Bebida</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Carrinho</h2>
-        <div id="carrinho"></div>
-
-        <div class="summary-box">
-          <div class="summary-line">
-            <span>Taxa de Entrega:</span>
-            <span>R$ <span id="taxaEntrega">0.00</span></span>
-          </div>
-          <div id="mensagemEntrega" style="font-size: 0.85rem; color: var(--gold); margin-bottom: 6px;"></div>
-          <div class="summary-total">
-            <span>Total do Pedido:</span>
-            <span>R$ <span id="totalPedido">0.00</span></span>
-          </div>
-        </div>
-
-        <div class="btn-row">
-          <button id="btnWhatsApp" class="gold" type="button">Enviar WhatsApp</button>
-          <button id="btnRegistrarHistorico" type="button">Registrar no Histórico</button>
-          <button onclick="imprimirCupomTermico()" class="gold" type="button">🖨️ Imprimir Cupom Térmico</button>
-          <button onclick="novoPedido()" class="secondary" type="button">🆕 Novo Pedido</button>
-        </div>
-      </div>
-    </section>
-
+    <!-- ========================================== -->
     <!-- ABA 2: SABORES & PREÇOS -->
-    <section id="tab-sabores" class="tab-panel">
+    <!-- ========================================== -->
+    <div id="tab-sabores" class="tab-content">
       <div class="card">
-        <h2>Cadastrar / Editar Sabor</h2>
-        <input type="hidden" id="saborEditandoOriginal" />
-        <div class="grid-3">
-          <div>
-            <label for="cadNomeSabor">Nome do Sabor</label>
-            <input id="cadNomeSabor" placeholder="Ex: Portuguesa" />
+        <h2 class="card-title">🍕 Cadastrar / Editar Sabor</h2>
+        <input type="hidden" id="editSaborId">
+        <div class="form-row">
+          <div class="form-group" style="flex: 2;">
+            <label>Nome do Sabor</label>
+            <input type="text" id="saborNome" placeholder="Ex: Calabresa Especial">
           </div>
-          <div>
-            <label for="cadPrecoBrotinho">Brotinho 25cm (R$)</label>
-            <input id="cadPrecoBrotinho" type="number" step="0.50" min="0" placeholder="20.00" />
+          <div class="form-group">
+            <label>Brotinho 25cm (R$)</label>
+            <input type="number" id="saborPrecoBrotinho" step="0.50" placeholder="30.00">
           </div>
-          <div>
-            <label for="cadPrecoGrande">Grande 35cm (R$)</label>
-            <input id="cadPrecoGrande" type="number" step="0.50" min="0" placeholder="40.00" />
+          <div class="form-group">
+            <label>Grande 35cm (R$)</label>
+            <input type="number" id="saborPrecoGrande" step="0.50" placeholder="50.00">
           </div>
         </div>
-        <label for="cadIngredientes">Ingredientes (separados por vírgula)</label>
-        <input id="cadIngredientes" placeholder="Molho, Muçarela, Presunto, Ovo, Cebola, Azeitonas, Orégano" />
-
-        <div class="btn-row">
-          <button id="btnSalvarSabor" class="gold" type="button">Salvar Sabor</button>
-          <button id="btnCancelarEdicaoSabor" class="secondary" type="button">Limpar Campos</button>
-          <button id="btnRestaurarSabores" class="secondary" type="button">Restaurar Sabores Padrão</button>
+        <div class="form-group">
+          <label>Ingredientes (separados por vírgula)</label>
+          <input type="text" id="saborIngredientes" placeholder="Ex: Molho, muçarela, calabresa fatiada, cebola e orégano">
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-primary" onclick="saveSabor()">Salvar Sabor</button>
+          <button class="btn btn-secondary" onclick="clearSaborForm()">Limpar Campos</button>
+          <button class="btn btn-warning" onclick="restoreDefaultSabores()">Restaurar Sabores Padrão</button>
         </div>
       </div>
 
       <div class="card">
-        <h2>Sabores Cadastrados</h2>
-        <div id="listaSabores"></div>
+        <h2 class="card-title">📋 Sabores Cadastrados</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Sabor</th>
+                <th>Ingredientes</th>
+                <th>Brotinho (25cm)</th>
+                <th>Grande (35cm)</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="listaSaboresBody"></tbody>
+          </table>
+        </div>
       </div>
-    </section>
+    </div>
 
+    <!-- ========================================== -->
     <!-- ABA 3: CLIENTES -->
-    <section id="tab-clientes" class="tab-panel">
+    <!-- ========================================== -->
+    <div id="tab-clientes" class="tab-content">
       <div class="card">
-        <h2>Cadastrar / Editar Cliente</h2>
-        <input type="hidden" id="clienteEditId" />
-        <div class="grid-2">
-          <div>
-            <label for="cliNome">Nome</label>
-            <input id="cliNome" placeholder="Nome completo" />
+        <h2 class="card-title">👤 Cadastrar / Editar Cliente</h2>
+        <input type="hidden" id="editClienteId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" id="formCliNome" placeholder="Nome do cliente">
           </div>
-          <div>
-            <label for="cliTelefone">Telefone</label>
-            <input id="cliTelefone" placeholder="(67) 99999-9999" />
-          </div>
-        </div>
-        <div class="grid-3">
-          <div>
-            <label for="cliCep">CEP</label>
-            <input id="cliCep" placeholder="79097-000" />
-          </div>
-          <div>
-            <label for="cliNumero">Número</label>
-            <input id="cliNumero" placeholder="129" />
-          </div>
-          <div>
-            <label for="cliEndereco">Endereço</label>
-            <input id="cliEndereco" placeholder="Rua / Bairro" />
+          <div class="form-group">
+            <label>Telefone</label>
+            <input type="text" id="formCliTelefone" placeholder="(00) 00000-0000">
           </div>
         </div>
-        <label for="cliObs">Observação</label>
-        <input id="cliObs" placeholder="Preferências ou ponto de referência" />
-        <div class="btn-row">
-          <button id="btnSalvarCliente" class="gold" type="button">Salvar Cliente</button>
-          <button id="btnLimparClienteForm" class="secondary" type="button">Limpar</button>
+        <div class="form-row">
+          <div class="form-group" style="flex: 0.4;">
+            <label>CEP</label>
+            <input type="text" id="formCliCep" placeholder="00000-000">
+          </div>
+          <div class="form-group" style="flex: 0.3;">
+            <label>Número</label>
+            <input type="text" id="formCliNumero" placeholder="Nº">
+          </div>
+          <div class="form-group">
+            <label>Endereço</label>
+            <input type="text" id="formCliEndereco" placeholder="Rua, Bairro">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Observação</label>
+          <input type="text" id="formCliObs" placeholder="Ponto de referência, preferências...">
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-primary" onclick="saveClienteManualmente()">Salvar Cliente</button>
+          <button class="btn btn-secondary" onclick="clearClienteForm()">Limpar</button>
         </div>
       </div>
 
       <div class="card">
-        <h2>Base de Clientes</h2>
-        <input id="buscaCliente" placeholder="Buscar cliente por nome, telefone ou endereço..." />
-        <div id="listaClientes" style="margin-top: 12px;"></div>
+        <h2 class="card-title">👥 Base de Clientes Cadastrados</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Endereço Completo</th>
+                <th>Observação</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="listaClientesBody"></tbody>
+          </table>
+        </div>
       </div>
-    </section>
+    </div>
 
+    <!-- ========================================== -->
     <!-- ABA 4: HISTÓRICO & CAIXA -->
-    <section id="tab-historico" class="tab-panel">
-      <div class="card">
-        <h2>Resumo do Caixa</h2>
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-label">Pedidos Registrados</div>
-            <div id="kpiQtdPedidos" class="kpi-value">0</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Faturamento Total</div>
-            <div class="kpi-value">R$ <span id="kpiFaturamento">0.00</span></div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-label">Ticket Médio</div>
-            <div class="kpi-value">R$ <span id="kpiTicketMedio">0.00</span></div>
-          </div>
+    <!-- ========================================== -->
+    <div id="tab-historico" class="tab-content">
+      <!-- Indicadores de Caixa -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="label">Pedidos Registrados</div>
+          <div class="value" id="statTotalPedidos">0</div>
         </div>
-        <input id="buscaHistorico" placeholder="Buscar pedido por código (KV...), cliente ou status..." />
-        <div id="filtrosStatusHistorico" class="status-stepper" style="margin-top: 10px;">
-          <button type="button" class="status-btn active-feito" data-filtro-status="Todos" onclick="selecionarFiltroHistorico('Todos')">Todos</button>
-          <button type="button" class="status-btn" data-filtro-status="Gerado" onclick="selecionarFiltroHistorico('Gerado')">📥 Gerado</button>
-          <button type="button" class="status-btn" data-filtro-status="Em produção" onclick="selecionarFiltroHistorico('Em produção')">🔥 Em produção</button>
-          <button type="button" class="status-btn" data-filtro-status="Saiu para entrega" onclick="selecionarFiltroHistorico('Saiu para entrega')">🛵 Saiu para entrega</button>
-          <button type="button" class="status-btn" data-filtro-status="Concluído" onclick="selecionarFiltroHistorico('Concluído')">✅ Concluído</button>
+        <div class="stat-card">
+          <div class="label">Faturamento Total</div>
+          <div class="value" id="statFaturamento">R$ 0,00</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Ticket Médio</div>
+          <div class="value" id="statTicketMedio">R$ 0,00</div>
         </div>
       </div>
 
+      <!-- Filtros e Busca -->
       <div class="card">
-        <h2>Histórico de Pedidos</h2>
-        <div id="listaHistorico"></div>
+        <div class="form-row" style="align-items: center; margin-bottom: 0;">
+          <div class="form-group" style="flex: 2; margin-bottom: 0;">
+            <input type="text" id="searchOrderInput" placeholder="🔍 Buscar por código, cliente, telefone..." oninput="renderHistoryTable()">
+          </div>
+          <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <select id="filterStatusSelect" onchange="renderHistoryTable()">
+              <option value="TODOS">Todos os Status</option>
+              <option value="Gerado">📥 Gerado</option>
+              <option value="Em produção">🔥 Em produção</option>
+              <option value="Saiu para entrega">🛵 Saiu para entrega</option>
+              <option value="Concluído">✅ Concluído</option>
+            </select>
+          </div>
+        </div>
       </div>
-    </section>
 
-    <!-- ABA 5: RELATÓRIOS & BACKUP -->
-    <section id="tab-relatorios" class="tab-panel">
+      <!-- Lista de Pedidos -->
       <div class="card">
-        <h2>Exportar Relatórios CSV</h2>
-        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 10px;">
-          Baixe planilhas CSV compatíveis com Excel para controle financeiro e de clientes.
+        <h2 class="card-title">📜 Histórico Geral de Pedidos</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Data/Hora</th>
+                <th>Cliente</th>
+                <th>Itens</th>
+                <th>Total</th>
+                <th>Status Atual</th>
+                <th>Ações de Etapa</th>
+              </tr>
+            </thead>
+            <tbody id="listaHistoricoBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 5: CONTROLE DE ESTOQUE -->
+    <!-- ========================================== -->
+    <div id="tab-estoque" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">➕ Cadastrar / Repor Item de Estoque</h2>
+        <div class="form-row">
+          <div class="form-group" style="flex: 2;">
+            <label>Nome do Item / Insumo</label>
+            <input type="text" id="estItemNome" placeholder="Ex: Massa Brotinho, Caixa 35cm, Coca-Cola 2L">
+          </div>
+          <div class="form-group">
+            <label>Categoria</label>
+            <select id="estItemCat">
+              <option value="Insumo">Insumo</option>
+              <option value="Embalagem">Embalagem</option>
+              <option value="Bebida">Bebida</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Quantidade Atual</label>
+            <input type="number" id="estItemQtd" value="10" min="0">
+          </div>
+          <div class="form-group">
+            <label>Estoque Mínimo</label>
+            <input type="number" id="estItemMin" value="5" min="0">
+          </div>
+          <div class="form-group">
+            <label>Unidade</label>
+            <input type="text" id="estItemUn" placeholder="un, kg, pct" value="un">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addOrUpdateStockItem()">Salvar no Estoque</button>
+        <button class="btn btn-secondary" onclick="restoreDefaultStock()">Restaurar Estoque Base</button>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">📦 Inventário em Tempo Real</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Categoria</th>
+                <th>Qtd Atual</th>
+                <th>Estoque Mínimo</th>
+                <th>Status</th>
+                <th>Ajuste Rápido</th>
+                <th>Remover</th>
+              </tr>
+            </thead>
+            <tbody id="listaEstoqueBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ABA 6: RELATÓRIOS & BACKUP -->
+    <!-- ========================================== -->
+    <div id="tab-relatorios" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">📊 Exportar Relatórios CSV</h2>
+        <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+          Baixe planilhas CSV compatíveis com Excel, Google Sheets e LibreOffice para controle contábil.
         </p>
-        <div class="btn-row">
-          <button id="btnExportarPedidosCSV" class="gold" type="button">Baixar Histórico de Pedidos (CSV)</button>
-          <button id="btnExportarSaboresCSV" class="secondary" type="button">Baixar Tabela de Sabores (CSV)</button>
-          <button id="btnExportarClientesCSV" class="secondary" type="button">Baixar Base de Clientes (CSV)</button>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <button class="btn btn-secondary" onclick="exportOrdersCSV()">📥 Baixar Histórico de Pedidos (CSV)</button>
+          <button class="btn btn-secondary" onclick="exportSaboresCSV()">📥 Baixar Tabela de Sabores (CSV)</button>
+          <button class="btn btn-secondary" onclick="exportClientesCSV()">📥 Baixar Base de Clientes (CSV)</button>
+          <button class="btn btn-secondary" onclick="exportEstoqueCSV()">📥 Baixar Relatório de Estoque (CSV)</button>
         </div>
       </div>
 
       <div class="card">
-        <h2>Backup e Restauração (JSON)</h2>
-        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 10px;">
-          Salve todo o sistema (sabores, preços, clientes, histórico e numeração) ou restaure um arquivo JSON.
+        <h2 class="card-title">💾 Backup e Restauração Total (JSON)</h2>
+        <p style="margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+          Gera uma cópia de segurança completa de todos os pedidos, clientes, cardápio e estoque.
         </p>
-        <div class="btn-row">
-          <button id="btnExportarBackup" class="gold" type="button">Exportar Backup JSON</button>
-          <button id="btnImportarBackup" class="secondary" type="button">Restaurar Backup JSON</button>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button class="btn btn-primary" onclick="exportBackupJSON()">💾 Exportar Backup JSON</button>
+          <button class="btn btn-warning" onclick="document.getElementById('fileBackup').click()">📂 Carregar Arquivo JSON</button>
+          <input type="file" id="fileBackup" style="display: none;" accept=".json" onchange="handleFileBackup(event)">
         </div>
-        <label for="inputBackupJson">Conteúdo JSON para Restauração</label>
-        <textarea id="inputBackupJson" rows="6" placeholder="Cole aqui o JSON de backup ou selecione um arquivo abaixo..."></textarea>
-        <label for="fileBackupJson">Ou escolher arquivo .json</label>
-        <input id="fileBackupJson" type="file" accept=".json,application/json" />
+        
+        <div class="form-group">
+          <label>Ou cole o texto JSON para restaurar:</label>
+          <textarea id="txtBackupJson" rows="4" placeholder="Cole aqui o conteúdo JSON do seu backup..."></textarea>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="restoreFromTextareaJSON()">⚠️ Restaurar do Texto Colado</button>
       </div>
-    </section>
-    <!-- CUPOM TÉRMICO COMPACTO (SOMENTE IMPRESSÃO) -->
-    <div id="cupomTermico" aria-hidden="true"></div>
+    </div>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- CUPOM TÉRMICO 58mm (Renderizado ao Imprimir) -->
+  <!-- ========================================== -->
+  <div id="cupomTermico">
+    <div class="c-center c-bold" style="font-size: 13px;">KING VENTURA PIZZARIA</div>
+    <div class="c-center" style="font-size: 9px;">Delivery & Retirada Express</div>
+    <div class="c-divider"></div>
+    <div class="c-flex"><span class="c-bold" id="cpId">#KV0001</span><span id="cpData">00/00 00:00</span></div>
+    <div class="c-flex"><span>Status:</span><span class="c-bold" id="cpStatus">GERADO</span></div>
+    <div class="c-divider"></div>
+    <div class="c-bold">CLIENTE:</div>
+    <div id="cpClienteNome">Consumidor</div>
+    <div id="cpClienteTel">Tel: -</div>
+    <div id="cpClienteEnd">End: Balcão</div>
+    <div id="cpClienteObs" style="font-style: italic; font-size: 9px;"></div>
+    <div class="c-divider"></div>
+    <div class="c-bold">ITENS DO PEDIDO:</div>
+    <div id="cpItensList"></div>
+    <div class="c-divider"></div>
+    <div class="c-flex"><span>Subtotal:</span><span id="cpSubtotal">R$ 0,00</span></div>
+    <div class="c-flex"><span>Taxa Entrega:</span><span id="cpTaxa">R$ 0,00</span></div>
+    <div class="c-flex c-bold" style="font-size: 11px;"><span>TOTAL:</span><span id="cpTotal">R$ 0,00</span></div>
+    <div class="c-flex"><span>Pagamento:</span><span class="c-bold" id="cpPagto">PIX</span></div>
+    <div class="c-divider"></div>
+    <div class="c-center" style="font-size: 9px;">Obrigado pela preferência!</div>
+    <div class="c-center" style="font-size: 9px;">*** Bom Apetite ***</div>
   </div>
 
   <script>
-    const NUMERO_WHATSAPP = "5567991476156";
+    /* ========================================================
+       SISTEMA KING VENTURA PIZZARIA - LOGICA COMPLETA
+       ======================================================== */
 
-    const SABORES_PADRAO = {
-      "Muçarela": {
-        brotinho: 15,
-        grande: 35,
-        ingredientes: ["Molho", "Muçarela", "Azeitonas", "Orégano"]
-      },
-      "Calabresa": {
-        brotinho: 20,
-        grande: 35,
-        ingredientes: ["Molho", "Muçarela", "Calabresa", "Cebola", "Azeitonas", "Orégano"]
-      },
-      "Catupiry": {
-        brotinho: 20,
-        grande: 35,
-        ingredientes: ["Molho", "Muçarela", "Catupiry", "Azeitonas", "Orégano"]
-      },
-      "Calabresa com Catupiry": {
-        brotinho: 20,
-        grande: 40,
-        ingredientes: ["Molho", "Muçarela", "Calabresa", "Catupiry", "Azeitonas", "Orégano"]
-      },
-      "Frango com Catupiry": {
-        brotinho: 20,
-        grande: 40,
-        ingredientes: ["Molho", "Muçarela", "Frango Desfiado", "Catupiry", "Azeitonas", "Orégano"]
-      },
-      "Presunto": {
-        brotinho: 20,
-        grande: 35,
-        ingredientes: ["Molho", "Muçarela", "Presunto", "Cebola", "Azeitonas", "Orégano"]
-      },
-      "Presunto com Catupiry": {
-        brotinho: 20,
-        grande: 40,
-        ingredientes: ["Molho", "Muçarela", "Presunto", "Catupiry", "Azeitonas", "Orégano"]
-      },
-      "Brasileira": {
-        brotinho: 20,
-        grande: 40,
-        ingredientes: ["Molho", "Muçarela", "Milho Verde", "Ervilha", "Cebola", "Azeitonas", "Orégano"]
-      },
-      "Frango com Milho e Tomate": {
-        brotinho: 20,
-        grande: 40,
-        ingredientes: ["Molho", "Muçarela", "Frango Desfiado", "Milho Verde", "Tomate", "Azeitonas", "Orégano"]
-      },
-      "Baiana": {
-        brotinho: 23,
-        grande: 40,
-        ingredientes: ["Molho", "Muçarela", "Calabresa", "Bacon", "Molho de Pimenta", "Cebola", "Azeitonas", "Orégano"]
-      },
-      "Bacon": {
-        brotinho: 23,
-        grande: 40,
-        ingredientes: ["Molho", "Muçarela", "Bacon", "Cebola", "Azeitonas", "Orégano"]
-      },
-      "Cremosa": {
-        brotinho: 23,
-        grande: 40,
-        ingredientes: ["Molho", "Muçarela", "Catupiry", "Creme de Leite", "Azeitonas", "Orégano"]
-      },
-      "Lombo ao Creme": {
-        brotinho: 23,
-        grande: 40,
-        ingredientes: ["Molho", "Muçarela", "Lombinho", "Creme de Leite", "Azeitonas", "Orégano"]
-      }
-    };
-
-    let SABORES = {};
-    let historicoPedidos = [];
-    let clientesBase = [];
-    let taxaEntrega = 0;
-
-    let pedidoAtual = {
-      numero: "",
-      data: "",
-      status: "Aberto",
-      cliente: "",
-      telefone: "",
-      cep: "",
-      endereco: "",
-      numeroCasa: "",
-      observacao: "",
-      taxaEntrega: 0,
-      itens: [],
-      total: 0
-    };
-
-    function carregarSaboresStorage() {
-      const salvo = localStorage.getItem("kv_sabores");
-      if (salvo) {
-        try {
-          SABORES = JSON.parse(salvo);
-          return;
-        } catch (e) {}
-      }
-      SABORES = JSON.parse(JSON.stringify(SABORES_PADRAO));
-      salvarSaboresStorage();
-    }
-
-    function salvarSaboresStorage() {
-      localStorage.setItem("kv_sabores", JSON.stringify(SABORES));
-    }
-
-    function carregarHistorico() {
-      const dados = localStorage.getItem("historicoPedidos");
-      if (dados) {
-        try {
-          historicoPedidos = JSON.parse(dados);
-        } catch (e) {
-          historicoPedidos = [];
-        }
-      }
-    }
-
-    function salvarHistorico() {
-      localStorage.setItem("historicoPedidos", JSON.stringify(historicoPedidos));
-    }
-
-    function carregarClientes() {
-      const dados = localStorage.getItem("kv_clientes");
-      if (dados) {
-        try {
-          clientesBase = JSON.parse(dados);
-        } catch (e) {
-          clientesBase = [];
-        }
-      }
-    }
-
-    function salvarClientes() {
-      localStorage.setItem("kv_clientes", JSON.stringify(clientesBase));
-    }
-
-
-    const ETAPAS_PEDIDO = [
-      { key: "Gerado", label: "📥 Gerado", pillClass: "status-feito", activeClass: "active-feito" },
-      { key: "Em produção", label: "🔥 Em produção", pillClass: "status-producao", activeClass: "active-producao" },
-      { key: "Saiu para entrega", label: "🛵 Saiu para entrega", pillClass: "status-entrega", activeClass: "active-entrega" },
-      { key: "Concluído", label: "✅ Concluído", pillClass: "status-finalizado", activeClass: "active-finalizado" }
+    // 1. DADOS INICIAIS / PADRÕES
+    const DEFAULT_SABORES = [
+      { id: '1', nome: 'Calabresa', brotinho: 28.00, grande: 46.00, ingredientes: 'Molho, muçarela, calabresa fatiada, cebola e orégano' },
+      { id: '2', nome: 'Muçarela', brotinho: 26.00, grande: 44.00, ingredientes: 'Molho especial, muçarela farta, tomate e azeitonas' },
+      { id: '3', nome: 'Frango com Catupiry', brotinho: 30.00, grande: 50.00, ingredientes: 'Molho, peito de frango desfiado, catupiry e milho' },
+      { id: '4', nome: 'Portuguesa', brotinho: 32.00, grande: 52.00, ingredientes: 'Molho, muçarela, presunto, ovos cozidos, ervilha, cebola e azeitona' },
+      { id: '5', nome: 'Quatro Queijos', brotinho: 34.00, grande: 54.00, ingredientes: 'Molho, muçarela, catupiry, provolone e parmesão' },
+      { id: '6', nome: 'Bacon Especial', brotinho: 32.00, grande: 52.00, ingredientes: 'Molho, muçarela farta, tiras crocantes de bacon e tomate' }
     ];
 
-    function normalizarStatusPedido(status) {
-      const s = String(status || "").trim().toLowerCase();
-      if (!s || s === "aberto" || s === "feito" || s === "gerado") return "Gerado";
-      if (s.includes("preparo") || s.includes("produ")) return "Em produção";
-      if (s.includes("entrega") || s.includes("saiu")) return "Saiu para entrega";
-      if (s.includes("conclu") || s.includes("final")) return "Concluído";
-      return "Gerado";
+    const DEFAULT_ESTOQUE = [
+      { id: 'est_1', nome: 'Caixa Pizza Grande 35cm', categoria: 'Embalagem', qtd: 45, min: 15, un: 'un' },
+      { id: 'est_2', nome: 'Caixa Pizza Brotinho 25cm', categoria: 'Embalagem', qtd: 30, min: 10, un: 'un' },
+      { id: 'est_3', nome: 'Disco de Massa Grande', categoria: 'Insumo', qtd: 40, min: 12, un: 'un' },
+      { id: 'est_4', nome: 'Disco de Massa Brotinho', categoria: 'Insumo', qtd: 25, min: 8, un: 'un' },
+      { id: 'est_5', nome: 'Muçarela Ralada (kg)', categoria: 'Insumo', qtd: 14, min: 4, un: 'kg' },
+      { id: 'est_6', nome: 'Calabresa Fatiada (kg)', categoria: 'Insumo', qtd: 8, min: 3, un: 'kg' },
+      { id: 'est_7', nome: 'Catupiry Bisnaga', categoria: 'Insumo', qtd: 9, min: 3, un: 'un' },
+      { id: 'est_8', nome: 'Coca-Cola 2 Litros', categoria: 'Bebida', qtd: 18, min: 6, un: 'un' },
+      { id: 'est_9', nome: 'Guaraná Antarctica 1 Litro', categoria: 'Bebida', qtd: 12, min: 4, un: 'un' },
+      { id: 'est_10', nome: 'Coca-Cola Lata 310ml', categoria: 'Bebida', qtd: 24, min: 8, un: 'un' }
+    ];
+
+    // 2. ESTADO GLOBAL DA APLICAÇÃO (LocalStorage)
+    let appState = {
+      orderSeq: 1,
+      currentOrderId: 'KV0001',
+      currentOrderStatus: 'Gerado',
+      cart: [],
+      sabores: [],
+      clientes: [],
+      historico: [],
+      estoque: []
+    };
+
+    function loadState() {
+      const saved = localStorage.getItem('kv_pizzaria_state_v2');
+      if (saved) {
+        try {
+          appState = JSON.parse(saved);
+        } catch (e) {
+          console.error('Erro ao ler estado do localStorage, iniciando novo.', e);
+        }
+      }
+      if (!appState.sabores || appState.sabores.length === 0) appState.sabores = [...DEFAULT_SABORES];
+      if (!appState.estoque || appState.estoque.length === 0) appState.estoque = [...DEFAULT_ESTOQUE];
+      if (!appState.cart) appState.cart = [];
+      if (!appState.clientes) appState.clientes = [];
+      if (!appState.historico) appState.historico = [];
+      if (!appState.orderSeq) appState.orderSeq = 1;
+      if (!appState.currentOrderId) appState.currentOrderId = 'KV' + String(appState.orderSeq).padStart(4, '0');
+      if (!appState.currentOrderStatus) appState.currentOrderStatus = 'Gerado';
+
+      saveState();
     }
 
-    function obterMetaStatus(status) {
-      const norm = normalizarStatusPedido(status);
-      return ETAPAS_PEDIDO.find((e) => e.key === norm) || ETAPAS_PEDIDO[0];
+    function saveState() {
+      localStorage.setItem('kv_pizzaria_state_v2', JSON.stringify(appState));
     }
 
-    function atualizarBadgeStatusAtual(status) {
-      const meta = obterMetaStatus(status);
-      const badge = document.getElementById("statusPedido");
-      if (!badge) return;
-      badge.className = "status-pill " + meta.pillClass;
-      badge.innerText = meta.label;
+    // 3. NAVEGAÇÃO DE ABAS
+    function switchTab(tabName) {
+      // Remove classe ativa de todos os botões e abas
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+      // Ativa o botão correto
+      const clickedBtn = Array.from(document.querySelectorAll('.nav-tabs .tab-btn')).find(b => 
+        b.getAttribute('onclick')?.includes(`'${tabName}'`)
+      );
+      if (clickedBtn) clickedBtn.classList.add('active');
+
+      // Ativa a tela correta
+      const targetTab = document.getElementById(`tab-${tabName}`);
+      if (targetTab) {
+        targetTab.classList.add('active');
+      }
+
+      // Rerenderizações dinâmicas ao abrir a aba
+      if (tabName === 'sabores') renderSaboresTable();
+      if (tabName === 'clientes') { renderClientesTable(); populateClientSelect(); }
+      if (tabName === 'historico') { renderHistoryTable(); updateCaixaSummary(); }
+      if (tabName === 'estoque') renderEstoqueTable();
     }
 
-    function definirStatusPedidoAtual(novoStatus) {
-      const meta = obterMetaStatus(novoStatus);
-      pedidoAtual.status = meta.key;
-      atualizarBadgeStatusAtual(meta.key);
-      renderizarBotoesStatusAtual();
-    }
-
-    function renderizarBotoesStatusAtual() {
-      const container = document.getElementById("botoesStatusPedidoAtual");
-      if (!container) return;
-      const atualNorm = normalizarStatusPedido(pedidoAtual.status);
-      container.innerHTML = ETAPAS_PEDIDO.map((etapa) => {
-        const isCurrent = etapa.key === atualNorm;
-        return `<button type="button" class="status-btn ${isCurrent ? etapa.activeClass : ""}" onclick="definirStatusPedidoAtual('${etapa.key}')">${etapa.label}</button>`;
-      }).join("");
-    }
-
-    function gerarNumeroPedido() {
-      let numero = Number(localStorage.getItem("ultimoPedido") || 0);
-      numero++;
-      localStorage.setItem("ultimoPedido", numero);
-      return "KV" + String(numero).padStart(4, "0");
-    }
-
-    function registrarPedido(pedido) {
-      pedido.numero = pedido.numero || gerarNumeroPedido();
-      pedido.data = pedido.data || new Date().toLocaleString("pt-BR");
-      pedido.status = normalizarStatusPedido(pedido.status || pedidoAtual.status || "Feito");
-      historicoPedidos.unshift(pedido);
-      salvarHistorico();
-      renderizarHistorico();
-      popularDatalistRuas();
-    }
-
-    function inicializarPedido() {
-      const agora = new Date();
-      let proximoNum = Number(localStorage.getItem("ultimoPedido") || 0) + 1;
-      const codigo = "KV" + String(proximoNum).padStart(4, "0");
-
-      pedidoAtual.numero = codigo;
-      pedidoAtual.data = agora.toLocaleString("pt-BR");
-      pedidoAtual.status = "Gerado";
-
-      document.getElementById("numeroPedido").innerText = codigo;
-      document.getElementById("dataPedido").innerText = pedidoAtual.data;
-      atualizarBadgeStatusAtual("Gerado");
-      renderizarBotoesStatusAtual();
-    }
-
-    function carregarSabores() {
-      const tamanho = document.getElementById("tamanho").value;
-      const sabor1 = document.getElementById("sabor1");
-      const sabor2 = document.getElementById("sabor2");
-
-      const prev1 = sabor1.value;
-      const prev2 = sabor2.value;
-
-      sabor1.innerHTML = '<option value="">🍕 Selecione um sabor</option>';
-      sabor2.innerHTML = '<option value="">🍕 Selecione um sabor</option>';
-
-      Object.keys(SABORES).forEach((nome) => {
-        const preco = tamanho === "brotinho" ? Number(SABORES[nome].brotinho) : Number(SABORES[nome].grande);
-        sabor1.innerHTML += `<option value="${nome}">${nome} - R$ ${preco.toFixed(2)}</option>`;
-        sabor2.innerHTML += `<option value="${nome}">${nome} - R$ ${preco.toFixed(2)}</option>`;
+    // 4. CONTROLE DE ETAPAS / STATUS DO PEDIDO
+    function setCurrentOrderStatus(status) {
+      appState.currentOrderStatus = status;
+      document.getElementById('currentStatusText').innerText = getStatusIcon(status) + ' ' + status;
+      
+      // Atualiza botões do stepper
+      document.querySelectorAll('.status-stepper .status-btn').forEach(btn => {
+        if (btn.getAttribute('data-status') === status) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
       });
 
-      if (prev1 && SABORES[prev1]) sabor1.value = prev1;
-      if (prev2 && SABORES[prev2]) sabor2.value = prev2;
+      // Atualiza badge do cabeçalho
+      const badge = document.getElementById('headerOrderStatusBadge');
+      badge.className = `badge ${getStatusBadgeClass(status)}`;
+      badge.innerText = getStatusIcon(status) + ' ' + status;
 
-      atualizarVisualPedido();
-      atualizarPreviewIngredientes();
+      saveState();
     }
 
-    function atualizarVisualPedido() {
-      const tamanho = document.getElementById("tamanho").value;
-      const tipoSelect = document.getElementById("tipoPizza");
-      const boxSabor2 = document.getElementById("boxSabor2");
+    function getStatusIcon(status) {
+      switch(status) {
+        case 'Gerado': return '📥';
+        case 'Em produção': return '🔥';
+        case 'Saiu para entrega': return '🛵';
+        case 'Concluído': return '✅';
+        default: return '📦';
+      }
+    }
 
-      if (tamanho === "brotinho") {
+    function getStatusBadgeClass(status) {
+      switch(status) {
+        case 'Gerado': return 'badge-gerado';
+        case 'Em produção': return 'badge-producao';
+        case 'Saiu para entrega': return 'badge-entrega';
+        case 'Concluído': return 'badge-concluido';
+        default: return 'badge-gerado';
+      }
+    }
+
+    function getNextStatus(current) {
+      if (current === 'Gerado') return 'Em produção';
+      if (current === 'Em produção') return 'Saiu para entrega';
+      if (current === 'Saiu para entrega') return 'Concluído';
+      return 'Concluído';
+    }
+
+    function advanceOrderStatusInHistory(orderId) {
+      const order = appState.historico.find(o => o.id === orderId);
+      if (order) {
+        order.status = getNextStatus(order.status);
+        saveState();
+        renderHistoryTable();
+      }
+    }
+
+    function setOrderStatusInHistory(orderId, newStatus) {
+      const order = appState.historico.find(o => o.id === orderId);
+      if (order) {
+        order.status = newStatus;
+        saveState();
+        renderHistoryTable();
+      }
+    }
+
+    // 5. SABORES & CARDÁPIO
+    function populateSaborSelects() {
+      const s1 = document.getElementById('pizzaSabor1');
+      const s2 = document.getElementById('pizzaSabor2');
+      s1.innerHTML = '';
+      s2.innerHTML = '';
+
+      appState.sabores.forEach(s => {
+        const opt1 = document.createElement('option');
+        opt1.value = s.id;
+        opt1.textContent = `${s.nome} (G: R$ ${s.grande.toFixed(2)} | B: R$ ${s.brotinho.toFixed(2)})`;
+        s1.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = s.id;
+        opt2.textContent = `${s.nome} (G: R$ ${s.grande.toFixed(2)} | B: R$ ${s.brotinho.toFixed(2)})`;
+        s2.appendChild(opt2);
+      });
+    }
+
+    function togglePizzaHalfOption() {
+      const tipo = document.getElementById('pizzaTipo').value;
+      const grp2 = document.getElementById('groupSabor2');
+      grp2.style.display = (tipo === 'Meio a Meio') ? 'block' : 'none';
+    }
+
+    function updatePizzaSizeOptions() {
+      const tam = document.getElementById('pizzaTamanho').value;
+      const tipoSelect = document.getElementById('pizzaTipo');
+      if (tam.includes('Brotinho')) {
+        tipoSelect.value = 'Inteira';
         tipoSelect.disabled = true;
-        tipoSelect.value = "inteira";
-        boxSabor2.style.display = "none";
       } else {
         tipoSelect.disabled = false;
-        boxSabor2.style.display = tipoSelect.value === "meio" ? "block" : "none";
       }
-
-      atualizarPreviewIngredientes();
+      togglePizzaHalfOption();
     }
 
-    function atualizarPreviewIngredientes() {
-      const el = document.getElementById("ingredientes");
-      const tamanho = document.getElementById("tamanho").value;
-      const tipo = document.getElementById("tipoPizza").value;
-      const s1 = document.getElementById("sabor1").value;
-      const s2 = document.getElementById("sabor2").value;
-
-      if (!s1 || !SABORES[s1]) {
-        el.innerText = "";
-        return;
-      }
-
-      if (tamanho === "grande" && tipo === "meio" && s2 && SABORES[s2]) {
-        el.innerText =
-          `Ingredientes — 50% ${s1}: ${SABORES[s1].ingredientes.join(", ")} | ` +
-          `50% ${s2}: ${SABORES[s2].ingredientes.join(", ")}`;
-      } else {
-        el.innerText = `Ingredientes: ${SABORES[s1].ingredientes.join(", ")}`;
-      }
-    }
-
-    function adicionarItem(item) {
-      pedidoAtual.itens.push(item);
-      atualizarCarrinho();
-    }
-
-    function removerItem(indice) {
-      pedidoAtual.itens.splice(indice, 1);
-      atualizarCarrinho();
-    }
-
-    function limparPedido() {
-      pedidoAtual.itens = [];
-      atualizarCarrinho();
-    }
-
-    function atualizarCarrinho() {
-      const carrinho = document.getElementById("carrinho");
-      if (!carrinho) return;
-
-      let html = "";
-      pedidoAtual.itens.forEach((item, index) => {
-        html += `
-          <div class="item">
-            <b>${item.descricao}</b><br />
-            ${item.ingredientes ? `<span style="color: var(--muted); font-size: 0.85rem;">${item.ingredientes}</span><br />` : ""}
-            ${item.observacao ? `<span style="color: var(--gold); font-size: 0.85rem;">Obs: ${item.observacao}</span><br />` : ""}
-            <div style="margin-top: 6px; display: flex; justify-content: space-between; align-items: center;">
-              <strong>Valor: R$ ${Number(item.valor).toFixed(2)}</strong>
-              <button class="danger" onclick="removerItem(${index})" type="button">Excluir</button>
-            </div>
-          </div>
+    function renderSaboresTable() {
+      const tbody = document.getElementById('listaSaboresBody');
+      tbody.innerHTML = '';
+      appState.sabores.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${s.nome}</strong></td>
+          <td style="color: #64748b; font-size: 0.85rem;">${s.ingredientes || '-'}</td>
+          <td>R$ ${Number(s.brotinho).toFixed(2)}</td>
+          <td>R$ ${Number(s.grande).toFixed(2)}</td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="editSabor('${s.id}')">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteSabor('${s.id}')">🗑️</button>
+          </td>
         `;
+        tbody.appendChild(tr);
       });
-
-      carrinho.innerHTML = html || '<p style="color: var(--muted);">Nenhum item adicionado ainda.</p>';
-      atualizarTotal();
     }
 
-    function atualizarTotal() {
-      let subtotal = 0;
-      pedidoAtual.itens.forEach((item) => {
-        subtotal += Number(item.valor) || 0;
-      });
+    function saveSabor() {
+      const id = document.getElementById('editSaborId').value;
+      const nome = document.getElementById('saborNome').value.trim();
+      const brotinho = parseFloat(document.getElementById('saborPrecoBrotinho').value);
+      const grande = parseFloat(document.getElementById('saborPrecoGrande').value);
+      const ingredientes = document.getElementById('saborIngredientes').value.trim();
 
-      const total = subtotal + taxaEntrega;
-      pedidoAtual.taxaEntrega = taxaEntrega;
-      pedidoAtual.total = total;
-
-      document.getElementById("taxaEntrega").innerText = taxaEntrega.toFixed(2);
-      document.getElementById("totalPedido").innerText = total.toFixed(2);
-    }
-
-    function calcularTaxaEntrega() {
-      const cep = document.getElementById("cep").value.replace(/[^0-9]/g, "");
-      if (cep.length < 8) {
+      if (!nome || isNaN(brotinho) || isNaN(grande)) {
+        alert('Por favor, preencha o nome e os valores da pizza!');
         return;
       }
 
-      if (cep.startsWith("79097")) {
-        taxaEntrega = 0;
-        document.getElementById("mensagemEntrega").innerHTML = "🎉 Você ganhou ENTREGA GRÁTIS";
+      if (id) {
+        const index = appState.sabores.findIndex(s => s.id === id);
+        if (index !== -1) {
+          appState.sabores[index] = { id, nome, brotinho, grande, ingredientes };
+        }
       } else {
-        taxaEntrega = 5;
-        document.getElementById("mensagemEntrega").innerHTML = "Taxa de Entrega: R$ 5,00";
+        appState.sabores.push({
+          id: 'sab_' + Date.now(),
+          nome,
+          brotinho,
+          grande,
+          ingredientes
+        });
       }
 
-      atualizarTotal();
+      saveState();
+      clearSaborForm();
+      renderSaboresTable();
+      populateSaborSelects();
+      alert('Sabor salvo com sucesso!');
     }
 
-    const RUAS_REFERENCIA_CG = [
-      { rua: "Rua Delamare", bairro: "Jardim Tarumã", cep: "79097-000" },
-      { rua: "Rua Yokohama", bairro: "Jardim Tarumã", cep: "79097-010" },
-      { rua: "Rua das Garças", bairro: "Jardim Tarumã", cep: "79097-020" },
-      { rua: "Avenida Guaicurus", bairro: "Jardim Tarumã", cep: "79097-000" },
-      { rua: "Rua Marquês de Lavradio", bairro: "Jardim Tarumã", cep: "79097-030" },
-      { rua: "Rua Brilhante", bairro: "Vila Bandeirante", cep: "79006-000" },
-      { rua: "Avenida Afonso Pena", bairro: "Centro", cep: "79002-000" },
-      { rua: "Rua 14 de Julho", bairro: "Centro", cep: "79002-110" }
-    ];
-    function popularDatalistRuas() {
-      const dl = document.getElementById("listaRuasCG");
-      if (!dl) return;
-      const mapa = new Map();
-
-      RUAS_REFERENCIA_CG.forEach((r) => {
-        mapa.set(`${r.rua} - ${r.bairro}`.toLowerCase(), r);
-      });
-
-      (clientesBase || []).forEach((c) => {
-        if (c.endereco) {
-          mapa.set(String(c.endereco).toLowerCase(), {
-            rua: c.endereco,
-            bairro: "",
-            cep: c.cep || ""
-          });
-        }
-      });
-
-      dl.innerHTML = "";
-      mapa.forEach((item) => {
-        const opt = document.createElement("option");
-        opt.value = item.bairro ? `${item.rua} - ${item.bairro}` : item.rua;
-        dl.appendChild(opt);
-      });
+    function editSabor(id) {
+      const s = appState.sabores.find(item => item.id === id);
+      if (!s) return;
+      document.getElementById('editSaborId').value = s.id;
+      document.getElementById('saborNome').value = s.nome;
+      document.getElementById('saborPrecoBrotinho').value = s.brotinho;
+      document.getElementById('saborPrecoGrande').value = s.grande;
+      document.getElementById('saborIngredientes').value = s.ingredientes;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    async function buscarCEP() {
-      const cep = document.getElementById("cep").value.replace(/\D/g, "");
-      if (cep.length !== 8) return;
-
-      try {
-        const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        const dados = await resposta.json();
-        if (!dados.erro) {
-          const log = dados.logradouro || "";
-          const bai = dados.bairro || "";
-          document.getElementById("endereco").value = bai ? `${log} - ${bai}` : log;
-        }
-      } catch (erro) {
-        console.log("Erro CEP", erro);
+    function deleteSabor(id) {
+      if (confirm('Deseja realmente excluir este sabor?')) {
+        appState.sabores = appState.sabores.filter(s => s.id !== id);
+        saveState();
+        renderSaboresTable();
+        populateSaborSelects();
       }
     }
 
-    async function buscarCEPPorRua() {
-      const campoEnd = document.getElementById("endereco");
-      const campoCep = document.getElementById("cep");
-      const texto = (campoEnd.value || "").trim();
-      if (texto.length < 4) return;
+    function clearSaborForm() {
+      document.getElementById('editSaborId').value = '';
+      document.getElementById('saborNome').value = '';
+      document.getElementById('saborPrecoBrotinho').value = '';
+      document.getElementById('saborPrecoGrande').value = '';
+      document.getElementById('saborIngredientes').value = '';
+    }
 
-      const ruaLimpa = texto.split(" - ")[0].trim();
-      const matchLocal = RUAS_REFERENCIA_CG.find(
-        (r) =>
-          `${r.rua} - ${r.bairro}`.toLowerCase() === texto.toLowerCase() ||
-          r.rua.toLowerCase() === ruaLimpa.toLowerCase()
-      );
+    function restoreDefaultSabores() {
+      if (confirm('Deseja restaurar os sabores padrão de fábrica?')) {
+        appState.sabores = [...DEFAULT_SABORES];
+        saveState();
+        renderSaboresTable();
+        populateSaborSelects();
+      }
+    }
 
-      if (matchLocal && matchLocal.cep) {
-        campoCep.value = matchLocal.cep;
-        if (!texto.includes(" - ") && matchLocal.bairro) {
-          campoEnd.value = `${matchLocal.rua} - ${matchLocal.bairro}`;
-        }
-        calcularTaxaEntrega();
+    // 6. CLIENTES
+    function populateClientSelect() {
+      const select = document.getElementById('selectClienteSalvo');
+      select.innerHTML = '<option value="">-- Carregar Cliente Cadastrado --</option>';
+      appState.clientes.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = `${c.nome} (${c.telefone})`;
+        select.appendChild(opt);
+      });
+    }
+
+    function loadSavedClient(id) {
+      if (!id) return;
+      const c = appState.clientes.find(cli => cli.id === id);
+      if (!c) return;
+      document.getElementById('cliNome').value = c.nome;
+      document.getElementById('cliTelefone').value = c.telefone;
+      document.getElementById('cliCep').value = c.cep || '';
+      document.getElementById('cliNumero').value = c.numero || '';
+      document.getElementById('cliEndereco').value = c.endereco || '';
+      document.getElementById('cliObs').value = c.obs || '';
+    }
+
+    function saveClientFromOrder() {
+      const nome = document.getElementById('cliNome').value.trim();
+      const telefone = document.getElementById('cliTelefone').value.trim();
+      const cep = document.getElementById('cliCep').value.trim();
+      const numero = document.getElementById('cliNumero').value.trim();
+      const endereco = document.getElementById('cliEndereco').value.trim();
+      const obs = document.getElementById('cliObs').value.trim();
+
+      if (!nome || !telefone) {
+        alert('Nome e telefone são obrigatórios para salvar o cliente.');
         return;
       }
 
-      const cliMatch = (clientesBase || []).find(
-        (c) => (c.endereco || "").toLowerCase().includes(ruaLimpa.toLowerCase()) && c.cep
-      );
-      if (cliMatch) {
-        campoCep.value = cliMatch.cep;
-        calcularTaxaEntrega();
+      const existingIndex = appState.clientes.findIndex(c => c.telefone === telefone);
+      if (existingIndex !== -1) {
+        appState.clientes[existingIndex] = { ...appState.clientes[existingIndex], nome, telefone, cep, numero, endereco, obs };
+      } else {
+        appState.clientes.push({ id: 'cli_' + Date.now(), nome, telefone, cep, numero, endereco, obs });
+      }
+
+      saveState();
+      populateClientSelect();
+      renderClientesTable();
+      alert('Cliente salvo na base!');
+    }
+
+    function renderClientesTable() {
+      const tbody = document.getElementById('listaClientesBody');
+      tbody.innerHTML = '';
+      appState.clientes.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${c.nome}</strong></td>
+          <td>${c.telefone}</td>
+          <td>${c.endereco || ''} ${c.numero ? ', Nº ' + c.numero : ''} ${c.cep ? '(' + c.cep + ')' : ''}</td>
+          <td>${c.obs || '-'}</td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="editCliente('${c.id}')">✏️</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteCliente('${c.id}')">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function saveClienteManualmente() {
+      const id = document.getElementById('editClienteId').value;
+      const nome = document.getElementById('formCliNome').value.trim();
+      const telefone = document.getElementById('formCliTelefone').value.trim();
+      const cep = document.getElementById('formCliCep').value.trim();
+      const numero = document.getElementById('formCliNumero').value.trim();
+      const endereco = document.getElementById('formCliEndereco').value.trim();
+      const obs = document.getElementById('formCliObs').value.trim();
+
+      if (!nome || !telefone) {
+        alert('Nome e telefone são obrigatórios!');
         return;
       }
 
-      if (ruaLimpa.length >= 5) {
+      if (id) {
+        const idx = appState.clientes.findIndex(c => c.id === id);
+        if (idx !== -1) {
+          appState.clientes[idx] = { id, nome, telefone, cep, numero, endereco, obs };
+        }
+      } else {
+        appState.clientes.push({ id: 'cli_' + Date.now(), nome, telefone, cep, numero, endereco, obs });
+      }
+
+      saveState();
+      clearClienteForm();
+      renderClientesTable();
+      populateClientSelect();
+      alert('Cliente salvo com sucesso!');
+    }
+
+    function editCliente(id) {
+      const c = appState.clientes.find(cli => cli.id === id);
+      if (!c) return;
+      document.getElementById('editClienteId').value = c.id;
+      document.getElementById('formCliNome').value = c.nome;
+      document.getElementById('formCliTelefone').value = c.telefone;
+      document.getElementById('formCliCep').value = c.cep || '';
+      document.getElementById('formCliNumero').value = c.numero || '';
+      document.getElementById('formCliEndereco').value = c.endereco || '';
+      document.getElementById('formCliObs').value = c.obs || '';
+    }
+
+    function deleteCliente(id) {
+      if (confirm('Excluir este cliente da base?')) {
+        appState.clientes = appState.clientes.filter(c => c.id !== id);
+        saveState();
+        renderClientesTable();
+        populateClientSelect();
+      }
+    }
+
+    function clearClienteForm() {
+      document.getElementById('editClienteId').value = '';
+      document.getElementById('formCliNome').value = '';
+      document.getElementById('formCliTelefone').value = '';
+      document.getElementById('formCliCep').value = '';
+      document.getElementById('formCliNumero').value = '';
+      document.getElementById('formCliEndereco').value = '';
+      document.getElementById('formCliObs').value = '';
+    }
+
+    // 7. CARRINHO & OPERAÇÃO DE PEDIDOS
+    function addPizzaToCart() {
+      const tamanho = document.getElementById('pizzaTamanho').value;
+      const tipo = document.getElementById('pizzaTipo').value;
+      const s1Id = document.getElementById('pizzaSabor1').value;
+      const s2Id = document.getElementById('pizzaSabor2').value;
+      const adicionalRaw = document.getElementById('pizzaAdicional').value.split('|');
+      const adicionalNome = adicionalRaw[0];
+      const adicionalPreco = parseFloat(adicionalRaw[1]) || 0;
+      const obs = document.getElementById('pizzaObs').value.trim();
+
+      const sabor1 = appState.sabores.find(s => s.id === s1Id);
+      if (!sabor1) {
+        alert('Selecione um sabor válido.');
+        return;
+      }
+
+      const isGrande = tamanho.includes('Grande');
+      let precoBase = 0;
+      let descricao = '';
+
+      if (tipo === 'Meio a Meio' && isGrande) {
+        const sabor2 = appState.sabores.find(s => s.id === s2Id) || sabor1;
+        precoBase = Math.max(sabor1.grande, sabor2.grande);
+        descricao = `Pizza Grande (1/2 ${sabor1.nome} + 1/2 ${sabor2.nome})`;
+      } else {
+        precoBase = isGrande ? sabor1.grande : sabor1.brotinho;
+        descricao = `Pizza ${isGrande ? 'Grande' : 'Brotinho'} (${sabor1.nome})`;
+      }
+
+      let precoTotalItem = precoBase + adicionalPreco;
+      if (adicionalNome !== 'Nenhum') {
+        descricao += ` + Adic: ${adicionalNome}`;
+      }
+      if (obs) {
+        descricao += ` [Obs: ${obs}]`;
+      }
+
+      appState.cart.push({
+        id: 'item_' + Date.now() + Math.random().toString(36).substr(2, 4),
+        tipoItem: 'Pizza',
+        tamanho: isGrande ? 'Grande 35cm' : 'Brotinho 25cm',
+        descricao,
+        preco: precoTotalItem,
+        qtd: 1
+      });
+
+      document.getElementById('pizzaObs').value = '';
+      saveState();
+      renderCart();
+    }
+
+    function addDrinkToCart() {
+      const select = document.getElementById('selectBebida').value;
+      const qtd = parseInt(document.getElementById('qtdBebida').value) || 1;
+      if (select.startsWith('Nenhuma') || qtd <= 0) return;
+
+      const [nome, precoStr] = select.split('|');
+      const precoUnit = parseFloat(precoStr);
+
+      appState.cart.push({
+        id: 'item_' + Date.now() + Math.random().toString(36).substr(2, 4),
+        tipoItem: 'Bebida',
+        tamanho: 'Padrão',
+        descricao: `${nome} (${qtd}x)`,
+        preco: precoUnit * qtd,
+        qtd: qtd,
+        nomeOriginal: nome
+      });
+
+      saveState();
+      renderCart();
+    }
+
+    function removeCartItem(itemId) {
+      appState.cart = appState.cart.filter(item => item.id !== itemId);
+      saveState();
+      renderCart();
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cartList');
+      if (appState.cart.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 1rem;">Nenhum item adicionado ainda.</div>';
+      } else {
+        container.innerHTML = '';
+        appState.cart.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'cart-item';
+          div.innerHTML = `
+            <div style="flex: 1; padding-right: 0.5rem;">
+              <strong>${item.descricao}</strong>
+              <div style="font-size: 0.8rem; color: #10b981; font-weight: 700;">R$ ${item.preco.toFixed(2)}</div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="removeCartItem('${item.id}')">✕</button>
+          `;
+          container.appendChild(div);
+        });
+      }
+      renderCartTotals();
+    }
+
+    function renderCartTotals() {
+      const subtotal = appState.cart.reduce((sum, item) => sum + item.preco, 0);
+      const taxa = parseFloat(document.getElementById('taxaEntrega').value) || 0;
+      const total = subtotal + taxa;
+
+      document.getElementById('cartSubtotal').innerText = `R$ ${subtotal.toFixed(2)}`;
+      document.getElementById('cartTaxa').innerText = `R$ ${taxa.toFixed(2)}`;
+      document.getElementById('cartTotal').innerText = `R$ ${total.toFixed(2)}`;
+    }
+
+    // 8. BAIXA AUTOMÁTICA DE ESTOQUE
+    function deductStockForOrder(cartItems) {
+      cartItems.forEach(item => {
+        if (item.tipoItem === 'Pizza') {
+          // Embalagem e Massa
+          if (item.tamanho.includes('Grande')) {
+            decreaseStockByName('Caixa Pizza Grande 35cm', 1);
+            decreaseStockByName('Disco de Massa Grande', 1);
+          } else {
+            decreaseStockByName('Caixa Pizza Brotinho 25cm', 1);
+            decreaseStockByName('Disco de Massa Brotinho', 1);
+          }
+        } else if (item.tipoItem === 'Bebida') {
+          if (item.nomeOriginal) {
+            decreaseStockByName(item.nomeOriginal, item.qtd || 1);
+          }
+        }
+      });
+      renderEstoqueTable();
+    }
+
+    function decreaseStockByName(itemName, amount) {
+      const item = appState.estoque.find(e => e.nome.toLowerCase().includes(itemName.toLowerCase()) || itemName.toLowerCase().includes(e.nome.toLowerCase()));
+      if (item) {
+        item.qtd = Math.max(0, item.qtd - amount);
+      }
+    }
+
+    // 9. REGISTRO NO HISTÓRICO & NOVO PEDIDO
+    function registerOrderHistory() {
+      if (appState.cart.length === 0) {
+        alert('Adicione ao menos um item ao carrinho antes de registrar o pedido.');
+        return;
+      }
+
+      const nome = document.getElementById('cliNome').value.trim() || 'Cliente Balcão';
+      const telefone = document.getElementById('cliTelefone').value.trim() || '-';
+      const endereco = document.getElementById('cliEndereco').value.trim() || 'Retirada no Balcão';
+      const numero = document.getElementById('cliNumero').value.trim();
+      const cep = document.getElementById('cliCep').value.trim();
+      const obs = document.getElementById('cliObs').value.trim();
+      const formaPagamento = document.getElementById('formaPagamento').value;
+
+      const subtotal = appState.cart.reduce((sum, item) => sum + item.preco, 0);
+      const taxa = parseFloat(document.getElementById('taxaEntrega').value) || 0;
+      const total = subtotal + taxa;
+
+      const novoRegistro = {
+        id: appState.currentOrderId,
+        dataHora: new Date().toLocaleString('pt-BR'),
+        timestamp: Date.now(),
+        cliente: { nome, telefone, endereco, numero, cep, obs },
+        itens: [...appState.cart],
+        subtotal,
+        taxa,
+        total,
+        formaPagamento,
+        status: appState.currentOrderStatus
+      };
+
+      // Se já existir no histórico com esse id, atualiza; senão adiciona
+      const idx = appState.historico.findIndex(h => h.id === appState.currentOrderId);
+      if (idx !== -1) {
+        appState.historico[idx] = novoRegistro;
+      } else {
+        appState.historico.unshift(novoRegistro);
+      }
+
+      // Baixa automática de estoque
+      deductStockForOrder(appState.cart);
+
+      saveState();
+      alert(`Pedido ${appState.currentOrderId} registrado com sucesso e estoque atualizado!`);
+      updateCaixaSummary();
+    }
+
+    function resetNewOrder() {
+      appState.orderSeq += 1;
+      appState.currentOrderId = 'KV' + String(appState.orderSeq).padStart(4, '0');
+      appState.currentOrderStatus = 'Gerado';
+      appState.cart = [];
+
+      document.getElementById('headerOrderId').innerText = '#' + appState.currentOrderId;
+      setCurrentOrderStatus('Gerado');
+      renderCart();
+
+      // Limpar formulário de cliente
+      document.getElementById('cliNome').value = '';
+      document.getElementById('cliTelefone').value = '';
+      document.getElementById('cliCep').value = '';
+      document.getElementById('cliNumero').value = '';
+      document.getElementById('cliEndereco').value = '';
+      document.getElementById('cliObs').value = '';
+      document.getElementById('selectClienteSalvo').value = '';
+
+      saveState();
+    }
+
+    // 10. IMPRESSÃO TÉRMICA 58mm
+    function printThermalCupom() {
+      if (appState.cart.length === 0) {
+        alert('O carrinho está vazio! Adicione itens para imprimir o cupom.');
+        return;
+      }
+
+      const nome = document.getElementById('cliNome').value.trim() || 'Consumidor';
+      const telefone = document.getElementById('cliTelefone').value.trim() || '-';
+      const endereco = document.getElementById('cliEndereco').value.trim() || 'Balcão / Retirada';
+      const numero = document.getElementById('cliNumero').value.trim();
+      const obs = document.getElementById('cliObs').value.trim();
+      const subtotal = appState.cart.reduce((sum, item) => sum + item.preco, 0);
+      const taxa = parseFloat(document.getElementById('taxaEntrega').value) || 0;
+      const total = subtotal + taxa;
+      const formaPagamento = document.getElementById('formaPagamento').value;
+
+      document.getElementById('cpId').innerText = '#' + appState.currentOrderId;
+      document.getElementById('cpData').innerText = new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+      document.getElementById('cpStatus').innerText = appState.currentOrderStatus.toUpperCase();
+      document.getElementById('cpClienteNome').innerText = nome;
+      document.getElementById('cpClienteTel').innerText = 'Tel: ' + telefone;
+      document.getElementById('cpClienteEnd').innerText = endereco + (numero ? ', Nº ' + numero : '');
+      document.getElementById('cpClienteObs').innerText = obs ? 'Obs: ' + obs : '';
+
+      const itemsContainer = document.getElementById('cpItensList');
+      itemsContainer.innerHTML = '';
+      appState.cart.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'c-flex';
+        div.style.marginBottom = '2px';
+        div.innerHTML = `<span>${item.descricao}</span><span>R$ ${item.preco.toFixed(2)}</span>`;
+        itemsContainer.appendChild(div);
+      });
+
+      document.getElementById('cpSubtotal').innerText = `R$ ${subtotal.toFixed(2)}`;
+      document.getElementById('cpTaxa').innerText = `R$ ${taxa.toFixed(2)}`;
+      document.getElementById('cpTotal').innerText = `R$ ${total.toFixed(2)}`;
+      document.getElementById('cpPagto').innerText = formaPagamento;
+
+      window.print();
+    }
+
+    // 11. ENVIAR WHATSAPP
+    function sendOrderWhatsApp() {
+      const telefone = document.getElementById('cliTelefone').value.replace(/\D/g, '');
+      const nome = document.getElementById('cliNome').value.trim() || 'Cliente';
+      const subtotal = appState.cart.reduce((sum, item) => sum + item.preco, 0);
+      const taxa = parseFloat(document.getElementById('taxaEntrega').value) || 0;
+      const total = subtotal + taxa;
+
+      let msg = `🍕 *KING VENTURA PIZZARIA*\n`;
+      msg += `*Pedido:* #${appState.currentOrderId}\n`;
+      msg += `*Status:* ${getStatusIcon(appState.currentOrderStatus)} ${appState.currentOrderStatus}\n`;
+      msg += `*Cliente:* ${nome}\n\n`;
+      msg += `*ITENS DO PEDIDO:*\n`;
+      appState.cart.forEach(i => {
+        msg += `• ${i.descricao} - R$ ${i.preco.toFixed(2)}\n`;
+      });
+      msg += `\n*Taxa de Entrega:* R$ ${taxa.toFixed(2)}\n`;
+      msg += `*TOTAL:* R$ ${total.toFixed(2)}\n`;
+      msg += `*Forma de Pagamento:* ${document.getElementById('formaPagamento').value}\n`;
+
+      const encoded = encodeURIComponent(msg);
+      const url = telefone ? `[api.whatsapp.com](https://api.whatsapp.com/send?phone=55${telefone}&text=${encoded})` : `[api.whatsapp.com](https://api.whatsapp.com/send?text=${encoded})`;
+      window.open(url, '_blank');
+    }
+
+    // 12. IMPORTAR WHATSAPP
+    function importWhatsAppOrder() {
+      const text = document.getElementById('txtImportWhats').value;
+      if (!text.trim()) {
+        alert('Cole o texto do pedido primeiro.');
+        return;
+      }
+
+      // Parser simples de campos comuns
+      const nomeMatch = text.match(/nome[:\s]+([^\n\r]+)/i);
+      const telMatch = text.match(/tel(?:efone)?[:\s]+([^\n\r]+)/i);
+      const endMatch = text.match(/end(?:ere[çc]o)?[:\s]+([^\n\r]+)/i);
+      const obsMatch = text.match(/obs(?:erva[çc][ãa]o)?[:\s]+([^\n\r]+)/i);
+
+      if (nomeMatch) document.getElementById('cliNome').value = nomeMatch[1].trim();
+      if (telMatch) document.getElementById('cliTelefone').value = telMatch[1].trim();
+      if (endMatch) document.getElementById('cliEndereco').value = endMatch[1].trim();
+      if (obsMatch) document.getElementById('cliObs').value = obsMatch[1].trim();
+
+      alert('Dados do cliente importados! Verifique e adicione os sabores desejados.');
+    }
+
+    // 13. HISTÓRICO & CAIXA
+    function updateCaixaSummary() {
+      const totalPedidos = appState.historico.length;
+      const faturamento = appState.historico.reduce((sum, o) => sum + (o.total || 0), 0);
+      const ticketMedio = totalPedidos > 0 ? (faturamento / totalPedidos) : 0;
+
+      document.getElementById('statTotalPedidos').innerText = totalPedidos;
+      document.getElementById('statFaturamento').innerText = `R$ ${faturamento.toFixed(2)}`;
+      document.getElementById('statTicketMedio').innerText = `R$ ${ticketMedio.toFixed(2)}`;
+    }
+
+    function renderHistoryTable() {
+      updateCaixaSummary();
+      const tbody = document.getElementById('listaHistoricoBody');
+      const search = document.getElementById('searchOrderInput').value.toLowerCase();
+      const filterStatus = document.getElementById('filterStatusSelect').value;
+
+      tbody.innerHTML = '';
+
+      const filtrados = appState.historico.filter(o => {
+        const matchesStatus = (filterStatus === 'TODOS' || o.status === filterStatus);
+        const matchesSearch = o.id.toLowerCase().includes(search) || 
+                              o.cliente.nome.toLowerCase().includes(search) ||
+                              o.cliente.telefone.toLowerCase().includes(search);
+        return matchesStatus && matchesSearch;
+      });
+
+      if (filtrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Nenhum pedido encontrado.</td></tr>`;
+        return;
+      }
+
+      filtrados.forEach(o => {
+        const tr = document.createElement('tr');
+        const descItens = o.itens.map(i => i.descricao).join('<br>');
+        
+        tr.innerHTML = `
+          <td><strong>${o.id}</strong></td>
+          <td style="font-size: 0.8rem; color: var(--text-muted);">${o.dataHora}</td>
+          <td>
+            <strong>${o.cliente.nome}</strong><br>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">${o.cliente.telefone}</span>
+          </td>
+          <td style="font-size: 0.82rem;">${descItens}</td>
+          <td><strong style="color: var(--primary);">R$ ${o.total.toFixed(2)}</strong></td>
+          <td>
+            <span class="badge ${getStatusBadgeClass(o.status)}">
+              ${getStatusIcon(o.status)} ${o.status}
+            </span>
+          </td>
+          <td>
+            <div style="display: flex; gap: 0.3rem; align-items: center;">
+              <button class="btn btn-secondary btn-sm" title="Avançar etapa" onclick="advanceOrderStatusInHistory('${o.id}')">➡️ Próxima</button>
+              <select style="width: auto; padding: 0.2rem 0.4rem; font-size: 0.75rem;" onchange="setOrderStatusInHistory('${o.id}', this.value)">
+                <option value="" disabled selected>Alterar...</option>
+                <option value="Gerado">Gerado</option>
+                <option value="Em produção">Em produção</option>
+                <option value="Saiu para entrega">Saiu p/ entrega</option>
+                <option value="Concluído">Concluído</option>
+              </select>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 14. CONTROLE DE ESTOQUE
+    function renderEstoqueTable() {
+      const tbody = document.getElementById('listaEstoqueBody');
+      tbody.innerHTML = '';
+
+      appState.estoque.forEach(item => {
+        const tr = document.createElement('tr');
+        const isLow = item.qtd <= item.min;
+
+        tr.innerHTML = `
+          <td><strong>${item.nome}</strong></td>
+          <td><span class="badge" style="background:#e2e8f0; color:#334155;">${item.categoria}</span></td>
+          <td><strong style="font-size: 1.05rem;">${item.qtd}</strong> ${item.un}</td>
+          <td>${item.min} ${item.un}</td>
+          <td>
+            ${isLow ? `<span class="stock-alert">⚠️ Baixo Estoque!</span>` : `<span style="color: #10b981; font-weight: 700; font-size: 0.85rem;">✅ Regular</span>`}
+          </td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="adjustStock('${item.id}', 1)">+1</button>
+            <button class="btn btn-secondary btn-sm" onclick="adjustStock('${item.id}', -1)">-1</button>
+            <button class="btn btn-secondary btn-sm" onclick="adjustStock('${item.id}', 5)">+5</button>
+          </td>
+          <td>
+            <button class="btn btn-danger btn-sm" onclick="removeStockItem('${item.id}')">🗑️</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function adjustStock(itemId, delta) {
+      const item = appState.estoque.find(e => e.id === itemId);
+      if (item) {
+        item.qtd = Math.max(0, item.qtd + delta);
+        saveState();
+        renderEstoqueTable();
+      }
+    }
+
+    function addOrUpdateStockItem() {
+      const nome = document.getElementById('estItemNome').value.trim();
+      const categoria = document.getElementById('estItemCat').value;
+      const qtd = parseInt(document.getElementById('estItemQtd').value) || 0;
+      const min = parseInt(document.getElementById('estItemMin').value) || 0;
+      const un = document.getElementById('estItemUn').value.trim() || 'un';
+
+      if (!nome) {
+        alert('Informe o nome do item de estoque.');
+        return;
+      }
+
+      const existing = appState.estoque.find(e => e.nome.toLowerCase() === nome.toLowerCase());
+      if (existing) {
+        existing.qtd += qtd;
+        existing.min = min;
+        existing.categoria = categoria;
+        existing.un = un;
+      } else {
+        appState.estoque.push({
+          id: 'est_' + Date.now(),
+          nome,
+          categoria,
+          qtd,
+          min,
+          un
+        });
+      }
+
+      saveState();
+      renderEstoqueTable();
+      document.getElementById('estItemNome').value = '';
+      alert('Estoque atualizado!');
+    }
+
+    function removeStockItem(itemId) {
+      if (confirm('Deseja remover este item do estoque?')) {
+        appState.estoque = appState.estoque.filter(e => e.id !== itemId);
+        saveState();
+        renderEstoqueTable();
+      }
+    }
+
+    function restoreDefaultStock() {
+      if (confirm('Restaurar o catálogo de estoque padrão?')) {
+        appState.estoque = [...DEFAULT_ESTOQUE];
+        saveState();
+        renderEstoqueTable();
+      }
+    }
+
+    // 15. EXPORTAÇÃO CSV & BACKUP JSON
+    function downloadCSV(csvContent, fileName) {
+      const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function exportOrdersCSV() {
+      let csv = 'ID;DataHora;Cliente;Telefone;Subtotal;Taxa;Total;Pagamento;Status;Itens\n';
+      appState.historico.forEach(o => {
+        const itensText = o.itens.map(i => i.descricao.replace(/;/g, ' ')).join(' | ');
+        csv += `"${o.id}";"${o.dataHora}";"${o.cliente.nome}";"${o.cliente.telefone}";"${o.subtotal.toFixed(2)}";"${o.taxa.toFixed(2)}";"${o.total.toFixed(2)}";"${o.formaPagamento}";"${o.status}";"${itensText}"\n`;
+      });
+      downloadCSV(csv, `pedidos_king_ventura_${Date.now()}.csv`);
+    }
+
+    function exportSaboresCSV() {
+      let csv = 'ID;Sabor;Preco_Brotinho;Preco_Grande;Ingredientes\n';
+      appState.sabores.forEach(s => {
+        csv += `"${s.id}";"${s.nome}";"${s.brotinho.toFixed(2)}";"${s.grande.toFixed(2)}";"${(s.ingredientes || '').replace(/;/g, ',')}"\n`;
+      });
+      downloadCSV(csv, `sabores_king_ventura_${Date.now()}.csv`);
+    }
+
+    function exportClientesCSV() {
+      let csv = 'ID;Nome;Telefone;CEP;Numero;Endereco;Observacao\n';
+      appState.clientes.forEach(c => {
+        csv += `"${c.id}";"${c.nome}";"${c.telefone}";"${c.cep || ''}";"${c.numero || ''}";"${c.endereco || ''}";"${c.obs || ''}"\n`;
+      });
+      downloadCSV(csv, `clientes_king_ventura_${Date.now()}.csv`);
+    }
+
+    function exportEstoqueCSV() {
+      let csv = 'ID;Item;Categoria;Quantidade_Atual;Estoque_Minimo;Unidade;Status\n';
+      appState.estoque.forEach(e => {
+        const st = e.qtd <= e.min ? 'BAIXO ESTOQUE' : 'REGULAR';
+        csv += `"${e.id}";"${e.nome}";"${e.categoria}";"${e.qtd}";"${e.min}";"${e.un}";"${st}"\n`;
+      });
+      downloadCSV(csv, `estoque_king_ventura_${Date.now()}.csv`);
+    }
+
+    function exportBackupJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `backup_king_ventura_${Date.now()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function handleFileBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
         try {
-          const url = `https://viacep.com.br/ws/MS/Campo%20Grande/${encodeURIComponent(ruaLimpa)}/json/`;
-          const resp = await fetch(url);
-          const lista = await resp.json();
-          if (Array.isArray(lista) && lista.length > 0 && lista[0].cep) {
-            campoCep.value = lista[0].cep;
-            const bai = lista[0].bairro || "";
-            const log = lista[0].logradouro || ruaLimpa;
-            campoEnd.value = bai ? `${log} - ${bai}` : log;
-            calcularTaxaEntrega();
+          const parsed = JSON.parse(e.target.result);
+          if (confirm('Substituir todos os dados do sistema por este arquivo de backup?')) {
+            appState = parsed;
+            saveState();
+            location.reload();
           }
         } catch (err) {
-          console.log("Erro busca CEP por rua", err);
+          alert('Arquivo JSON inválido!');
         }
-      }
+      };
+      reader.readAsText(file);
     }
 
-    function imprimirCupomTermico() {
-      sincronizarDadosClientePedido();
-      const numeroPed = document.getElementById("numeroPedido").innerText || "KV";
-      const dataPed = document.getElementById("dataPedido").innerText || new Date().toLocaleString("pt-BR");
-
-      const itensArr = Array.isArray(pedidoAtual.itens) ? pedidoAtual.itens : [];
-      const itensHtml = itensArr
-        .map((item) => {
-          const desc = String(item.descricao || "ITEM");
-          const val = Number(item.valor || 0).toFixed(2);
-          const obs = item.observacao ? `<div style="font-size:11px;margin-top:1px;">OBS: ${String(item.observacao)}</div>` : "";
-          return `
-            <div class="cupom-item">
-              <div style="font-size:12px;">${desc} - R$ ${val}</div>
-              ${obs}
-            </div>
-          `;
-        })
-        .join("");
-
-      const cupomEl = document.getElementById("cupomTermico");
-      cupomEl.innerHTML = `
-        <div style="text-align:center;font-size:13px;">KING VENTURA PIZZARIA</div>
-        <div style="font-size:11px;">PED: ${numeroPed} | ${dataPed}</div>
-        <div class="cupom-linha"></div>
-        <div style="font-size:11px;">CLI: ${pedidoAtual.cliente || "-"}</div>
-        <div style="font-size:11px;">FONE: ${pedidoAtual.telefone || "-"}</div>
-        <div style="font-size:11px;">END: ${pedidoAtual.endereco || "-"}, ${pedidoAtual.numeroCasa || "-"}</div>
-        <div style="font-size:11px;">CEP: ${pedidoAtual.cep || "-"}</div>
-        ${pedidoAtual.observacao ? `<div style="font-size:11px;">OBS: ${pedidoAtual.observacao}</div>` : ""}
-        <div class="cupom-linha"></div>
-        ${itensHtml || '<div style="font-size:12px;">SEM ITENS NO CARRINHO</div>'}
-        <div class="cupom-linha"></div>
-        <div style="font-size:11px;">TAXA ENTREGA: R$ ${Number(pedidoAtual.taxaEntrega || 0).toFixed(2)}</div>
-        <div style="font-size:13px;margin-top:2px;">TOTAL: R$ ${Number(pedidoAtual.total || 0).toFixed(2)}</div>
-        <div class="cupom-linha"></div>
-        <div style="text-align:center;font-size:11px;margin-top:2px;">OBRIGADO PELA PREFERENCIA!</div>
-      `;
-
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          window.print();
-        }, 60);
-      });
-    }
-
-    function sincronizarDadosClientePedido() {
-      pedidoAtual.cliente = document.getElementById("nome").value.trim();
-      pedidoAtual.telefone = document.getElementById("telefone").value.trim();
-      pedidoAtual.cep = document.getElementById("cep").value.trim();
-      pedidoAtual.endereco = document.getElementById("endereco").value.trim();
-      pedidoAtual.numeroCasa = document.getElementById("numero").value.trim();
-      pedidoAtual.observacao = document.getElementById("observacao").value.trim();
-      pedidoAtual.taxaEntrega = taxaEntrega;
-    }
-
-    function enviarWhatsApp(pedido) {
-      let mensagem = "KING VENTURA PIZZARIA\n\n";
-      mensagem += "Pedido: " + (pedido.numero || document.getElementById("numeroPedido").innerText) + "\n";
-      mensagem += "Status: " + normalizarStatusPedido(pedido.status || pedidoAtual.status || "Gerado") + "\n";
-      mensagem += "Cliente: " + (pedido.cliente || "") + "\n";
-      mensagem += "Telefone: " + (pedido.telefone || "") + "\n";
-      mensagem += "CEP: " + (pedido.cep || "") + "\n";
-      mensagem += "Endereço: " + (pedido.endereco || "") + "\n";
-      mensagem += "Número: " + (pedido.numeroCasa || "") + "\n";
-      mensagem += "Observação: " + (pedido.observacao || "") + "\n";
-      mensagem += "Taxa de Entrega: R$ " + Number(pedido.taxaEntrega || 0).toFixed(2) + "\n\n";
-      mensagem += "ITENS:\n[KV-ITENS]\n";
-
-      (pedido.itens || []).forEach((item) => {
-        mensagem += item.descricao + " - R$ " + Number(item.valor).toFixed(2) + "\n";
-        if (item.adicionais && item.adicionais.length) {
-          mensagem += "Adicionais: " + item.adicionais.join(", ") + "\n";
-        }
-        if (item.observacao) {
-          mensagem += "Obs: " + item.observacao + "\n";
-        }
-        mensagem += "\n";
-      });
-
-      mensagem += "\nTOTAL: R$ " + Number(pedido.total || 0).toFixed(2);
-
-      window.open(
-        "https://wa.me/" + NUMERO_WHATSAPP + "?text=" + encodeURIComponent(mensagem),
-        "_blank"
-      );
-    }
-
-    function importarPedidoWhats() {
-      const texto = document.getElementById("pedidoWhats").value;
-      if (!texto.trim()) return;
-
-      limparPedido();
-
-      const nome = texto.match(/Cliente:\s*(.*)/i);
-      const telefone = texto.match(/Telefone:\s*(.*)/i);
-      const cep = texto.match(/CEP:\s*(.*)/i);
-      const numero = texto.match(/N[uú]mero:\s*(.*)/i);
-      const endereco = texto.match(/Endere[cç]o:\s*(.*)/i);
-      const obs = texto.match(/Observa[cç][aã]o:\s*(.*)/i);
-
-      document.getElementById("nome").value = nome ? nome[1].trim() : "";
-      document.getElementById("telefone").value = telefone ? telefone[1].trim() : "";
-      document.getElementById("cep").value = cep ? cep[1].trim() : "";
-      document.getElementById("numero").value = numero ? numero[1].trim() : "";
-      if (endereco && endereco[1].trim()) {
-        document.getElementById("endereco").value = endereco[1].trim();
-      }
-      if (obs && obs[1].trim()) {
-        document.getElementById("observacao").value = obs[1].trim();
-      }
-
-      const linhas = texto.split("\n");
-      linhas.forEach((rawLinha) => {
-        const linha = rawLinha.trim();
-
-        if (linha.startsWith("Brotinho 25cm - ")) {
-          const sabor = linha
-            .split(" - R$ ")[0]
-            .replace("Brotinho 25cm - ", "")
-            .split(" + ")[0]
-            .trim();
-
-          if (SABORES[sabor]) {
-            document.getElementById("tamanho").value = "brotinho";
-            carregarSabores();
-            document.getElementById("sabor1").value = sabor;
-            document.getElementById("btnAdicionarPizza").click();
-          }
-        } else if (linha.startsWith("Grande 35cm Meio a Meio - ")) {
-          const descricaoPizza = linha
-            .split(" - R$ ")[0]
-            .replace("Grande 35cm Meio a Meio - ", "");
-          const partes = descricaoPizza.split(" + ")[0].split(" / ");
-
-          if (partes.length === 2 && SABORES[partes[0].trim()] && SABORES[partes[1].trim()]) {
-            document.getElementById("tamanho").value = "grande";
-            document.getElementById("tipoPizza").value = "meio";
-            carregarSabores();
-            atualizarVisualPedido();
-            document.getElementById("sabor1").value = partes[0].trim();
-            document.getElementById("sabor2").value = partes[1].trim();
-            document.getElementById("btnAdicionarPizza").click();
-          }
-        } else if (linha.startsWith("Grande 35cm - ")) {
-          const sabor = linha
-            .split(" - R$ ")[0]
-            .replace("Grande 35cm - ", "")
-            .split(" + ")[0]
-            .trim();
-
-          if (SABORES[sabor]) {
-            document.getElementById("tamanho").value = "grande";
-            document.getElementById("tipoPizza").value = "inteira";
-            carregarSabores();
-            document.getElementById("sabor1").value = sabor;
-            document.getElementById("btnAdicionarPizza").click();
-          }
-        }
-      });
-
-      const bebidaSelect = document.getElementById("bebida");
-      for (let i = 1; i < bebidaSelect.options.length; i++) {
-        const optText = bebidaSelect.options[i].text.split(" - R$ ")[0];
-        if (texto.includes(optText)) {
-          bebidaSelect.selectedIndex = i;
-          document.getElementById("btnAdicionarBebida").click();
-        }
-      }
-
-      buscarCEP();
-      calcularTaxaEntrega();
-      alert("Pedido importado!");
-    }
-
-    function novoPedido() {
-      if (!confirm("Deseja limpar o pedido atual e iniciar um novo pedido?")) {
+    function restoreFromTextareaJSON() {
+      const txt = document.getElementById('txtBackupJson').value.trim();
+      if (!txt) {
+        alert('Cole o JSON no campo primeiro.');
         return;
       }
-      location.reload();
-    }
-
-    /* GESTÃO DE SABORES & PREÇOS */
-    function renderizarListaSabores() {
-      const container = document.getElementById("listaSabores");
-      const nomes = Object.keys(SABORES);
-
-      if (!nomes.length) {
-        container.innerHTML = '<p style="color: var(--muted);">Nenhum sabor cadastrado.</p>';
-        return;
-      }
-
-      container.innerHTML = nomes
-        .map((nome) => {
-          const s = SABORES[nome];
-          return `
-            <div class="list-card">
-              <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-                <div>
-                  <strong>${nome}</strong><br />
-                  <span style="color: var(--gold); font-size: 0.9rem;">
-                    Brotinho 25cm: R$ ${Number(s.brotinho).toFixed(2)} | Grande 35cm: R$ ${Number(s.grande).toFixed(2)}
-                  </span><br />
-                  <span style="color: var(--muted); font-size: 0.85rem;">
-                    Ingredientes: ${(s.ingredientes || []).join(", ")}
-                  </span>
-                </div>
-                <div class="btn-row" style="margin-top: 0;">
-                  <button class="secondary btn-editar-sabor" data-sabor="${nome.replace(/"/g, '&quot;')}" type="button">Editar</button>
-                  <button class="danger btn-excluir-sabor" data-sabor="${nome.replace(/"/g, '&quot;')}" type="button">Excluir</button>
-                </div>
-              </div>
-            </div>
-          `;
-        })
-        .join("");
-
-      container.querySelectorAll(".btn-editar-sabor").forEach((btn) => {
-        btn.addEventListener("click", () => prepararEdicaoSabor(btn.dataset.sabor));
-      });
-
-      container.querySelectorAll(".btn-excluir-sabor").forEach((btn) => {
-        btn.addEventListener("click", () => excluirSabor(btn.dataset.sabor));
-      });
-    }
-
-    function prepararEdicaoSabor(nome) {
-      const s = SABORES[nome];
-      if (!s) return;
-      document.getElementById("saborEditandoOriginal").value = nome;
-      document.getElementById("cadNomeSabor").value = nome;
-      document.getElementById("cadPrecoBrotinho").value = s.brotinho;
-      document.getElementById("cadPrecoGrande").value = s.grande;
-      document.getElementById("cadIngredientes").value = (s.ingredientes || []).join(", ");
-    }
-
-    function limparFormSabor() {
-      document.getElementById("saborEditandoOriginal").value = "";
-      document.getElementById("cadNomeSabor").value = "";
-      document.getElementById("cadPrecoBrotinho").value = "";
-      document.getElementById("cadPrecoGrande").value = "";
-      document.getElementById("cadIngredientes").value = "";
-    }
-
-    function excluirSabor(nome) {
-      if (!confirm(`Excluir o sabor "${nome}"?`)) return;
-      delete SABORES[nome];
-      salvarSaboresStorage();
-      carregarSabores();
-      renderizarListaSabores();
-    }
-
-    /* GESTÃO DE CLIENTES */
-    function salvarClienteBase(dados) {
-      if (!dados.nome) {
-        alert("Informe o nome do cliente.");
-        return;
-      }
-
-      if (dados.id) {
-        const idx = clientesBase.findIndex((c) => c.id === dados.id);
-        if (idx >= 0) {
-          clientesBase[idx] = { ...clientesBase[idx], ...dados };
+      try {
+        const parsed = JSON.parse(txt);
+        if (confirm('Substituir todos os dados atuais pelo conteúdo colado?')) {
+          appState = parsed;
+          saveState();
+          location.reload();
         }
-      } else {
-        const existente = clientesBase.find(
-          (c) => c.nome.toLowerCase() === dados.nome.toLowerCase()
-        );
-        if (existente) {
-          Object.assign(existente, dados, { id: existente.id });
-        } else {
-          clientesBase.unshift({
-            id: "CLI-" + Date.now(),
-            ...dados
-          });
-        }
+      } catch (err) {
+        alert('Texto JSON inválido!');
       }
-
-      salvarClientes();
-      renderizarClientes();
     }
 
-    function usarClienteNoPedido(id) {
-      const cli = clientesBase.find((c) => c.id === id);
-      if (!cli) return;
-
-      document.getElementById("nome").value = cli.nome || "";
-      document.getElementById("telefone").value = cli.telefone || "";
-      document.getElementById("cep").value = cli.cep || "";
-      document.getElementById("numero").value = cli.numero || "";
-      document.getElementById("endereco").value = cli.endereco || "";
-      document.getElementById("observacao").value = cli.observacao || "";
-
-      calcularTaxaEntrega();
-      mudarAba("pedido");
-    }
-
-    function editarClienteBase(id) {
-      const cli = clientesBase.find((c) => c.id === id);
-      if (!cli) return;
-
-      document.getElementById("clienteEditId").value = cli.id;
-      document.getElementById("cliNome").value = cli.nome || "";
-      document.getElementById("cliTelefone").value = cli.telefone || "";
-      document.getElementById("cliCep").value = cli.cep || "";
-      document.getElementById("cliNumero").value = cli.numero || "";
-      document.getElementById("cliEndereco").value = cli.endereco || "";
-      document.getElementById("cliObs").value = cli.observacao || "";
-    }
-
-    function excluirClienteBase(id) {
-      if (!confirm("Deseja remover este cliente?")) return;
-      clientesBase = clientesBase.filter((c) => c.id !== id);
-      salvarClientes();
-      renderizarClientes();
-    }
-
-    function renderizarClientes() {
-      const container = document.getElementById("listaClientes");
-      const termo = (document.getElementById("buscaCliente").value || "").toLowerCase().trim();
-
-      const filtrados = clientesBase.filter((c) => {
-        if (!termo) return true;
-        return (
-          (c.nome || "").toLowerCase().includes(termo) ||
-          (c.telefone || "").toLowerCase().includes(termo) ||
-          (c.endereco || "").toLowerCase().includes(termo)
-        );
-      });
-
-      if (!filtrados.length) {
-        container.innerHTML = '<p style="color: var(--muted);">Nenhum cliente encontrado.</p>';
-        return;
-      }
-
-      container.innerHTML = filtrados
-        .map(
-          (c) => `
-          <div class="list-card">
-            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-              <div>
-                <strong>${c.nome}</strong> ${c.telefone ? `• ${c.telefone}` : ""}<br />
-                <span style="color: var(--muted); font-size: 0.85rem;">
-                  ${c.endereco || ""} ${c.numero ? "nº " + c.numero : ""} ${c.cep ? "• CEP " + c.cep : ""}
-                </span>
-                ${c.observacao ? `<br /><span style="color: var(--gold); font-size: 0.82rem;">Obs: ${c.observacao}</span>` : ""}
-              </div>
-              <div class="btn-row" style="margin-top: 0;">
-                <button class="gold" onclick="usarClienteNoPedido('${c.id}')" type="button">Usar no Pedido</button>
-                <button class="secondary" onclick="editarClienteBase('${c.id}')" type="button">Editar</button>
-                <button class="danger" onclick="excluirClienteBase('${c.id}')" type="button">Excluir</button>
-              </div>
-            </div>
-          </div>
-        `
-        )
-        .join("");
-    }
-
-    /* HISTÓRICO & CAIXA */
-    function definirStatusHistorico(index, novoStatus) {
-      if (!historicoPedidos[index]) return;
-      const meta = obterMetaStatus(novoStatus);
-      historicoPedidos[index].status = meta.key;
-      salvarHistorico();
-      renderizarHistorico();
-      popularDatalistRuas();
-    }
-
-    function alternarStatusPedido(index) {
-      if (!historicoPedidos[index]) return;
-      const atualNorm = normalizarStatusPedido(historicoPedidos[index].status);
-      const idxAtual = ETAPAS_PEDIDO.findIndex((e) => e.key === atualNorm);
-      const prox = ETAPAS_PEDIDO[(idxAtual + 1) % ETAPAS_PEDIDO.length];
-      definirStatusHistorico(index, prox.key);
-    }
-
-    let filtroHistoricoAtual = "Todos";
-
-    function selecionarFiltroHistorico(filtro) {
-      filtroHistoricoAtual = filtro || "Todos";
-      const barra = document.getElementById("filtrosStatusHistorico");
-      if (barra) {
-        barra.querySelectorAll("button").forEach((b) => {
-          const f = b.dataset.filtroStatus;
-          b.className = "status-btn";
-          if (f === filtroHistoricoAtual) {
-            if (f === "Todos") b.classList.add("active-feito");
-            else {
-              const meta = obterMetaStatus(f);
-              b.classList.add(meta.activeClass);
-            }
-          }
-        });
-      }
-      renderizarHistorico();
-    }
-
-    function renderizarHistorico() {
-      const container = document.getElementById("listaHistorico");
-      const termo = (document.getElementById("buscaHistorico").value || "").toLowerCase().trim();
-
-      let soma = 0;
-      historicoPedidos.forEach((p) => {
-        const val = Number(String(p.total || 0).replace(",", "."));
-        if (!isNaN(val)) soma += val;
-      });
-
-      const qtd = historicoPedidos.length;
-      const ticket = qtd > 0 ? soma / qtd : 0;
-
-      document.getElementById("kpiQtdPedidos").innerText = qtd;
-      document.getElementById("kpiFaturamento").innerText = soma.toFixed(2);
-      document.getElementById("kpiTicketMedio").innerText = ticket.toFixed(2);
-
-      const filtrados = historicoPedidos
-        .map((p, idx) => ({ p, idx }))
-        .filter(({ p }) => {
-          const normStatus = normalizarStatusPedido(p.status);
-          if (filtroHistoricoAtual && filtroHistoricoAtual !== "Todos" && normStatus !== filtroHistoricoAtual) {
-            return false;
-          }
-          if (!termo) return true;
-          return (
-            (p.numero || "").toLowerCase().includes(termo) ||
-            (p.cliente || "").toLowerCase().includes(termo) ||
-            (p.status || "").toLowerCase().includes(termo) ||
-            normStatus.toLowerCase().includes(termo)
-          );
-        });
-
-      if (!filtrados.length) {
-        container.innerHTML = '<p style="color: var(--muted);">Nenhum pedido registrado no histórico.</p>';
-        return;
-      }
-
-      container.innerHTML = filtrados
-        .map(
-          ({ p, idx }) => {
-            const meta = obterMetaStatus(p.status);
-            const botoesEtapas = ETAPAS_PEDIDO.map((etapa) => {
-              const ativo = etapa.key === meta.key;
-              return `<button class="status-btn ${ativo ? etapa.activeClass : ""}" onclick="definirStatusHistorico(${idx}, '${etapa.key}')" type="button">${etapa.label}</button>`;
-            }).join("");
-
-            return `
-          <div class="list-card">
-            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-              <div>
-                <strong>${p.numero || "KV"}</strong> • <span class="status-pill ${meta.pillClass}">${meta.label}</span><br />
-                <span style="font-size: 0.9rem;">Cliente: ${p.cliente || "Não informado"} ${p.telefone ? "• " + p.telefone : ""}</span><br />
-                <span style="color: var(--muted); font-size: 0.82rem;">${p.data || ""}</span>
-              </div>
-              <div style="text-align: right;">
-                <strong style="color: var(--gold); font-size: 1.05rem;">R$ ${Number(p.total || 0).toFixed(2)}</strong><br />
-                <button class="secondary" style="margin-top: 6px;" onclick="alternarStatusPedido(${idx})" type="button">
-                  Próxima Etapa
-                </button>
-              </div>
-            </div>
-            <div class="status-stepper" aria-label="Alterar status do pedido ${p.numero || ""}">
-              ${botoesEtapas}
-            </div>
-          </div>
-        `;
-          }
-        )
-        .join("");
-    }
-
-    /* EXPORTAÇÃO CSV & BACKUP JSON */
-    function baixarCSV(nomeArquivo, linhas) {
-      const csv = linhas
-        .map((linha) =>
-          linha.map((campo) => `"${String(campo ?? "").replace(/"/g, '""')}"`).join(";")
-        )
-        .join("\n");
-
-      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = nomeArquivo;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function mudarAba(tabName) {
-      document.querySelectorAll(".nav-tab").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.tab === tabName);
-      });
-      document.querySelectorAll(".tab-panel").forEach((panel) => {
-        panel.classList.toggle("active", panel.id === "tab-" + tabName);
-      });
-    }
-
-    /* EVENTOS */
-    document.querySelectorAll(".nav-tab").forEach((btn) => {
-      btn.addEventListener("click", () => mudarAba(btn.dataset.tab));
+    // INICIALIZAÇÃO DO SISTEMA AO CARREGAR A PÁGINA
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      populateSaborSelects();
+      populateClientSelect();
+      renderCart();
+      setCurrentOrderStatus(appState.currentOrderStatus);
+      document.getElementById('headerOrderId').innerText = '#' + appState.currentOrderId;
     });
-
-    document.getElementById("tamanho").addEventListener("change", carregarSabores);
-    document.getElementById("tipoPizza").addEventListener("change", atualizarVisualPedido);
-    document.getElementById("sabor1").addEventListener("change", atualizarPreviewIngredientes);
-    document.getElementById("sabor2").addEventListener("change", atualizarPreviewIngredientes);
-
-    document.getElementById("btnAdicionarPizza").addEventListener("click", function () {
-      const tamanho = document.getElementById("tamanho").value;
-      const tipo = document.getElementById("tipoPizza").value;
-      const sabor1 = document.getElementById("sabor1").value;
-      const sabor2 = document.getElementById("sabor2").value;
-
-      if (!sabor1 || !SABORES[sabor1]) {
-        alert("Selecione o Sabor 1.");
-        return;
-      }
-
-      let descricao = "";
-      let valor = 0;
-      let ingredientes = "";
-
-      if (tamanho === "brotinho") {
-        descricao = "Brotinho 25cm - " + sabor1;
-        valor = Number(SABORES[sabor1].brotinho);
-        ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
-      } else if (tipo === "meio") {
-        if (!sabor2 || !SABORES[sabor2]) {
-          alert("Selecione o Sabor 2 para pizza Meio a Meio.");
-          return;
-        }
-        descricao = "Grande 35cm Meio a Meio - " + sabor1 + " / " + sabor2;
-        valor = Math.max(Number(SABORES[sabor1].grande), Number(SABORES[sabor2].grande));
-        ingredientes =
-          "50% " + sabor1 + ": " + (SABORES[sabor1].ingredientes || []).join(", ") +
-          " | 50% " + sabor2 + ": " + (SABORES[sabor2].ingredientes || []).join(", ");
-      } else {
-        descricao = "Grande 35cm - " + sabor1;
-        valor = Number(SABORES[sabor1].grande);
-        ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
-      }
-
-      const adicionalEl = document.getElementById("adicional");
-      const valorAdicional = Number(adicionalEl.value) || 0;
-      const nomeAdicional = adicionalEl.options[adicionalEl.selectedIndex].text;
-      const obsPizza = document.getElementById("obsPizza").value.trim();
-
-      adicionarItem({
-        descricao: valorAdicional > 0 ? descricao + " + " + nomeAdicional
+  </script>
+</body>
+</html>
