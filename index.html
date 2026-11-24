@@ -480,7 +480,11 @@
         print-color-adjust: exact !important;
       }
 
-      .cupom-linha {
+      .cupom-espaco {
+      height: 4px;
+    }
+
+    .cupom-linha {
         border: 0 !important;
         border-top: 1px dashed #000 !important;
         height: 0 !important;
@@ -1420,6 +1424,12 @@
         return;
       }
 
+      // aviso provisorio enquanto procura; sera trocado pelo valor da taxa
+      marcarEndereco("aviso", "Calculando a taxa de entrega...");
+
+      // o endereco veio do CEP: a distancia e estimada pela faixa do CEP,
+      // sem depender de internet, e o texto mostra a taxa (nao um aviso).
+
       // 1) entrega gratis por bairro
       const gratis = BAIRROS_ENTREGA_GRATIS.some(function (b) {
         return textoLimpo(b) === bairroChave;
@@ -1610,11 +1620,12 @@
 
       if (rua || bairro) {
         campoEnd.value = bairro ? rua + " - " + bairro : rua;
-        marcarEndereco("ok", "✅ Endereço preenchido pelo CEP.");
       } else {
         marcarEndereco("aviso", "CEP localizado, mas sem rua cadastrada.");
+        return;
       }
 
+      // calcula a taxa e deixa o resultado aparecer no lugar do aviso
       calcularTaxaEntrega();
     }
     buscarCEP.ultimo = "";
@@ -1861,36 +1872,70 @@
       pedidoAtual.taxaEntrega = taxaEntrega;
     }
 
-    function enviarWhatsApp(pedido) {
-      let mensagem = "KING VENTURA PIZZARIA\n\n";
-      mensagem += "Pedido: " + (pedido.numero || document.getElementById("numeroPedido").innerText) + "\n";
-      mensagem += "Status: " + normalizarStatusPedido(pedido.status || pedidoAtual.status || "Gerado") + "\n";
-      mensagem += "Cliente: " + (pedido.cliente || "") + "\n";
-      mensagem += "Telefone: " + (pedido.telefone || "") + "\n";
-      mensagem += "CEP: " + (pedido.cep || "") + "\n";
-      mensagem += "Endereço: " + (pedido.endereco || "") + "\n";
-      mensagem += "Número: " + (pedido.numeroCasa || "") + "\n";
-      mensagem += "Observação: " + (pedido.observacao || "") + "\n";
-      mensagem += "Taxa de Entrega: R$ " + Number(pedido.taxaEntrega || 0).toFixed(2) + "\n\n";
-      mensagem += "ITENS:\n[KV-ITENS]\n";
+    /* ===== TEXTO DO PEDIDO: uma fonte so, usada no WhatsApp e no cupom ===== */
 
-      (pedido.itens || []).forEach((item) => {
-        mensagem += item.descricao + " - R$ " + Number(item.valor).toFixed(2) + "\n";
+    function montarTextoPedido(pedido) {
+      let t = "KING VENTURA PIZZARIA\n\n";
+      t += "Pedido: " + (pedido.numero || document.getElementById("numeroPedido").innerText) + "\n";
+      t += "Status: " + normalizarStatusPedido(pedido.status || pedidoAtual.status || "Gerado") + "\n";
+      t += "Cliente: " + (pedido.cliente || "") + "\n";
+      t += "Telefone: " + (pedido.telefone || "") + "\n";
+      t += "CEP: " + (pedido.cep || "") + "\n";
+      t += "Endereço: " + (pedido.endereco || "") + "\n";
+      t += "Número: " + (pedido.numeroCasa || "") + "\n";
+      t += "Observação: " + (pedido.observacao || "") + "\n";
+      t += "Taxa de Entrega: R$ " + Number(pedido.taxaEntrega || 0).toFixed(2) + "\n\n";
+      t += "ITENS:\n[KV-ITENS]\n";
+
+      (pedido.itens || []).forEach(function (item) {
+        t += item.descricao + " - R$ " + Number(item.valor).toFixed(2) + "\n";
         if (item.adicionais && item.adicionais.length) {
-          mensagem += "Adicionais: " + item.adicionais.join(", ") + "\n";
+          t += "Adicionais: " + item.adicionais.join(", ") + "\n";
         }
         if (item.observacao) {
-          mensagem += "Obs: " + item.observacao + "\n";
+          t += "Obs: " + item.observacao + "\n";
         }
-        mensagem += "\n";
+        t += "\n";
       });
 
-      mensagem += "\nTOTAL: R$ " + Number(pedido.total || 0).toFixed(2);
+      t += "\nTOTAL: R$ " + Number(pedido.total || 0).toFixed(2);
+      return t;
+    }
 
+    function enviarWhatsApp(pedido) {
+      const mensagem = montarTextoPedido(pedido);
       window.open(
         "https://wa.me/" + NUMERO_WHATSAPP + "?text=" + encodeURIComponent(mensagem),
         "_blank"
       );
+    }
+
+    /* ===== CUPOM TERMICO: imprime o MESMO texto do WhatsApp ===== */
+
+    function imprimirCupomTermico() {
+      sincronizarDadosClientePedido();
+
+      const texto = montarTextoPedido(pedidoAtual);
+
+      // no papel, cada linha vira um <div>; as linhas de separacao ficam tracejadas
+      const html = texto
+        .split("\n")
+        .map(function (linha) {
+          if (linha.trim() === "") {
+            return '<div class="cupom-espaco"></div>';
+          }
+          if (linha.indexOf("[KV-ITENS]") !== -1) {
+            return '<div class="cupom-linha"></div>';
+          }
+          const destaque = linha.indexOf("KING VENTURA") === 0 || linha.indexOf("TOTAL:") === 0;
+          return '<div class="cupom-txt' + (destaque ? " cupom-total" : "") + '">' +
+            linha + '</div>';
+        })
+        .join("");
+
+      document.getElementById("cupomTermico").innerHTML = html;
+
+      setTimeout(function () { window.print(); }, 350);
     }
 
     function importarPedidoWhats() {
