@@ -355,6 +355,14 @@
       display: none;
     }
 
+    /* no papel, o cupom e o unico elemento visivel */
+    @media print {
+      #cupomTermico {
+        display: block !important;
+        visibility: visible !important;
+      }
+    }
+
     @media print {
       @page {
         margin: 0 !important;
@@ -375,6 +383,7 @@
       }
       #cupomTermico {
         display: block !important;
+        visibility: visible !important;
         position: static !important;
         width: 52mm !important;
         max-width: 52mm !important;
@@ -498,10 +507,6 @@
 
       .status-stepper button {
         flex: 1 1 auto;
-      }
-
-      #cupomTermico {
-        display: none;
       }
     }
 
@@ -1394,7 +1399,7 @@
     }
 
     const RUAS_REFERENCIA_CG = [
-      { rua: "Rua Delamare", bairro: "Jardim Tarumã", cep: "79097-000" },
+      { rua: "Rua Delamare", bairro: "Jardim Tarumã", cep: "79097-240" },
       { rua: "Rua Yokohama", bairro: "Jardim Tarumã", cep: "79097-010" },
       { rua: "Rua das Garças", bairro: "Jardim Tarumã", cep: "79097-020" },
       { rua: "Avenida Guaicurus", bairro: "Jardim Tarumã", cep: "79097-000" },
@@ -1446,6 +1451,7 @@
         const bai = dados.bairro || "";
         if (log || bai) {
           document.getElementById("endereco").value = bai ? `${log} - ${bai}` : log;
+          avisarEndereco("");
         } else {
           avisarEndereco("CEP localizado, mas sem rua cadastrada.");
         }
@@ -1489,20 +1495,39 @@
         return;
       }
 
-      if (ruaLimpa.length >= 5) {
+      if (ruaLimpa.length >= 3) {
+        // O ViaCEP exige o logradouro SEM o tipo (Rua, Avenida, Travessa...)
+        // e com no minimo 3 caracteres.
+        const semTipo = ruaLimpa.replace(/^(rua|avenida|av\.?|travessa|tv\.?|alameda|estrada|rodovia|praca|praça)\s+/i, "").trim();
+        const termo = semTipo.length >= 3 ? semTipo : ruaLimpa;
+        const url = "https://viacep.com.br/ws/MS/Campo%20Grande/" +
+          encodeURIComponent(termo) + "/json/";
+
         try {
-          const url = `https://viacep.com.br/ws/MS/Campo%20Grande/${encodeURIComponent(ruaLimpa)}/json/`;
           const resp = await fetch(url);
           const lista = await resp.json();
           if (Array.isArray(lista) && lista.length > 0 && lista[0].cep) {
-            campoCep.value = lista[0].cep;
-            const bai = lista[0].bairro || "";
-            const log = lista[0].logradouro || ruaLimpa;
+            // se houver mais de um CEP para a mesma rua, escolhe o do bairro digitado
+            let escolhido = lista[0];
+            if (texto.includes(" - ")) {
+              const bairroDigitado = normalizarTexto(texto.split(" - ").slice(1).join(" - "));
+              const doBairro = lista.find(function (l) {
+                return normalizarTexto(l.bairro || "") === bairroDigitado;
+              });
+              if (doBairro) escolhido = doBairro;
+            }
+            campoCep.value = escolhido.cep;
+            const bai = escolhido.bairro || "";
+            const log = escolhido.logradouro || ruaLimpa;
             campoEnd.value = bai ? `${log} - ${bai}` : log;
+            avisarEndereco("");
             calcularTaxaEntrega();
+          } else {
+            avisarEndereco("CEP nao localizado para esta rua. Digite o CEP.");
           }
         } catch (err) {
           console.log("Erro busca CEP por rua", err);
+          avisarEndereco("Sem conexao para buscar o CEP agora.");
         }
       }
     }
@@ -1546,10 +1571,13 @@
         <div style="text-align:center;font-size:11px;margin-top:2px;">OBRIGADO PELA PREFERENCIA!</div>
       `;
 
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          window.print();
-        }, 60);
+      // so imprime depois que o conteudo do cupom esta no DOM e pintado
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          setTimeout(function () {
+            window.print();
+          }, 250);
+        });
       });
     }
 
