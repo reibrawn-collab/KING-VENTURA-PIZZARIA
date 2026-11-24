@@ -1870,6 +1870,45 @@
       setTimeout(function () { window.print(); }, 350);
     }
 
+    // Adiciona direto no carrinho, sem passar pelo botao (evita bloqueio e duplicidade)
+    function adicionarPizzaDireto(tamanho, tipo, s1, s2, adicional, obsPizza) {
+      if (!s1 || !SABORES[s1]) return false;
+
+      let descricao = "";
+      let valor = 0;
+      let ingredientes = "";
+
+      if (tamanho === "brotinho") {
+        descricao = "Brotinho 25cm - " + s1;
+        valor = Number(SABORES[s1].brotinho);
+        ingredientes = (SABORES[s1].ingredientes || []).join(", ");
+      } else if (tipo === "meio") {
+        if (!s2 || !SABORES[s2]) return false;
+        descricao = "Grande 35cm Meio a Meio - " + s1 + " / " + s2;
+        valor = Math.max(Number(SABORES[s1].grande), Number(SABORES[s2].grande));
+        ingredientes =
+          "50% " + s1 + ": " + (SABORES[s1].ingredientes || []).join(", ") +
+          " | 50% " + s2 + ": " + (SABORES[s2].ingredientes || []).join(", ");
+      } else {
+        descricao = "Grande 35cm - " + s1;
+        valor = Number(SABORES[s1].grande);
+        ingredientes = (SABORES[s1].ingredientes || []).join(", ");
+      }
+
+      if (adicional && adicional.valor > 0) {
+        descricao += " + " + adicional.nome;
+        valor += adicional.valor;
+      }
+
+      adicionarItem({
+        descricao: descricao,
+        ingredientes: ingredientes,
+        observacao: obsPizza || "",
+        valor: valor
+      });
+      return true;
+    }
+
     function importarPedidoWhats() {
       const texto = document.getElementById("pedidoWhats").value;
       if (!texto.trim()) return;
@@ -1898,6 +1937,16 @@
       linhas.forEach((rawLinha) => {
         const linha = rawLinha.trim();
 
+        // le o adicional da propria linha: "... + Catupiry Extra (+R$ 4,00)"
+        let adicional = null;
+        const mAd = linha.match(/\+\s*([^+(]+?)\s*\(\+R\$\s*([\d.,]+)\)/);
+        if (mAd) {
+          adicional = {
+            nome: mAd[1].trim(),
+            valor: Number(mAd[2].replace(".", "").replace(",", ".")) || 0
+          };
+        }
+
         if (linha.startsWith("Brotinho 25cm - ")) {
           const sabor = linha
             .split(" - R$ ")[0]
@@ -1906,10 +1955,7 @@
             .trim();
 
           if (SABORES[sabor]) {
-            document.getElementById("tamanho").value = "brotinho";
-            carregarSabores();
-            document.getElementById("sabor1").value = sabor;
-            document.getElementById("btnAdicionarPizza").click();
+            adicionarPizzaDireto("brotinho", "inteira", sabor, "", adicional, "");
           }
         } else if (linha.startsWith("Grande 35cm Meio a Meio - ")) {
           const descricaoPizza = linha
@@ -1918,13 +1964,7 @@
           const partes = descricaoPizza.split(" + ")[0].split(" / ");
 
           if (partes.length === 2 && SABORES[partes[0].trim()] && SABORES[partes[1].trim()]) {
-            document.getElementById("tamanho").value = "grande";
-            document.getElementById("tipoPizza").value = "meio";
-            carregarSabores();
-            atualizarVisualPedido();
-            document.getElementById("sabor1").value = partes[0].trim();
-            document.getElementById("sabor2").value = partes[1].trim();
-            document.getElementById("btnAdicionarPizza").click();
+            adicionarPizzaDireto("grande", "meio", partes[0].trim(), partes[1].trim(), adicional, "");
           }
         } else if (linha.startsWith("Grande 35cm - ")) {
           const sabor = linha
@@ -1934,11 +1974,7 @@
             .trim();
 
           if (SABORES[sabor]) {
-            document.getElementById("tamanho").value = "grande";
-            document.getElementById("tipoPizza").value = "inteira";
-            carregarSabores();
-            document.getElementById("sabor1").value = sabor;
-            document.getElementById("btnAdicionarPizza").click();
+            adicionarPizzaDireto("grande", "inteira", sabor, "", adicional, "");
           }
         }
       });
@@ -1947,8 +1983,12 @@
       for (let i = 1; i < bebidaSelect.options.length; i++) {
         const optText = bebidaSelect.options[i].text.split(" - R$ ")[0];
         if (texto.includes(optText)) {
-          bebidaSelect.selectedIndex = i;
-          document.getElementById("btnAdicionarBebida").click();
+          const valorBebida = Number(bebidaSelect.options[i].value);
+          if (valorBebida) {
+            adicionarItem({
+              descricao: optText, ingredientes: "", observacao: "", valor: valorBebida
+            });
+          }
         }
       }
 
@@ -2165,6 +2205,11 @@
     });
 
     document.getElementById("btnAdicionarBebida").addEventListener("click", function () {
+      if (this.disabled) return;          // evita clique duplo
+      const botaoBebida = this;
+      this.disabled = true;
+      setTimeout(function () { botaoBebida.disabled = false; }, 400);
+
       const sel = document.getElementById("bebida");
       if (!sel.value) {
         alert("Selecione uma bebida.");
