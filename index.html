@@ -1749,6 +1749,50 @@
       }
     }
 
+    function imprimirCupomTermico() {
+      sincronizarDadosClientePedido();
+
+      const texto = montarTextoPedido(pedidoAtual);
+
+      // monta as linhas do cupom
+      const linhas = texto.split("\n").map(function (linha) {
+        if (linha.trim() === "") return '<div class="c-espaco"></div>';
+        if (linha.indexOf("[KV-ITENS]") !== -1) return '<div class="c-linha"></div>';
+        const forte = linha.indexOf("KING VENTURA") === 0 || linha.indexOf("TOTAL:") === 0;
+        return '<div class="c-txt' + (forte ? " c-forte" : "") + '">' + linha + '</div>';
+      }).join("");
+
+      // abre uma janela propria: imprime apenas o cupom, sem depender do CSS da pagina
+      const janela = window.open("", "_blank", "width=380,height=600");
+
+      if (!janela) {
+        // navegador bloqueou a janela: avisa e usa o caminho antigo
+        document.getElementById("cupomTermico").innerHTML = linhas;
+        alert("O navegador bloqueou a janela de impressão. Autorize pop-ups deste site e tente de novo.");
+        return;
+      }
+
+      janela.document.write(
+        '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">' +
+        '<title>Cupom</title><style>' +
+        '@page { size: 58mm auto; margin: 0; }' +
+        'html, body { margin: 0; padding: 0; width: 58mm; background: #fff; }' +
+        'body { font-family: "Courier New", Courier, monospace; font-weight: 700; color: #000; }' +
+        '.c-txt { font-size: 12px; line-height: 1.3; word-wrap: break-word; }' +
+        '.c-forte { font-size: 13px; font-weight: 900; }' +
+        '.c-linha { border-top: 1px dashed #000; height: 0; margin: 5px 0; }' +
+        '.c-espaco { height: 5px; }' +
+        '#cupom { padding: 3mm 2mm 40mm 2mm; }' +
+        '</style></head><body><div id="cupom">' + linhas + '</div></body></html>'
+      );
+      janela.document.close();
+
+      // espera o desenho e imprime
+      setTimeout(function () {
+        janela.focus();
+        janela.print();
+      }, 500);
+    }
 
     function sincronizarDadosClientePedido() {
       pedidoAtual.cliente = document.getElementById("nome").value.trim();
@@ -1762,7 +1806,6 @@
 
     /* ===== TEXTO DO PEDIDO: uma fonte so, usada no WhatsApp e no cupom ===== */
 
-    // Texto completo: usado no WhatsApp (pedido + tudo)
     function montarTextoPedido(pedido) {
       let t = "KING VENTURA PIZZARIA\n\n";
       t += "Pedido: " + (pedido.numero || document.getElementById("numeroPedido").innerText) + "\n";
@@ -1791,34 +1834,6 @@
       return t;
     }
 
-    // Texto do CUPOM: somente cliente e carrinho
-    function montarTextoCupom(pedido) {
-      let t = "KING VENTURA PIZZARIA\n";
-      t += "Pedido: " + (pedido.numero || document.getElementById("numeroPedido").innerText) + "\n";
-      t += "Data: " + (document.getElementById("dataPedido").innerText || new Date().toLocaleString("pt-BR")) + "\n";
-      t += "[KV-LINHA]\n";
-
-      t += "CLIENTE\n";
-      t += "Nome: " + (pedido.cliente || "-") + "\n";
-      t += "Telefone: " + (pedido.telefone || "-") + "\n";
-      t += "Endereço: " + (pedido.endereco || "-") +
-           (pedido.numeroCasa ? ", nº " + pedido.numeroCasa : "") + "\n";
-      t += "CEP: " + (pedido.cep || "-") + "\n";
-      if (pedido.observacao) t += "Obs: " + pedido.observacao + "\n";
-      t += "[KV-LINHA]\n";
-
-      t += "CARRINHO\n";
-      (pedido.itens || []).forEach(function (item) {
-        t += item.descricao + " - R$ " + Number(item.valor).toFixed(2) + "\n";
-        if (item.observacao) t += "  Obs: " + item.observacao + "\n";
-      });
-      t += "[KV-LINHA]\n";
-
-      t += "Taxa de Entrega: R$ " + Number(pedido.taxaEntrega || 0).toFixed(2) + "\n";
-      t += "TOTAL: R$ " + Number(pedido.total || 0).toFixed(2);
-      return t;
-    }
-
     function enviarWhatsApp(pedido) {
       const mensagem = montarTextoPedido(pedido);
       window.open(
@@ -1832,46 +1847,27 @@
     function imprimirCupomTermico() {
       sincronizarDadosClientePedido();
 
-      // SOMENTE cliente e carrinho
-      const texto = montarTextoCupom(pedidoAtual);
+      const texto = montarTextoPedido(pedidoAtual);
 
-      const linhas = texto.split("\n").map(function (linha) {
-        if (linha.trim() === "") {
-          return '<div class="c-espaco"></div>';
-        }
-        if (linha.indexOf("[KV-LINHA]") !== -1) {
-          return '<div class="c-linha"></div>';
-        }
-        const forte = linha.indexOf("KING VENTURA") === 0 ||
-                      linha.indexOf("TOTAL:") === 0 ||
-                      linha === "CLIENTE" || linha === "CARRINHO";
-        return '<div class="c-txt' + (forte ? " c-forte" : "") + '">' + linha + '</div>';
-      }).join("");
+      // no papel, cada linha vira um <div>; as linhas de separacao ficam tracejadas
+      const html = texto
+        .split("\n")
+        .map(function (linha) {
+          if (linha.trim() === "") {
+            return '<div class="cupom-espaco"></div>';
+          }
+          if (linha.indexOf("[KV-ITENS]") !== -1) {
+            return '<div class="cupom-linha"></div>';
+          }
+          const destaque = linha.indexOf("KING VENTURA") === 0 || linha.indexOf("TOTAL:") === 0;
+          return '<div class="cupom-txt' + (destaque ? " cupom-total" : "") + '">' +
+            linha + '</div>';
+        })
+        .join("");
 
-      const janela = window.open("", "_blank", "width=380,height=600");
-      if (!janela) {
-        alert("O navegador bloqueou a janela de impressão. Autorize pop-ups deste site e tente de novo.");
-        return;
-      }
+      document.getElementById("cupomTermico").innerHTML = html;
 
-      janela.document.write(
-        '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Cupom</title><style>' +
-        '@page { size: 58mm auto; margin: 0; }' +
-        'html, body { margin: 0; padding: 0; width: 58mm; background: #fff; }' +
-        'body { font-family: "Courier New", Courier, monospace; font-weight: 700; color: #000; }' +
-        '.c-txt { font-size: 12px; line-height: 1.3; word-wrap: break-word; }' +
-        '.c-forte { font-size: 13px; font-weight: 900; }' +
-        '.c-linha { border-top: 1px dashed #000; height: 0; margin: 5px 0; }' +
-        '.c-espaco { height: 5px; }' +
-        '#cupom { padding: 3mm 2mm 40mm 2mm; }' +
-        '</style></head><body><div id="cupom">' + linhas + '</div></body></html>'
-      );
-      janela.document.close();
-
-      setTimeout(function () {
-        janela.focus();
-        janela.print();
-      }, 600);
+      setTimeout(function () { window.print(); }, 350);
     }
 
     // Adiciona direto no carrinho, sem passar pelo botao (evita bloqueio e duplicidade)
@@ -2678,8 +2674,55 @@
       document.getElementById("cardEditarPedido").style.display = "none";
     }
 
+    document.getElementById("btnSalvarEdicaoPedido").addEventListener("click", salvarEdicaoPedido);
+    document.getElementById("btnCancelarEdicaoPedido").addEventListener("click", fecharEdicaoPedido);
+
+    /* EXPORTAÇÃO CSV & BACKUP JSON */
+    function baixarCSV(nomeArquivo, linhas) {
+      const csv = linhas
+        .map((linha) =>
+          linha.map((campo) => `"${String(campo ?? "").replace(/"/g, '""')}"`).join(";")
+        )
+        .join("\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = nomeArquivo;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function mudarAba(tabName) {
+      document.querySelectorAll(".nav-tab").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.tab === tabName);
+      });
+      document.querySelectorAll(".tab-panel").forEach((panel) => {
+        panel.classList.toggle("active", panel.id === "tab-" + tabName);
+      });
+    }
+
+    /* EVENTOS */
+    document.querySelectorAll(".nav-tab").forEach((btn) => {
+      btn.addEventListener("click", () => mudarAba(btn.dataset.tab));
+    });
+
+    document.getElementById("tamanho").addEventListener("change", carregarSabores);
+    document.getElementById("tipoPizza").addEventListener("change", atualizarVisualPedido);
+    document.getElementById("sabor1").addEventListener("change", atualizarPreviewIngredientes);
     document.getElementById("sabor2").addEventListener("change", atualizarPreviewIngredientes);
 
+    document.getElementById("btnAdicionarPizza").addEventListener("click", function () {
+      const tamanho = document.getElementById("tamanho").value;
+      const tipo = document.getElementById("tipoPizza").value;
+      const sabor1 = document.getElementById("sabor1").value;
+      const sabor2 = document.getElementById("sabor2").value;
+
+      if (!sabor1 || !SABORES[sabor1]) {
+        alert("Selecione o Sabor 1.");
+        return;
+      }
 
       let descricao = "";
       let valor = 0;
@@ -2719,34 +2762,35 @@
     });
 
     document.getElementById("btnAdicionarBebida").addEventListener("click", function () {
-      if (this.disabled) return;
-      const botaoBebida = this;
-      this.disabled = true;
-      setTimeout(function () { botaoBebida.disabled = false; }, 400);
-
       const sel = document.getElementById("bebida");
       if (!sel.value) {
         alert("Selecione uma bebida.");
         return;
       }
       const descricao = sel.options[sel.selectedIndex].text.split(" - R$ ")[0];
-      const valor = Number(sel.value);
-      if (!valor || isNaN(valor)) {
-        alert("Selecione uma bebida válida.");
-        return;
-      }
       adicionarItem({
         descricao: descricao,
         ingredientes: "",
         observacao: "",
-        valor: valor
+        valor: Number(sel.value)
       });
+      sel.value = "";
     });
 
+    document.getElementById("btnWhatsApp").addEventListener("click", function () {
+      if (!pedidoAtual.itens.length) {
+        alert("Adicione pelo menos um item antes de enviar.");
+        return;
+      }
       sincronizarDadosClientePedido();
       enviarWhatsApp(pedidoAtual);
     });
 
+    document.getElementById("btnRegistrarHistorico").addEventListener("click", function () {
+      if (!pedidoAtual.itens.length) {
+        alert("Adicione pelo menos um item antes de registrar.");
+        return;
+      }
       sincronizarDadosClientePedido();
       const pedido = JSON.parse(JSON.stringify(pedidoAtual));
       pedido.numero = gerarNumeroPedido();
@@ -2756,6 +2800,15 @@
       alert("Pedido registrado no histórico.");
     });
 
+    document.getElementById("btnSalvarClienteRapido").addEventListener("click", function () {
+      const dados = {
+        nome: document.getElementById("nome").value.trim(),
+        telefone: document.getElementById("telefone").value.trim(),
+        cep: document.getElementById("cep").value.trim(),
+        numero: document.getElementById("numero").value.trim(),
+        endereco: document.getElementById("endereco").value.trim(),
+        observacao: document.getElementById("observacao").value.trim()
+      };
       if (!dados.nome) {
         alert("Informe o nome do cliente.");
         return;
@@ -2764,14 +2817,72 @@
       alert("Cliente salvo na base.");
     });
 
+    document.getElementById("btnSalvarCliente").addEventListener("click", function () {
+      const id = document.getElementById("clienteEditId").value;
+      const dados = {
+        nome: document.getElementById("cliNome").value.trim(),
+        telefone: document.getElementById("cliTelefone").value.trim(),
+        cep: document.getElementById("cliCep").value.trim(),
+        numero: document.getElementById("cliNumero").value.trim(),
+        endereco: document.getElementById("cliEndereco").value.trim(),
+        observacao: document.getElementById("cliObs").value.trim()
+      };
       if (id) dados.id = id;
       salvarClienteBase(dados);
       limparFormCliente();
     });
 
+    document.getElementById("btnLimparClienteForm").addEventListener("click", limparFormCliente);
+
+    document.getElementById("btnSalvarSabor").addEventListener("click", function () {
+      const nome = document.getElementById("cadNomeSabor").value.trim();
+      const brotinho = Number(document.getElementById("cadPrecoBrotinho").value);
+      const grande = Number(document.getElementById("cadPrecoGrande").value);
+      const ingredientes = document.getElementById("cadIngredientes").value
+        .split(",")
+        .map(function (i) { return i.trim(); })
+        .filter(function (i) { return i; });
+      const original = document.getElementById("saborEditandoOriginal").value;
+
+      if (!nome) {
+        alert("Informe o nome do sabor.");
+        return;
+      }
+      if (isNaN(brotinho) || isNaN(grande)) {
+        alert("Informe os preços do brotinho e do grande.");
+        return;
+      }
+
+      if (original && original !== nome) {
+        delete SABORES[original];
+      }
+      SABORES[nome] = { brotinho: brotinho, grande: grande, ingredientes: ingredientes };
+
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+      limparFormSabor();
       alert("Sabor salvo.");
     });
 
+    document.getElementById("btnCancelarEdicaoSabor").addEventListener("click", limparFormSabor);
+
+    document.getElementById("btnRestaurarSabores").addEventListener("click", function () {
+      if (!confirm("Restaurar a tabela de sabores e preços padrão? As alterações feitas aqui serão perdidas.")) return;
+      SABORES = JSON.parse(JSON.stringify(SABORES_PADRAO));
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+      alert("Sabores padrão restaurados.");
+    });
+
+    document.getElementById("buscaCliente").addEventListener("input", renderizarClientes);
+    document.getElementById("buscaHistorico").addEventListener("input", renderizarHistorico);
+
+    document.getElementById("btnImportarWhats").addEventListener("click", importarPedidoWhats);
+
+    document.getElementById("btnExportarPedidosCSV").addEventListener("click", function () {
+      const linhas = [["Codigo", "Data", "Status", "Cliente", "Telefone", "CEP", "Endereco", "Numero", "Observacao", "Taxa Entrega", "Total", "Itens"]];
       historicoPedidos.forEach(function (p) {
         const itens = (p.itens || []).map(function (i) { return i.descricao + " R$ " + Number(i.valor).toFixed(2); }).join(" | ");
         linhas.push([p.numero, p.data, normalizarStatusPedido(p.status), p.cliente, p.telefone, p.cep, p.endereco, p.numeroCasa, p.observacao, Number(p.taxaEntrega || 0).toFixed(2), Number(p.total || 0).toFixed(2), itens]);
