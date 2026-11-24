@@ -396,64 +396,101 @@
       border-color: #ffffff;
     }
 
+    /* ===== CUPOM TERMICO: escondido na tela, visivel so no papel ===== */
     #cupomTermico {
       display: none;
     }
 
-    /* no papel, o cupom e o unico elemento visivel */
+    .cupom-txt {
+      font-size: 12px;
+      line-height: 1.25;
+      color: #000;
+    }
+
+    .cupom-titulo {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .cupom-total {
+      font-size: 13px;
+      font-weight: 900;
+      margin-top: 2px;
+    }
+
+    .cupom-rodape {
+      text-align: center;
+      margin-top: 2px;
+    }
+
+    .cupom-obs {
+      font-size: 11px;
+    }
+
     @media print {
+      /* A pagina inteira vira o cupom: 58mm de largura, altura livre */
       @page {
-        margin: 0 !important;
         size: 58mm auto;
+        margin: 0;
       }
+
       html, body {
-        margin: 0 !important;
-        padding: 0 !important;
         width: 58mm !important;
         height: auto !important;
         min-height: 0 !important;
         max-height: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
         overflow: visible !important;
-        background: #ffffff !important;
+        background: #fff !important;
       }
+
       body > *:not(#cupomTermico) {
         display: none !important;
       }
+
       #cupomTermico {
         display: block !important;
         position: static !important;
-        width: 52mm !important;
-        max-width: 52mm !important;
+        width: 100% !important;
+        max-width: 58mm !important;
         height: auto !important;
         min-height: 0 !important;
-        overflow: visible !important;
-        page-break-after: avoid !important;
-        break-after: avoid !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        font-family: "Courier New", Courier, monospace !important;
-        font-size: 12px !important;
-        font-weight: 900 !important;
-        line-height: 1.15 !important;
-        color: #000000 !important;
-        background: #ffffff !important;
-        padding: 1mm 0 1mm 1mm !important;
+        max-height: none !important;
         margin: 0 !important;
+        padding: 2mm 2mm 30mm 2mm !important;
+        overflow: visible !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+        page-break-after: auto !important;
+        break-after: auto !important;
+        font-family: "Courier New", Courier, monospace !important;
+        font-weight: 700 !important;
+        background: #fff !important;
+        color: #000 !important;
+        box-sizing: border-box !important;
       }
-      #cupomTermico, #cupomTermico * {
-        font-weight: 900 !important;
-        color: #000000 !important;
-        background: #ffffff !important;
+
+      #cupomTermico * {
+        font-family: "Courier New", Courier, monospace !important;
+        color: #000 !important;
+        background: #fff !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+
       .cupom-linha {
-        border-top: 1px dashed #000000 !important;
-        margin: 3px 0 !important;
+        border: 0 !important;
+        border-top: 1px dashed #000 !important;
         height: 0 !important;
+        margin: 4px 0 !important;
       }
+
       .cupom-item {
-        margin-bottom: 3px !important;
+        margin-bottom: 4px !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
     }
 
@@ -477,7 +514,6 @@
       .summary-line, .summary-total { font-size: 1rem; }
       .summary-total { font-size: 1.1rem; }
       .status-stepper button { flex: 1 1 auto; }
-      #cupomTermico { display: none; }
     }
 
     @media (max-width: 400px) {
@@ -1013,18 +1049,6 @@
       // { prefixo: "79002", km: 7.5,  nome: "Centro" }
     ];
 
-    let timerTaxaReal = null;
-    let timerBuscaRua = null;
-    let ultimaTaxaBuscada = "";
-
-    function normalizarTexto(txt) {
-      return String(txt || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim();
-    }
-
     const SABORES_PADRAO = {
       "Muçarela": {
         brotinho: 15,
@@ -1414,69 +1438,125 @@
         "Informe o CEP para calcular a taxa de entrega.";
     }
 
-    function obterBairroDoEndereco() {
-      const texto = document.getElementById("endereco").value || "";
-      if (texto.includes(" - ")) {
-        return texto.split(" - ").slice(1).join(" - ").trim();
+    /* ============ TAXA DE ENTREGA (reescrita) ============ */
+
+    function bairroDoEndereco() {
+      const texto = (document.getElementById("endereco").value || "").trim();
+      const p = texto.split(" - ");
+      if (p.length > 1) {
+        const b = p.slice(1).join(" - ").trim();
+        if (b.length >= 3) return b;
       }
       return "";
     }
 
-    function obterChaveEntrega(cep, bairro) {
-      const numeros = String(cep || "").replace(/[^0-9]/g, "");
-      if (numeros.length === 8) {
-        return numeros.slice(0, 5) + "-" + numeros.slice(5, 8);
-      }
-      return bairro || "";
-    }
+    // Distancia (km) estimada por prefixo de CEP. Ajuste os km conforme a realidade.
+    const DISTANCIAS_POR_CEP = [
+      { prefixo: "79097", km: 1.5, nome: "Jardim Tarumã" },
+      { prefixo: "79006", km: 6.5, nome: "Vila Bandeirante" },
+      { prefixo: "79002", km: 7.5, nome: "Centro" },
+      { prefixo: "79001", km: 8.0, nome: "Centro" }
+    ];
 
-    function calcularTaxaPorDistancia(distanciaKm) {
-      if (distanciaKm <= REPASSE_ATE_KM) {
-        return 0;
-      }
-      if (distanciaKm <= REPASSE_FIM_INICIAL) {
-        return REPASSE_INICIAL;
-      }
-      // cada km iniciado além dos 4 km soma R$ 1,50
-      const kmExtra = Math.ceil(distanciaKm - REPASSE_FIM_INICIAL);
-      return REPASSE_INICIAL + kmExtra * REPASSE_POR_KM_EXTRA;
-    }
+    // Distancia (km) estimada por bairro (tem prioridade sobre o CEP).
+    const DISTANCIAS_POR_BAIRRO = {
+      "jardim taruma": 1.5
+    };
 
-    function dentroDaAreaDeEntrega(distanciaKm) {
-      return Number(distanciaKm) <= RAIO_MAXIMO_KM;
-    }
+    function calcularTaxaEntrega() {
+      const cep = soDigitos(document.getElementById("cep").value);
+      const bairro = bairroDoEndereco();
+      const bairroChave = textoLimpo(bairro).replace(/\s+/g, " ");
 
-    function aplicarTaxaPorKm(distanciaKm, referencia) {
-      if (!dentroDaAreaDeEntrega(distanciaKm)) {
-        taxaEntrega = calcularTaxaPorDistancia(RAIO_MAXIMO_KM);
-        document.getElementById("mensagemEntrega").innerHTML =
-          "🚫 FORA DA ÁREA DE ENTREGA — " + referencia + " fica a " +
-          distanciaKm.toLocaleString("pt-BR") + " km (limite de " + RAIO_MAXIMO_KM +
-          " km). Confirme com a pizzaria antes de fechar.";
+      if (cep.length < 8 && !bairro) {
+        taxaEntrega = 0;
+        marcarEndereco("aviso", "Informe o CEP ou a rua para calcular a taxa de entrega.");
         atualizarTotal();
         return;
       }
 
-      taxaEntrega = calcularTaxaPorDistancia(distanciaKm);
+      // 1) entrega gratis por bairro
+      const gratis = BAIRROS_ENTREGA_GRATIS.some(function (b) {
+        return textoLimpo(b) === bairroChave;
+      });
+      if (bairro && gratis) {
+        taxaEntrega = 0;
+        marcarEndereco("ok", "🎉 ENTREGA GRÁTIS — " + bairro);
+        atualizarTotal();
+        return;
+      }
+
+      // 2) km por bairro cadastrado
+      let km = null;
+      let referencia = bairro || cep;
+      if (bairroChave && DISTANCIAS_POR_BAIRRO[bairroChave] !== undefined) {
+        km = DISTANCIAS_POR_BAIRRO[bairroChave];
+        referencia = bairro;
+      }
+
+      // 3) km por prefixo de CEP
+      if (km === null && cep.length === 8) {
+        const faixa = DISTANCIAS_POR_CEP.find(function (f) {
+          return cep.indexOf(f.prefixo) === 0;
+        });
+        if (faixa) {
+          km = faixa.km;
+          referencia = bairro ? bairro : faixa.nome;
+        }
+      }
+
+      // 4) km na lista de referencia, se houver
+      if (km === null && cep.length === 8) {
+        const ref = RUAS_REFERENCIA_CG.find(function (r) {
+          return soDigitos(r.cep) === cep;
+        });
+        if (ref && ref.km !== undefined) {
+          km = ref.km;
+          referencia = ref.bairro || ref.rua;
+        }
+      }
+
+      if (km === null) {
+        taxaEntrega = 5;
+        marcarEndereco("erro",
+          "⚠️ Taxa provisória de R$ 5,00 — este endereço ainda não está cadastrado.");
+        atualizarTotal();
+        return;
+      }
+
+      // fora da area
+      if (km > RAIO_MAXIMO_KM) {
+        taxaEntrega = calcularTaxaPorDistancia(RAIO_MAXIMO_KM);
+        marcarEndereco("erro",
+          "🚫 FORA DA ÁREA — " + referencia + " fica a " + km.toFixed(1) +
+          " km (limite " + RAIO_MAXIMO_KM + " km). Taxa máxima aplicada.");
+        atualizarTotal();
+        return;
+      }
+
+      // aplica a regra
+      taxaEntrega = calcularTaxaPorDistancia(km);
 
       if (taxaEntrega === 0) {
-        document.getElementById("mensagemEntrega").innerHTML =
-          "🎉 ENTREGA GRÁTIS — " + referencia + " (até " + REPASSE_ATE_KM + " km)";
+        marcarEndereco("ok",
+          "🎉 ENTREGA GRÁTIS — " + referencia + " (" + km.toFixed(1) +
+          " km, até " + REPASSE_ATE_KM + " km)");
       } else {
-        const kmExtra = Math.max(0, Math.ceil(distanciaKm - REPASSE_FIM_INICIAL));
-        const detalhe = kmExtra > 0
-          ? " + " + kmExtra + " km x R$ " + REPASSE_POR_KM_EXTRA.toFixed(2)
-          : " (faixa de " + REPASSE_ATE_KM + " a " + REPASSE_FIM_INICIAL + " km)";
-        document.getElementById("mensagemEntrega").innerHTML =
-          "Taxa: R$ " + taxaEntrega.toFixed(2) + " — " + distanciaKm.toLocaleString("pt-BR") +
-          " km" + detalhe;
+        const extra = Math.max(0, Math.ceil(km - REPASSE_FIM_INICIAL));
+        const detalhe = extra > 0
+          ? " (+" + extra + " km x R$ " + REPASSE_POR_KM_EXTRA.toFixed(2).replace(".", ",") + ")"
+          : "";
+        marcarEndereco("ok",
+          "Taxa: R$ " + taxaEntrega.toFixed(2) + " — " + km.toFixed(1) + " km" + detalhe);
       }
 
       atualizarTotal();
     }
 
-    function promoverFreteParaConfirmar() {
-      taxaEntrega = 5;
+    function aplicarTaxaPorKm(distanciaKm, referencia) {
+      taxaEntrega = calcularTaxaPorDistancia(distanciaKm);
+      marcarEndereco("ok", "Taxa: R$ " + taxaEntrega.toFixed(2) + " — " + referencia);
+      atualizarTotal();
     }
 
     const RUAS_REFERENCIA_CG = [
@@ -1516,819 +1596,504 @@
       });
     }
 
-    async function buscarCEP() {
-      const cep = document.getElementById("cep").value.replace(/[^0-9]/g, "");
-      if (cep.length !== 8) return;
+    /* ============ ENDERECO <-> CEP (reescrito) ============ */
 
-      try {
-        const resposta = await fetch("https://viacep.com.br/ws/" + cep + "/json/");
-        const dados = await resposta.json();
-        if (dados.erro) {
-          avisarEndereco("CEP nao encontrado. Confira os 8 numeros.");
-          return;
-        }
+    function soDigitos(t) {
+      return String(t || "").replace(/[^0-9]/g, "");
+    }
 
-        const log = dados.logradouro || "";
-        const bai = dados.bairro || "";
-        if (log || bai) {
-          document.getElementById("endereco").value = bai ? `${log} - ${bai}` : log;
-          avisarEndereco("");
-        } else {
-          avisarEndereco("CEP localizado, mas sem rua cadastrada.");
-        }
-        calcularTaxaEntrega();
-      } catch (erro) {
-        console.log("Erro CEP", erro);
-        avisarEndereco("Sem conexao para buscar o CEP agora.");
+    function textoLimpo(t) {
+      return String(t || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[.,;]/g, " ")
+        .replace(/\s+/g, " ")
+        .toLowerCase()
+        .trim();
+    }
+
+    function marcarEndereco(estado, mensagem) {
+      const el = document.getElementById("mensagemEntrega");
+      if (!el) return;
+      if (estado === "ok") {
+        el.style.color = "var(--azul-claro)";
+      } else if (estado === "erro") {
+        el.style.color = "var(--danger)";
+      } else {
+        el.style.color = "var(--muted)";
+      }
+      el.innerHTML = mensagem || "";
+    }
+
+    function preencherFormatoCep(campo) {
+      const d = soDigitos(campo.value);
+      if (d.length === 8) {
+        campo.value = d.slice(0, 5) + "-" + d.slice(5);
       }
     }
 
+    /* ---------- CEP -> RUA ---------- */
+    async function buscarCEP() {
+      const campoCep = document.getElementById("cep");
+      const campoEnd = document.getElementById("endereco");
+      const cep = soDigitos(campoCep.value);
+
+      if (cep.length !== 8) return;
+      if (cep === buscarCEP.ultimo) return;   // evita repetir a mesma consulta
+      buscarCEP.ultimo = cep;
+
+      marcarEndereco("aviso", "Buscando o endereço do CEP...");
+
+      let dados = null;
+      try {
+        const r = await fetch("https://viacep.com.br/ws/" + cep + "/json/");
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        dados = await r.json();
+      } catch (e) {
+        console.log("Falha ViaCEP", e);
+        marcarEndereco("erro", "⚠️ Sem conexão para buscar o CEP agora. Você pode digitar a rua abaixo.");
+        return;
+      }
+
+      if (!dados || dados.erro) {
+        marcarEndereco("erro", "⚠️ CEP não encontrado. Confira os 8 números.");
+        return;
+      }
+
+      const rua = dados.logradouro || "";
+      const bairro = dados.bairro || "";
+
+      if (rua || bairro) {
+        campoEnd.value = bairro ? rua + " - " + bairro : rua;
+        marcarEndereco("ok", "✅ Endereço preenchido pelo CEP.");
+      } else {
+        marcarEndereco("aviso", "CEP localizado, mas sem rua cadastrada.");
+      }
+
+      calcularTaxaEntrega();
+    }
+    buscarCEP.ultimo = "";
+
+    /* ---------- RUA -> CEP ---------- */
     async function buscarCEPPorRua() {
       const campoEnd = document.getElementById("endereco");
       const campoCep = document.getElementById("cep");
-      const texto = (campoEnd.value || "").trim();
-      if (texto.length < 4) return;
+      const bruto = (campoEnd.value || "").trim();
 
-      const ruaLimpa = texto.split(" - ")[0].trim();
-      const textoTxt = normalizarTexto(texto);
-      const ruaTxt = normalizarTexto(ruaLimpa);
-      const matchLocal = RUAS_REFERENCIA_CG.find(
-        (r) =>
-          normalizarTexto(`${r.rua} - ${r.bairro}`) === textoTxt ||
-          normalizarTexto(r.rua) === ruaTxt
-      );
+      if (bruto.length < 3) return false;
 
-      if (matchLocal && matchLocal.cep) {
-        campoCep.value = matchLocal.cep;
-        if (!texto.includes(" - ") && matchLocal.bairro) {
-          campoEnd.value = `${matchLocal.rua} - ${matchLocal.bairro}`;
-        }
-        calcularTaxaEntrega();
-        return;
-      }
+      const partes = bruto.split(" - ");
+      const ruaDigitada = partes[0].trim();
+      const bairroDigitado = partes.length > 1 ? partes.slice(1).join(" - ").trim() : "";
+      const assinatura = textoLimpo(bruto);
+      if (assinatura === buscarCEPPorRua.ultimo) return false;
+      buscarCEPPorRua.ultimo = assinatura;
 
-      const cliMatch = (clientesBase || []).find(
-        (c) => (c.endereco || "").toLowerCase().includes(ruaLimpa.toLowerCase()) && c.cep
-      );
-      if (cliMatch) {
-        campoCep.value = cliMatch.cep;
-        calcularTaxaEntrega();
-        return;
-      }
-
-      if (ruaLimpa.length >= 3) {
-// O ViaCEP exige o logradouro SEM o tipo (Rua, Avenida, Travessa...)
-        // e com no minimo 3 caracteres.
-        const semTipo = ruaLimpa
-          .replace(/^(rua|r\.?|avenida|av\.?|travessa|tv\.?|alameda|al\.?|rodovia|rod\.?|praca|praca|estrada|est\.?)\s+/i, "")
-          .trim();
-
-        const termoBusca = semTipo.length >= 3 ? semTipo : ruaLimpa;
-        const urlBusca = `https://viacep.com.br/ws/MS/Campo%20Grande/${encodeURIComponent(termoBusca)}/json/`;
-        const resposta = await fetch(urlBusca);
-        if (!resposta.ok) {
-          throw new Error("HTTP " + resposta.status);
-        }
-        const lista = await resposta.json();
-
-        if (Array.isArray(lista) && lista.length > 0) {
-          const ruaNorm = normalizarTexto(ruaLimpa);
-          const semTipoNorm = normalizarTexto(semTipo);
-          const item =
-            lista.find((x) => {
-              const logNorm = normalizarTexto(x.logradouro || "");
-              return (
-                logNorm === ruaNorm ||
-                logNorm === semTipoNorm ||
-                logNorm.endsWith(" " + semTipoNorm) ||
-                logNorm.includes(semTipoNorm)
-              );
-            }) || lista[0];
-
-          if (item && item.cep) {
-            campoCep.value = item.cep;
-            if (item.logradouro && !texto.includes(" - ")) {
-              campoEnd.value = item.bairro ? `${item.logradouro} - ${item.bairro}` : item.logradouro;
-            }
-            avisarEndereco("");
-            calcularTaxaEntrega();
-            return;
-          }
-        }
-      } catch (erro) {
-        console.log("Erro buscar CEP pela rua", erro);
-      }
-
-      // Tentativa secundaria via Nominatim (OpenStreetMap) caso o ViaCEP nao retorne
-      try {
-        const query = encodeURIComponent(`${ruaLimpa}, Campo Grande, Mato Grosso do Sul, Brazil`);
-        const respNom = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${query}&format=json&addressdetails=1&countrycodes=br&limit=1`
-        );
-        if (respNom.ok) {
-          const dadosNom = await respNom.json();
-          if (Array.isArray(dadosNom) && dadosNom.length > 0 && dadosNom[0].address) {
-            const addr = dadosNom[0].address;
-            if (addr.postcode) {
-              campoCep.value = addr.postcode;
-            }
-            const bairroNom = addr.suburb || addr.neighbourhood || addr.city_district || "";
-            if (!texto.includes(" - ") && bairroNom) {
-              campoEnd.value = `${ruaLimpa} - ${bairroNom}`;
-            }
-            if (addr.postcode || bairroNom) {
-              avisarEndereco("");
-              calcularTaxaEntrega();
-              return;
-            }
-          }
-        }
-      } catch (erroNom) {
-        console.log("Erro Nominatim buscar CEP pela rua", erroNom);
-      }
-
-      if (!campoCep.value.trim()) {
-        avisarEndereco("CEP nao localizado automaticamente. Digite o CEP ou confira o endereco.");
-      }
-    }
-
-    // ===== CALCULO DE ROTA (OpenRouteService) =====
-    // Busca coordenadas de um endereco de entrega via Nominatim e calcula
-    // a rota real de carro ate o ponto de partida via OpenRouteService.
-    // Se nao houver chave ORS salva, cai no calculo em linha reta (Haversine)
-    // com aviso claro para o usuario.
-    function obterChaveOrs() {
-      try {
-        return (localStorage.getItem(ORS_CHAVE_LOCAL) || "").trim();
-      } catch (e) {
-        return "";
-      }
-    }
-
-    function salvarChaveOrs(chave) {
-      const limpo = String(chave || "").trim();
-      if (!limpo) {
-        localStorage.removeItem(ORS_CHAVE_LOCAL);
-      } else {
-        localStorage.setItem(ORS_CHAVE_LOCAL, limpo);
-      }
-    }
-
-    function haversineKm(a, b) {
-      const R = 6371;
-      const toRad = (g) => (g * Math.PI) / 180;
-      const dLat = toRad(b.lat - a.lat);
-      const dLng = toRad(b.lng - a.lng);
-      const lat1 = toRad(a.lat);
-      const lat2 = toRad(b.lat);
-      const h =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-      return 2 * R * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
-    }
-
-    async function geocodificarEndereco(enderecoTexto) {
-      const limpo = String(enderecoTexto || "").trim();
-      if (!limpo) return null;
-
-      // Se houver um CEP de 8 digitos no texto ou no campo, busca primeiro por ele
-      // no ViaCEP para obter rua/bairro/cidade corretos e geocodificar com precisao.
-      const matchCep = limpo.match(/\b\d{5}-?\d{3}\b/);
-      let consulta = limpo;
-      if (matchCep) {
-        const cepDigitos = matchCep[0].replace(/\D/g, "");
-        try {
-          const rCep = await fetch(`https://viacep.com.br/ws/${cepDigitos}/json/`);
-          if (rCep.ok) {
-            const dCep = await rCep.json();
-            if (dCep && !dCep.erro) {
-              const partes = [dCep.logradouro, dCep.bairro, dCep.localidade, dCep.uf, "Brasil"].filter(Boolean);
-              if (partes.length >= 2) {
-                consulta = partes.join(", ");
-              }
-            }
-          }
-        } catch (e) {}
-      }
-
-      if (!/campo grande/i.test(consulta)) {
-        consulta = `${consulta}, Campo Grande - MS, Brasil`;
-      }
-
-      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(consulta)}&format=json&countrycodes=br&limit=1`;
-      const resp = await fetch(url, {
-        headers: { "Accept": "application/json" }
+      // 1) lista local de referencia
+      const alvo = textoLimpo(ruaDigitada);
+      const local = RUAS_REFERENCIA_CG.find(function (r) {
+        return textoLimpo(r.rua) === alvo || textoLimpo(r.rua).indexOf(alvo) === 0;
       });
-      if (!resp.ok) {
-        throw new Error("Falha ao localizar endereco (" + resp.status + ")");
-      }
-      const dados = await resp.json();
-      if (!Array.isArray(dados) || dados.length === 0) {
-        return null;
-      }
-      return {
-        lat: parseFloat(dados[0].lat),
-        lng: parseFloat(dados[0].lon),
-        label: dados[0].display_name || consulta
-      };
-    }
-
-    async function consultarRotaOrs(origem, destino, chave) {
-      // OpenRouteService espera [lng, lat]
-      const url = `${ORS_ENDPOINT}/v2/directions/${ORS_PROFILE}?api_key=${encodeURIComponent(chave)}&start=${origem.lng},${origem.lat}&end=${destino.lng},${destino.lat}`;
-      const resp = await fetch(url);
-      if (!resp.ok) {
-        let detalhe = "";
-        try {
-          const errJson = await resp.json();
-          detalhe = errJson?.error?.message || errJson?.message || "";
-        } catch (e) {}
-        throw new Error(`OpenRouteService HTTP ${resp.status}${detalhe ? ": " + detalhe : ""}`);
-      }
-      const data = await resp.json();
-      const seg = data?.features?.[0]?.properties?.segments?.[0];
-      if (!seg || typeof seg.distance !== "number") {
-        throw new Error("Resposta do OpenRouteService sem distancia.");
-      }
-      return {
-        distanciaKm: seg.distance / 1000,
-        duracaoMin: typeof seg.duration === "number" ? Math.round(seg.duration / 60) : null,
-        modo: "ors"
-      };
-    }
-
-    async function calcularRotaEntrega(enderecoTexto) {
-      const origem = obterOrigemReal();
-      const destino = await geocodificarEndereco(enderecoTexto);
-      if (!destino) {
-        throw new Error("Endereco nao encontrado no mapa. Confira rua, numero ou CEP.");
-      }
-
-      const chave = obterChaveOrs();
-      if (chave) {
-        try {
-          const rota = await consultarRotaOrs(origem, destino, chave);
-          return { ...rota, destinoLabel: destino.label };
-        } catch (errOrs) {
-          // Se a chave for invalida/sem cota, avisa e usa estimativa em linha reta
-          const distLinhaReta = haversineKm(origem, destino);
-          return {
-            distanciaKm: distLinhaReta,
-            duracaoMin: Math.max(3, Math.round((distLinhaReta / 25) * 60)),
-            modo: "fallback_ors",
-            aviso: errOrs.message,
-            destinoLabel: destino.label
-          };
+      if (local && local.cep) {
+        campoCep.value = local.cep;
+        if (!bairroDigitado && local.bairro) {
+          campoEnd.value = local.rua + " - " + local.bairro;
         }
+        marcarEndereco("ok", "✅ CEP encontrado na lista de referência.");
+        calcularTaxaEntrega();
+        return true;
       }
 
-      const distLinhaReta = haversineKm(origem, destino);
-      return {
-        distanciaKm: distLinhaReta,
-        duracaoMin: Math.max(3, Math.round((distLinhaReta / 25) * 60)),
-        modo: "sem_chave",
-        destinoLabel: destino.label
-      };
-    }
-
-    function montarUrlMapsRota(destinoTexto) {
-      const origem = encodeURIComponent(ORIGEM_ENTREGA.endereco);
-      const destino = encodeURIComponent(destinoTexto);
-      return `https://www.google.com/maps/dir/?api=1&origin=${origem}&destination=${destino}&travelmode=driving`;
-    }
-
-    function atualizarStatusChaveUi() {
-      const input = document.getElementById("inputChaveRota");
-      const status = document.getElementById("statusChaveRota");
-      if (!input || !status) return;
-      const chave = obterChaveOrs();
-      if (!input.value && chave) {
-        input.value = chave;
-      }
-      if (chave) {
-        status.innerHTML = "✅ Chave salva neste aparelho (rota real por ruas habilitada).";
-      } else {
-        status.innerHTML = "⚠️ Nenhuma chave salva — usando estimativa em linha reta. Cole sua chave acima para rota real por ruas.";
-      }
-    }
-
-    async function renderizarRotaNaTela(enderecoTexto, clienteRotulo) {
-      const box = document.getElementById("resultadoRota");
-      if (!box) return;
-      const limpo = String(enderecoTexto || "").trim();
-      if (!limpo) {
-        box.style.display = "block";
-        box.innerHTML = '<span style="color: var(--danger);">Informe um endereco de entrega.</span>';
-        return;
+      // 2) base de clientes ja cadastrados
+      const cli = (clientesBase || []).find(function (c) {
+        return c.cep && textoLimpo(c.endereco || "").indexOf(alvo) === 0;
+      });
+      if (cli) {
+        campoCep.value = cli.cep;
+        marcarEndereco("ok", "✅ CEP encontrado na base de clientes.");
+        calcularTaxaEntrega();
+        return true;
       }
 
-      box.style.display = "block";
-      box.innerHTML = "Calculando rota a partir da Rua Delamare, 129...";
+      // 3) ViaCEP por logradouro
+      if (ruaDigitada.length < 3) return false;
 
+      const semTipo = ruaDigitada.replace(
+        /^(rua|r\.?|avenida|av\.?|travessa|tv\.?|alameda|estrada|rodovia|rod\.?|praca|praça|servidao|servidão|viela|beco)\s+/i,
+        ""
+      ).trim();
+      const termo = semTipo.length >= 3 ? semTipo : ruaDigitada;
+
+      marcarEndereco("aviso", "Buscando o CEP da rua...");
+
+      let lista = null;
       try {
-        const res = await calcularRotaEntrega(limpo);
-        const kmArred = Math.round(res.distanciaKm * 10) / 10;
-        const taxaSugerida = calcularTaxaPorDistancia(kmArred);
-        const dentroArea = dentroDaAreaDeEntrega(kmArred);
-        const urlMaps = montarUrlMapsRota(limpo);
-
-        let badgeModo = "";
-        if (res.modo === "ors") {
-          badgeModo = '<span class="status-pill status-feito">Rota real (OpenRouteService)</span>';
-        } else if (res.modo === "sem_chave") {
-          badgeModo = '<span class="status-pill status-producao">Estimativa em linha reta (sem chave ORS)</span>';
-        } else {
-          badgeModo = '<span class="status-pill status-producao">Estimativa em linha reta (falha na chave ORS)</span>';
-        }
-
-        const avisoExtra = res.aviso
-          ? `<div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Detalhe: ${res.aviso}</div>`
-          : "";
-
-        box.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
-            <strong>${clienteRotulo ? clienteRotulo + " — " : ""}${limpo}</strong>
-            ${badgeModo}
-          </div>
-          <div class="summary-line"><span>Distancia:</span><strong>${kmArred.toFixed(1)} km</strong></div>
-          <div class="summary-line"><span>Tempo estimado:</span><strong>${res.duracaoMin} min</strong></div>
-          <div class="summary-line"><span>Area de entrega (max ${RAIO_MAXIMO_KM} km):</span><strong>${dentroArea ? "✅ Dentro" : "🚫 Fora"}</strong></div>
-          <div class="summary-line"><span>Taxa pela distancia:</span><strong>R$ ${taxaSugerida.toFixed(2)}</strong></div>
-          <div style="font-size: 0.8rem; color: var(--muted); margin-top: 4px;">Destino localizado: ${res.destinoLabel}</div>
-          ${avisoExtra}
-          <div class="btn-row">
-            <a href="${urlMaps}" target="_blank" rel="noopener" style="text-decoration: none;">
-              <button class="gold" type="button">🗺️ Abrir no Google Maps</button>
-            </a>
-          </div>
-        `;
-      } catch (err) {
-        box.innerHTML = `<span style="color: var(--danger);">Erro ao calcular rota: ${err.message}</span>`;
-      }
-    }
-
-    function usarEnderecoPedidoAtual() {
-      const end = (document.getElementById("endereco").value || "").trim();
-      const num = (document.getElementById("numero").value || "").trim();
-      const cep = (document.getElementById("cep").value || "").trim();
-      const cli = (document.getElementById("nome").value || "").trim();
-      const cod = (document.getElementById("numeroPedido").innerText || "").trim();
-
-      const completo = [end, num ? `nº ${num}` : "", cep ? `CEP ${cep}` : ""].filter(Boolean).join(", ");
-      document.getElementById("rotaEndereco").value = completo || end;
-      document.getElementById("rotaCliente").value = [cod, cli].filter(Boolean).join(" - ");
-      if (completo || end) {
-        renderizarRotaNaTela(completo || end, [cod, cli].filter(Boolean).join(" - "));
-      }
-    }
-
-    function listarRotasPedidosHoje() {
-      const container = document.getElementById("listaRotasDia");
-      if (!container) return;
-      const hojeData = new Date().toLocaleDateString("pt-BR");
-      const pedidosHoje = (historicoPedidos || []).filter((p) =>
-        String(p.data || "").startsWith(hojeData)
-      );
-
-      if (!pedidosHoje.length) {
-        container.innerHTML = '<p style="color: var(--muted);">Nenhum pedido registrado hoje ate o momento.</p>';
-        return;
-      }
-
-      container.innerHTML = pedidosHoje
-        .map((p) => {
-          const endMontado = [p.endereco, p.numeroCasa ? `nº ${p.numeroCasa}` : "", p.cep ? `CEP ${p.cep}` : ""]
-            .filter(Boolean)
-            .join(", ");
-          const rotulo = `${p.numero || ""} - ${p.cliente || "Cliente"}`.trim();
-          const endEsc = encodeURIComponent(endMontado);
-          const rotEsc = encodeURIComponent(rotulo);
-          const mapsUrl = montarUrlMapsRota(endMontado);
-          return `
-            <div class="list-card">
-              <div>
-                <b>${rotulo}</b> <span class="status-pill status-feito">${p.status || "Gerado"}</span><br />
-                <span style="color: var(--muted); font-size: 0.85rem;">${endMontado || "Endereco nao informado"}</span><br />
-                <strong style="color: var(--gold);">Total: R$ ${Number(p.total || 0).toFixed(2)}</strong>
-              </div>
-              <div class="btn-row">
-                <button type="button" class="gold" onclick="selecionarRotaDoDia(decodeURIComponent('${endEsc}'), decodeURIComponent('${rotEsc}'))">Calcular Rota</button>
-                <a href="${mapsUrl}" target="_blank" rel="noopener" style="text-decoration: none;">
-                  <button type="button" class="secondary">🗺️ Maps</button>
-                </a>
-              </div>
-            </div>
-          `;
-        })
-        .join("");
-    }
-
-    function selecionarRotaDoDia(endereco, rotulo) {
-      document.getElementById("rotaEndereco").value = endereco;
-      document.getElementById("rotaCliente").value = rotulo;
-      renderizarRotaNaTela(endereco, rotulo);
-    }
-
-    async function testarConexaoApis() {
-      const box = document.getElementById("resultadoTesteApis");
-      if (!box) return;
-      box.innerHTML = "Testando conexoes com ViaCEP, Nominatim e OpenRouteService...";
-
-      const resultados = [];
-
-      // 1. ViaCEP
-      try {
-        const r1 = await fetch("https://viacep.com.br/ws/79097240/json/");
-        const d1 = await r1.json();
-        if (r1.ok && d1 && !d1.erro) {
-          resultados.push(`✅ <b>ViaCEP:</b> OK (${d1.logradouro || "CEP valido"} - ${d1.localidade || ""})`);
-        } else {
-          resultados.push(`⚠️ <b>ViaCEP:</b> Respondeu com erro`);
-        }
+        const url = "https://viacep.com.br/ws/MS/Campo%20Grande/" +
+          encodeURIComponent(termo) + "/json/";
+        const r = await fetch(url);
+        if (r.ok) lista = await r.json();
       } catch (e) {
-        resultados.push(`❌ <b>ViaCEP:</b> Falhou (${e.message})`);
+        console.log("Falha ViaCEP por rua", e);
       }
 
-      // 2. Nominatim
-      try {
-        const r2 = await fetch("https://nominatim.openstreetmap.org/search?q=Rua+Delamare+129+Campo+Grande+MS&format=json&limit=1");
-        const d2 = await r2.json();
-        if (r2.ok && Array.isArray(d2) && d2.length > 0) {
-          resultados.push(`✅ <b>Nominatim (Mapa/Geo):</b> OK (${parseFloat(d2[0].lat).toFixed(4)}, ${parseFloat(d2[0].lon).toFixed(4)})`);
-        } else {
-          resultados.push(`⚠️ <b>Nominatim:</b> Sem resultados no teste`);
-        }
-      } catch (e) {
-        resultados.push(`❌ <b>Nominatim:</b> Falhou (${e.message})`);
+      if (!Array.isArray(lista) || !lista.length) {
+        marcarEndereco("erro", "⚠️ Não achei essa rua. Confira o nome ou digite o CEP.");
+        return false;
       }
 
-      // 3. OpenRouteService
-      const chave = obterChaveOrs();
-      if (!chave) {
-        resultados.push(`⚠️ <b>OpenRouteService:</b> Chave nao configurada neste aparelho.`);
-      } else {
-        try {
-          const orig = obterOrigemReal();
-          const resOrs = await consultarRotaOrs(orig, { lat: -20.538, lng: -54.668 }, chave);
-          resultados.push(`✅ <b>OpenRouteService:</b> OK (rota teste ${resOrs.distanciaKm.toFixed(1)} km)`);
-        } catch (e) {
-          resultados.push(`❌ <b>OpenRouteService:</b> Falhou (${e.message})`);
-        }
+      let escolhido = lista[0];
+      if (bairroDigitado) {
+        const alvoB = textoLimpo(bairroDigitado);
+        const doBairro = lista.find(function (l) {
+          return textoLimpo(l.bairro || "") === alvoB;
+        });
+        if (doBairro) escolhido = doBairro;
       }
 
-      box.innerHTML = resultados.map((linha) => `<div style="margin-bottom: 6px;">${linha}</div>`).join("");
+      if (!escolhido.cep) {
+        marcarEndereco("erro", "⚠️ Achei a rua, mas sem CEP cadastrado.");
+        return false;
+      }
+
+      campoCep.value = escolhido.cep;
+      const b = escolhido.bairro || "";
+      const l = escolhido.logradouro || ruaDigitada;
+      campoEnd.value = b ? l + " - " + b : l;
+      marcarEndereco("ok", "✅ CEP encontrado: " + escolhido.cep);
+      calcularTaxaEntrega();
+      return true;
+    }
+    buscarCEPPorRua.ultimo = "";
+
+    /* ---------- gatilhos (funcionam em qualquer teclado) ---------- */
+    let timerRua = null;
+
+    function agendarBuscaRua(atraso) {
+      clearTimeout(timerRua);
+      timerRua = setTimeout(function () { buscarCEPPorRua(); }, atraso);
     }
 
-    function agendarBuscaCepPorRua() {
-      clearTimeout(timerBuscaRua);
-      const texto = (document.getElementById("endereco").value || "").trim();
-      if (texto.length < 4) return;
-      timerBuscaRua = setTimeout(() => {
+    function ligarCamposEndereco() {
+      const campoCep = document.getElementById("cep");
+      const campoEnd = document.getElementById("endereco");
+      const campoNum = document.getElementById("numero");
+      const botao = document.getElementById("btnBuscarCepDaRua");
+
+      // ---- CEP digitado: busca ao completar 8 digitos ----
+      campoCep.addEventListener("input", function () {
+        preencherFormatoCep(campoCep);
+        if (soDigitos(campoCep.value).length === 8) {
+          buscarCEP.ultimo = "";
+          buscarCEPPorRua.ultimo = "";
+          buscarCEP();
+        } else {
+          calcularTaxaEntrega();
+        }
+      });
+      campoCep.addEventListener("blur", function () {
+        preencherFormatoCep(campoCep);
+        buscarCEP();
+      });
+
+      // ---- RUA digitada: busca ao parar de digitar ----
+      campoEnd.addEventListener("input", function () {
+        const t = campoEnd.value;
+        buscarCEPPorRua.ultimo = "";
+        if (/[\s,\-]$/.test(t)) {
+          agendarBuscaRua(300);          // terminou uma palavra
+        } else if (t.trim().length >= 5) {
+          agendarBuscaRua(900);          // parou de digitar
+        }
+      });
+
+      // ---- ao sair do campo, sempre busca (nao depende do teclado) ----
+      campoEnd.addEventListener("blur", function () {
+        clearTimeout(timerRua);
         buscarCEPPorRua();
-      }, 650);
-    }
-
-    function agendarCalculoTaxaReal() {
-      clearTimeout(timerTaxaReal);
-      timerTaxaReal = setTimeout(() => {
-        calcularTaxaEntrega();
-      }, 250);
-    }
-
-    function adicionarPizza() {
-      const tamanho = document.getElementById("tamanho").value;
-      const tipo = document.getElementById("tipoPizza").value;
-      const s1 = document.getElementById("sabor1").value;
-      const s2 = document.getElementById("sabor2").value;
-      const adicional = Number(document.getElementById("adicional").value) || 0;
-      const selectAdicional = document.getElementById("adicional");
-      const nomeAdicional = adicional > 0 ? selectAdicional.options[selectAdicional.selectedIndex].text : "";
-      const obsPizza = document.getElementById("obsPizza").value.trim();
-
-      if (!s1 || !SABORES[s1]) {
-        alert("Selecione o Sabor 1.");
-        return;
-      }
-
-      const p1 = tamanho === "brotinho" ? Number(SABORES[s1].brotinho) : Number(SABORES[s1].grande);
-      let valor = p1;
-      let descricao = "";
-      let ingredientesTexto = "";
-
-      if (tamanho === "grande" && tipo === "meio") {
-        if (!s2 || !SABORES[s2]) {
-          alert("Selecione o Sabor 2 para pizza Meio a Meio.");
-          return;
-        }
-        const p2 = Number(SABORES[s2].grande);
-        valor = Math.max(p1, p2);
-        descricao = `Pizza Grande 35cm (Meio a Meio: ${s1} / ${s2})`;
-        ingredientesTexto = `50% ${s1}: ${SABORES[s1].ingredientes.join(", ")} | 50% ${s2}: ${SABORES[s2].ingredientes.join(", ")}`;
-      } else {
-        const nomeTam = tamanho === "brotinho" ? "Brotinho 25cm" : "Pizza Grande 35cm";
-        descricao = `${nomeTam} - ${s1}`;
-        ingredientesTexto = `Ingredientes: ${SABORES[s1].ingredientes.join(", ")}`;
-      }
-
-      if (adicional > 0) {
-        valor += adicional;
-        descricao += ` + ${nomeAdicional}`;
-      }
-
-      adicionarItem({
-        tipo: "pizza",
-        descricao,
-        ingredientes: ingredientesTexto,
-        observacao: obsPizza,
-        valor
+      });
+      campoEnd.addEventListener("change", function () {
+        clearTimeout(timerRua);
+        buscarCEPPorRua();
       });
 
-      document.getElementById("obsPizza").value = "";
-      document.getElementById("adicional").value = "0";
-    }
-
-    function adicionarBebida() {
-      const sel = document.getElementById("bebida");
-      const valor = Number(sel.value);
-      if (!valor) {
-        alert("Selecione uma bebida.");
-        return;
-      }
-      const nomeBebida = sel.options[sel.selectedIndex].text.split(" - ")[0];
-      adicionarItem({
-        tipo: "bebida",
-        descricao: nomeBebida,
-        ingredientes: "",
-        observacao: "",
-        valor
-      });
-      sel.value = "";
-    }
-
-    function sincronizarCamposPedido() {
-      pedidoAtual.cliente = document.getElementById("nome").value.trim();
-      pedidoAtual.telefone = document.getElementById("telefone").value.trim();
-      pedidoAtual.cep = document.getElementById("cep").value.trim();
-      pedidoAtual.numeroCasa = document.getElementById("numero").value.trim();
-      pedidoAtual.endereco = document.getElementById("endereco").value.trim();
-      pedidoAtual.observacao = document.getElementById("observacao").value.trim();
-      pedidoAtual.taxaEntrega = taxaEntrega;
-      atualizarTotal();
-    }
-
-    function gerarMensagemWhatsApp() {
-      sincizarCamposPedido();
-
-      if (pedidoAtual.itens.length === 0) {
-        alert("Adicione pelo menos um item ao carrinho antes de enviar.");
-        return null;
+      // ---- botao manual ----
+      if (botao) {
+        botao.addEventListener("click", function () {
+          buscarCEPPorRua.ultimo = "";
+          const b = botao;
+          b.disabled = true;
+          b.innerText = "Buscando...";
+          Promise.resolve(buscarCEPPorRua()).finally(function () {
+            b.disabled = false;
+            b.innerText = "🔍 Buscar CEP pela rua";
+          });
+        });
       }
 
-      let linhas = [];
-      linhas.push(`*KING VENTURA PIZZARIA*`);
-      linhas.push(`Pedido: *${pedidoAtual.numero}*`);
-      linhas.push(`Data: ${pedidoAtual.data}`);
-      linhas.push(`Status: *${normalizarStatusPedido(pedidoAtual.status)}*`);
-      linhas.push(``);
-
-      if (pedidoAtual.cliente) linhas.push(`*Cliente:* ${pedidoAtual.cliente}`);
-      if (pedidoAtual.telefone) linhas.push(`*Telefone:* ${pedidoAtual.telefone}`);
-      if (pedidoAtual.endereco || pedidoAtual.numeroCasa || pedidoAtual.cep) {
-        linhas.push(
-          `*Endereço:* ${pedidoAtual.endereco}${pedidoAtual.numeroCasa ? ", nº " + pedidoAtual.numeroCasa : ""}${pedidoAtual.cep ? " (CEP: " + pedidoAtual.cep + ")" : ""}`
-        );
-      }
-      if (pedidoAtual.observacao) linhas.push(`*Obs Cliente:* ${pedidoAtual.observacao}`);
-
-      linhas.push(``);
-      linhas.push(`*Itens do Pedido:*`);
-      pedidoAtual.itens.forEach((item, idx) => {
-        linhas.push(`${idx + 1}. ${item.descricao} — R$ ${Number(item.valor).toFixed(2)}`);
-        if (item.observacao) {
-          linhas.push(`   _Obs item: ${item.observacao}_`);
-        }
-      });
-
-      linhas.push(``);
-      linhas.push(`Taxa de Entrega: R$ ${Number(pedidoAtual.taxaEntrega).toFixed(2)}`);
-      linhas.push(`*TOTAL: R$ ${Number(pedidoAtual.total).toFixed(2)}*`);
-
-      return linhas.join("\n");
-    }
-
-    function enviarWhatsApp() {
-      const msg = gerarMensagemWhatsApp();
-      if (!msg) return;
-      const url = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(msg)}`;
-      window.open(url, "_blank");
-    }
-
-    function registrarPedidoAtualNoHistorico() {
-      sincronizarCamposPedido();
-
-      if (pedidoAtual.itens.length === 0) {
-        alert("Adicione pelo menos um item ao carrinho antes de registrar.");
-        return;
+      // ---- numero digitado: recalcula a taxa ----
+      if (campoNum) {
+        campoNum.addEventListener("input", function () {
+          clearTimeout(timerRua);
+          timerRua = setTimeout(function () { calcularTaxaEntrega(); }, 500);
+        });
       }
 
-      const copia = JSON.parse(JSON.stringify(pedidoAtual));
-      copia.status = normalizarStatusPedido(pedidoAtual.status || "Gerado");
-      registrarPedido(copia);
-      alert(`Pedido ${copia.numero} registrado no histórico!`);
-    }
-
-    function novoPedido() {
-      if (pedidoAtual.itens.length > 0) {
-        const confirmar = confirm("Iniciar um novo pedido? Os itens atuais do carrinho serão limpos.");
-        if (!confirmar) return;
+      // ---- aba Clientes: CEP -> rua ----
+      const cepCli = document.getElementById("cliCep");
+      const endCli = document.getElementById("cliEndereco");
+      if (cepCli && endCli) {
+        cepCli.addEventListener("blur", async function () {
+          const cep = soDigitos(cepCli.value);
+          if (cep.length !== 8) return;
+          cepCli.value = cep.slice(0, 5) + "-" + cep.slice(5);
+          try {
+            const r = await fetch("https://viacep.com.br/ws/" + cep + "/json/");
+            const d = await r.json();
+            if (d && !d.erro) {
+              const rua = d.logradouro || "";
+              const bai = d.bairro || "";
+              if (rua || bai) endCli.value = bai ? rua + " - " + bai : rua;
+            }
+          } catch (e) {
+            console.log("Falha CEP cliente", e);
+          }
+        });
       }
-
-      pedidoAtual = {
-        numero: "",
-        data: "",
-        status: "Gerado",
-        cliente: "",
-        telefone: "",
-        cep: "",
-        endereco: "",
-        numeroCasa: "",
-        observacao: "",
-        taxaEntrega: 0,
-        itens: [],
-        total: 0
-      };
-
-      taxaEntrega = 0;
-      document.getElementById("nome").value = "";
-      document.getElementById("telefone").value = "";
-      document.getElementById("cep").value = "";
-      document.getElementById("numero").value = "";
-      document.getElementById("endereco").value = "";
-      document.getElementById("observacao").value = "";
-      document.getElementById("obsPizza").value = "";
-      document.getElementById("mensagemEntrega").innerHTML = "";
-
-      atualizarCarrinho();
-      inicializarPedido();
-    }
-
-    function montarHtmlCupomTermico(pedido) {
-      const itensHtml = (pedido.itens || [])
-        .map((item, i) => {
-          const obsLinha = item.observacao
-            ? `<div>OBS: ${escaparHtml(item.observacao)}</div>`
-            : "";
-          return `
-            <div class="cupom-item">
-              <div>${i + 1}. ${escaparHtml(item.descricao)}</div>
-              <div>R$ ${Number(item.valor || 0).toFixed(2)}</div>
-              ${obsLinha}
-            </div>
-          `;
-        })
-        .join("");
-
-      const enderecoLinha = [
-        pedido.endereco,
-        pedido.numeroCasa ? `N. ${pedido.numeroCasa}` : "",
-        pedido.cep ? `CEP ${pedido.cep}` : ""
-      ]
-        .filter(Boolean)
-        .join(", ");
-
-      return `
-        <div style="text-align: center;">KING VENTURA PIZZARIA</div>
-        <div>PEDIDO: ${escaparHtml(pedido.numero || "")}</div>
-        <div>DATA: ${escaparHtml(pedido.data || "")}</div>
-        <div>STATUS: ${escaparHtml(normalizarStatusPedido(pedido.status))}</div>
-        <div class="cupom-linha"></div>
-        ${pedido.cliente ? `<div>CLI: ${escaparHtml(pedido.cliente)}</div>` : ""}
-        ${pedido.telefone ? `<div>TEL: ${escaparHtml(pedido.telefone)}</div>` : ""}
-        ${enderecoLinha ? `<div>END: ${escaparHtml(enderecoLinha)}</div>` : ""}
-        ${pedido.observacao ? `<div>OBS: ${escaparHtml(pedido.observacao)}</div>` : ""}
-        <div class="cupom-linha"></div>
-        ${itensHtml || "<div>SEM ITENS</div>"}
-        <div class="cupom-linha"></div>
-        <div>TAXA: R$ ${Number(pedido.taxaEntrega || 0).toFixed(2)}</div>
-        <div>TOTAL: R$ ${Number(pedido.total || 0).toFixed(2)}</div>
-      `;
     }
 
     function imprimirCupomTermico() {
-      sincronizarCamposPedido();
-      if (!pedidoAtual.itens || pedidoAtual.itens.length === 0) {
-        alert("Adicione pelo menos um item ao carrinho antes de imprimir o cupom.");
-        return;
-      }
+      sincronizarDadosClientePedido();
+
+      const numeroPed = document.getElementById("numeroPedido").innerText || "KV";
+      const dataPed = document.getElementById("dataPedido").innerText || new Date().toLocaleString("pt-BR");
+      const itens = Array.isArray(pedidoAtual.itens) ? pedidoAtual.itens : [];
+
+      let linhasItens = "";
+      itens.forEach(function (item) {
+        const desc = String(item.descricao || "ITEM");
+        const val = Number(item.valor || 0).toFixed(2);
+        linhasItens += '<div class="cupom-item">' +
+          '<div class="cupom-txt">' + desc + ' - R$ ' + val + '</div>';
+        if (item.observacao) {
+          linhasItens += '<div class="cupom-txt cupom-obs">OBS: ' + String(item.observacao) + '</div>';
+        }
+        linhasItens += '</div>';
+      });
+
+      const endereco = [
+        pedidoAtual.endereco || "",
+        pedidoAtual.numeroCasa ? "nº " + pedidoAtual.numeroCasa : ""
+      ].filter(Boolean).join(", ");
+
       const cupom = document.getElementById("cupomTermico");
-      if (!cupom) return;
-      cupom.innerHTML = montarHtmlCupomTermico(pedidoAtual);
-      window.print();
+      cupom.innerHTML =
+        '<div class="cupom-txt cupom-titulo">KING VENTURA PIZZARIA</div>' +
+        '<div class="cupom-txt">PED: ' + numeroPed + ' | ' + dataPed + '</div>' +
+        '<div class="cupom-linha"></div>' +
+        '<div class="cupom-txt">CLI: ' + (pedidoAtual.cliente || "-") + '</div>' +
+        '<div class="cupom-txt">FONE: ' + (pedidoAtual.telefone || "-") + '</div>' +
+        '<div class="cupom-txt">END: ' + (endereco || "-") + '</div>' +
+        '<div class="cupom-txt">CEP: ' + (pedidoAtual.cep || "-") + '</div>' +
+        (pedidoAtual.observacao ? '<div class="cupom-txt">OBS: ' + pedidoAtual.observacao + '</div>' : '') +
+        '<div class="cupom-linha"></div>' +
+        (linhasItens || '<div class="cupom-txt">SEM ITENS NO CARRINHO</div>') +
+        '<div class="cupom-linha"></div>' +
+        '<div class="cupom-txt">TAXA ENTREGA: R$ ' + Number(pedidoAtual.taxaEntrega || 0).toFixed(2) + '</div>' +
+        '<div class="cupom-txt cupom-total">TOTAL: R$ ' + Number(pedidoAtual.total || 0).toFixed(2) + '</div>' +
+        '<div class="cupom-linha"></div>' +
+        '<div class="cupom-txt cupom-rodape">OBRIGADO PELA PREFERENCIA!</div>';
+
+      setTimeout(function () { window.print(); }, 350);
     }
 
-    function imprimirPedidoHistorico(index) {
-      const pedido = historicoPedidos[index];
-      if (!pedido) return;
-      const cupom = document.getElementById("cupomTermico");
-      if (!cupom) return;
-      cupom.innerHTML = montarHtmlCupomTermico(pedido);
-      window.print();
+    function sincronizarDadosClientePedido() {
+      pedidoAtual.cliente = document.getElementById("nome").value.trim();
+      pedidoAtual.telefone = document.getElementById("telefone").value.trim();
+      pedidoAtual.cep = document.getElementById("cep").value.trim();
+      pedidoAtual.endereco = document.getElementById("endereco").value.trim();
+      pedidoAtual.numeroCasa = document.getElementById("numero").value.trim();
+      pedidoAtual.observacao = document.getElementById("observacao").value.trim();
+      pedidoAtual.taxaEntrega = taxaEntrega;
     }
 
-    function importarPedidoWhatsApp() {
-      const texto = document.getElementById("pedidoWhats").value.trim();
-      if (!texto) {
-        alert("Cole a mensagem do WhatsApp primeiro.");
-        return;
+    function enviarWhatsApp(pedido) {
+      let mensagem = "KING VENTURA PIZZARIA\n\n";
+      mensagem += "Pedido: " + (pedido.numero || document.getElementById("numeroPedido").innerText) + "\n";
+      mensagem += "Status: " + normalizarStatusPedido(pedido.status || pedidoAtual.status || "Gerado") + "\n";
+      mensagem += "Cliente: " + (pedido.cliente || "") + "\n";
+      mensagem += "Telefone: " + (pedido.telefone || "") + "\n";
+      mensagem += "CEP: " + (pedido.cep || "") + "\n";
+      mensagem += "Endereço: " + (pedido.endereco || "") + "\n";
+      mensagem += "Número: " + (pedido.numeroCasa || "") + "\n";
+      mensagem += "Observação: " + (pedido.observacao || "") + "\n";
+      mensagem += "Taxa de Entrega: R$ " + Number(pedido.taxaEntrega || 0).toFixed(2) + "\n\n";
+      mensagem += "ITENS:\n[KV-ITENS]\n";
+
+      (pedido.itens || []).forEach((item) => {
+        mensagem += item.descricao + " - R$ " + Number(item.valor).toFixed(2) + "\n";
+        if (item.adicionais && item.adicionais.length) {
+          mensagem += "Adicionais: " + item.adicionais.join(", ") + "\n";
+        }
+        if (item.observacao) {
+          mensagem += "Obs: " + item.observacao + "\n";
+        }
+        mensagem += "\n";
+      });
+
+      mensagem += "\nTOTAL: R$ " + Number(pedido.total || 0).toFixed(2);
+
+      window.open(
+        "https://wa.me/" + NUMERO_WHATSAPP + "?text=" + encodeURIComponent(mensagem),
+        "_blank"
+      );
+    }
+
+    function importarPedidoWhats() {
+      const texto = document.getElementById("pedidoWhats").value;
+      if (!texto.trim()) return;
+
+      limparPedido();
+
+      const nome = texto.match(/Cliente:\s*(.*)/i);
+      const telefone = texto.match(/Telefone:\s*(.*)/i);
+      const cep = texto.match(/CEP:\s*(.*)/i);
+      const numero = texto.match(/N[uú]mero:\s*(.*)/i);
+      const endereco = texto.match(/Endere[cç]o:\s*(.*)/i);
+      const obs = texto.match(/Observa[cç][aã]o:\s*(.*)/i);
+
+      document.getElementById("nome").value = nome ? nome[1].trim() : "";
+      document.getElementById("telefone").value = telefone ? telefone[1].trim() : "";
+      document.getElementById("cep").value = cep ? cep[1].trim() : "";
+      document.getElementById("numero").value = numero ? numero[1].trim() : "";
+      if (endereco && endereco[1].trim()) {
+        document.getElementById("endereco").value = endereco[1].trim();
+      }
+      if (obs && obs[1].trim()) {
+        document.getElementById("observacao").value = obs[1].trim();
       }
 
-      const linhas = texto.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-      pedidoAtual.itens = [];
+      const linhas = texto.split("\n");
+      linhas.forEach((rawLinha) => {
+        const linha = rawLinha.trim();
 
-      linhas.forEach((linha) => {
-        const matchPreco = linha.match(/R\$\s*([\d.,]+)/i);
-        const valorItem = matchPreco ? parseFloat(matchPreco[1].replace(",", ".")) : 0;
+        if (linha.startsWith("Brotinho 25cm - ")) {
+          const sabor = linha
+            .split(" - R$ ")[0]
+            .replace("Brotinho 25cm - ", "")
+            .split(" + ")[0]
+            .trim();
 
-        if (/^nome\s*:/i.test(linha)) {
-          document.getElementById("nome").value = linha.replace(/^nome\s*:/i, "").trim();
-        } else if (/^(telefone|fone|zap|whatsapp)\s*:/i.test(linha)) {
-          document.getElementById("telefone").value = linha.replace(/^(telefone|fone|zap|whatsapp)\s*:/i, "").trim();
-        } else if (/^cep\s*:/i.test(linha)) {
-          document.getElementById("cep").value = linha.replace(/^cep\s*:/i, "").trim();
-        } else if (/^(endereço|endereco|rua)\s*:/i.test(linha)) {
-          document.getElementById("endereco").value = linha.replace(/^(endereço|endereco|rua)\s*:/i, "").trim();
-        } else if (/^(obs|observação|observacao)\s*:/i.test(linha)) {
-          document.getElementById("observacao").value = linha.replace(/^(obs|observação|observacao)\s*:/i, "").trim();
-        } else if (/pizza|brotinho|coca|guaraná|guarana|bebida/i.test(linha) || matchPreco) {
-          const descLimpa = linha.replace(/[-–—]?\s*R\$\s*[\d.,]+/i, "").trim();
-          let precoFinal = valorItem;
-          if (!precoFinal) {
-            const saborEncontrado = Object.keys(SABORES).find((s) =>
-              descLimpa.toLowerCase().includes(s.toLowerCase())
-            );
-            if (saborEncontrado) {
-              precoFinal = /brotinho/i.test(descLimpa)
-                ? Number(SABORES[saborEncontrado].brotinho)
-                : Number(SABORES[saborEncontrado].grande);
-            }
+          if (SABORES[sabor]) {
+            document.getElementById("tamanho").value = "brotinho";
+            carregarSabores();
+            document.getElementById("sabor1").value = sabor;
+            document.getElementById("btnAdicionarPizza").click();
           }
-          adicionarItem({
-            tipo: /coca|guaraná|guarana|bebida|lata|litros/i.test(descLimpa) ? "bebida" : "pizza",
-            descricao: descLimpa || linha,
-            ingredientes: "",
-            observacao: "",
-            valor: precoFinal || 0
-          });
+        } else if (linha.startsWith("Grande 35cm Meio a Meio - ")) {
+          const descricaoPizza = linha
+            .split(" - R$ ")[0]
+            .replace("Grande 35cm Meio a Meio - ", "");
+          const partes = descricaoPizza.split(" + ")[0].split(" / ");
+
+          if (partes.length === 2 && SABORES[partes[0].trim()] && SABORES[partes[1].trim()]) {
+            document.getElementById("tamanho").value = "grande";
+            document.getElementById("tipoPizza").value = "meio";
+            carregarSabores();
+            atualizarVisualPedido();
+            document.getElementById("sabor1").value = partes[0].trim();
+            document.getElementById("sabor2").value = partes[1].trim();
+            document.getElementById("btnAdicionarPizza").click();
+          }
+        } else if (linha.startsWith("Grande 35cm - ")) {
+          const sabor = linha
+            .split(" - R$ ")[0]
+            .replace("Grande 35cm - ", "")
+            .split(" + ")[0]
+            .trim();
+
+          if (SABORES[sabor]) {
+            document.getElementById("tamanho").value = "grande";
+            document.getElementById("tipoPizza").value = "inteira";
+            carregarSabores();
+            document.getElementById("sabor1").value = sabor;
+            document.getElementById("btnAdicionarPizza").click();
+          }
         }
       });
 
+      const bebidaSelect = document.getElementById("bebida");
+      for (let i = 1; i < bebidaSelect.options.length; i++) {
+        const optText = bebidaSelect.options[i].text.split(" - R$ ")[0];
+        if (texto.includes(optText)) {
+          bebidaSelect.selectedIndex = i;
+          document.getElementById("btnAdicionarBebida").click();
+        }
+      }
+
       buscarCEP();
-      atualizarCarrinho();
-      alert("Mensagem importada! Confira os campos e o carrinho.");
+      calcularTaxaEntrega();
+      alert("Pedido importado!");
     }
 
+    function novoPedido() {
+      if (!confirm("Deseja limpar o pedido atual e iniciar um novo pedido?")) {
+        return;
+      }
+      location.reload();
+    }
+
+    /* GESTÃO DE SABORES & PREÇOS */
     function renderizarListaSabores() {
       const container = document.getElementById("listaSabores");
-      if (!container) return;
-
       const nomes = Object.keys(SABORES);
-      if (nomes.length === 0) {
+
+      if (!nomes.length) {
         container.innerHTML = '<p style="color: var(--muted);">Nenhum sabor cadastrado.</p>';
         return;
       }
 
       container.innerHTML = nomes
         .map((nome) => {
-          const info = SABORES[nome];
-          const ing = Array.isArray(info.ingredientes) ? info.ingredientes.join(", ") : "";
-          const nomeEsc = encodeURIComponent(nome);
+          const s = SABORES[nome];
           return `
             <div class="list-card">
-              <div>
-                <b>${nome}</b><br />
-                <span style="color: var(--gold); font-size: 0.9rem;">
-                  Brotinho: R$ ${Number(info.brotinho).toFixed(2)} | Grande: R$ ${Number(info.grande).toFixed(2)}
-                </span><br />
-                <span style="color: var(--muted); font-size: 0.85rem;">Ingredientes: ${ing}</span>
-              </div>
-              <div class="btn-row">
-                <button type="button" class="secondary" onclick="prepararEdicaoSabor(decodeURIComponent('${nomeEsc}'))">Editar</button>
-                <button type="button" class="danger" onclick="excluirSabor(decodeURIComponent('${nomeEsc}'))">Excluir</button>
+              <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <strong>${nome}</strong><br />
+                  <span style="color: var(--gold); font-size: 0.9rem;">
+                    Brotinho 25cm: R$ ${Number(s.brotinho).toFixed(2)} | Grande 35cm: R$ ${Number(s.grande).toFixed(2)}
+                  </span><br />
+                  <span style="color: var(--muted); font-size: 0.85rem;">
+                    Ingredientes: ${(s.ingredientes || []).join(", ")}
+                  </span>
+                </div>
+                <div class="btn-row" style="margin-top: 0;">
+                  <button class="secondary btn-editar-sabor" data-sabor="${nome.replace(/"/g, '&quot;')}" type="button">Editar</button>
+                  <button class="danger btn-excluir-sabor" data-sabor="${nome.replace(/"/g, '&quot;')}" type="button">Excluir</button>
+                </div>
               </div>
             </div>
           `;
         })
         .join("");
+
+      container.querySelectorAll(".btn-editar-sabor").forEach((btn) => {
+        btn.addEventListener("click", () => prepararEdicaoSabor(btn.dataset.sabor));
+      });
+
+      container.querySelectorAll(".btn-excluir-sabor").forEach((btn) => {
+        btn.addEventListener("click", () => excluirSabor(btn.dataset.sabor));
+      });
     }
 
     function prepararEdicaoSabor(nome) {
-      const info = SABORES[nome];
-      if (!info) return;
+      const s = SABORES[nome];
+      if (!s) return;
       document.getElementById("saborEditandoOriginal").value = nome;
       document.getElementById("cadNomeSabor").value = nome;
-      document.getElementById("cadPrecoBrotinho").value = info.brotinho;
-      document.getElementById("cadPrecoGrande").value = info.grande;
-      document.getElementById("cadIngredientes").value = (info.ingredientes || []).join(", ");
+      document.getElementById("cadPrecoBrotinho").value = s.brotinho;
+      document.getElementById("cadPrecoGrande").value = s.grande;
+      document.getElementById("cadIngredientes").value = (s.ingredientes || []).join(", ");
     }
 
     function limparFormSabor() {
@@ -2339,46 +2104,7 @@
       document.getElementById("cadIngredientes").value = "";
     }
 
-    function salvarSaborForm() {
-      const original = document.getElementById("saborEditandoOriginal").value.trim();
-      const nome = document.getElementById("cadNomeSabor").value.trim();
-      const brotinho = parseFloat(document.getElementById("cadPrecoBrotinho").value);
-      const grande = parseFloat(document.getElementById("cadPrecoGrande").value);
-      const ingRaw = document.getElementById("cadIngredientes").value;
-
-      if (!nome) {
-        alert("Informe o nome do sabor.");
-        return;
-      }
-      if (isNaN(brotinho) || brotinho < 0 || isNaN(grande) || grande < 0) {
-        alert("Informe preços válidos para Brotinho e Grande.");
-        return;
-      }
-
-      const ingredientes = ingRaw
-        .split(",")
-        .map((i) => i.trim())
-        .filter(Boolean);
-
-      if (original && original !== nome && SABORES[original]) {
-        delete SABORES[original];
-      }
-
-      SABORES[nome] = {
-        brotinho,
-        grande,
-        ingredientes: ingredientes.length ? ingredientes : ["Molho", "Muçarela", "Orégano"]
-      };
-
-      salvarSaboresStorage();
-      carregarSabores();
-      renderizarListaSabores();
-      limparFormSabor();
-      alert(`Sabor "${nome}" salvo!`);
-    }
-
     function excluirSabor(nome) {
-      if (!SABORES[nome]) return;
       if (!confirm(`Excluir o sabor "${nome}"?`)) return;
       delete SABORES[nome];
       salvarSaboresStorage();
@@ -2386,75 +2112,7 @@
       renderizarListaSabores();
     }
 
-    function restaurarSaboresPadrao() {
-      if (!confirm("Restaurar todos os sabores e preços padrão da King Ventura?")) return;
-      SABORES = JSON.parse(JSON.stringify(SABORES_PADRAO));
-      salvarSaboresStorage();
-      carregarSabores();
-      renderizarListaSabores();
-      limparFormSabor();
-    }
-
-    function salvarClienteNaBase(dados) {
-      if (!dados.nome) {
-        alert("Informe o nome do cliente.");
-        return false;
-      }
-
-      const existenteIdx = clientesBase.findIndex(
-        (c) =>
-          (dados.id && c.id === dados.id) ||
-          c.nome.toLowerCase() === dados.nome.toLowerCase() ||
-          (dados.telefone && c.telefone && c.telefone.replace(/\D/g, "") === dados.telefone.replace(/\D/g, ""))
-      );
-
-      if (existenteIdx >= 0) {
-        clientesBase[existenteIdx] = {
-          ...clientesBase[existenteIdx],
-          ...dados,
-          id: clientesBase[existenteIdx].id
-        };
-      } else {
-        clientesBase.unshift({
-          id: "CLI_" + Date.now(),
-          ...dados
-        });
-      }
-
-      salvarClientes();
-      renderizarClientes();
-      popularDatalistRuas();
-      return true;
-    }
-
-    function salvarClienteDoPedido() {
-      const ok = salvarClienteNaBase({
-        nome: document.getElementById("nome").value.trim(),
-        telefone: document.getElementById("telefone").value.trim(),
-        cep: document.getElementById("cep").value.trim(),
-        numero: document.getElementById("numero").value.trim(),
-        endereco: document.getElementById("endereco").value.trim(),
-        observacao: document.getElementById("observacao").value.trim()
-      });
-      if (ok) alert("Cliente salvo na base!");
-    }
-
-    function salvarClienteDaAba() {
-      const ok = salvarClienteNaBase({
-        id: document.getElementById("clienteEditId").value.trim(),
-        nome: document.getElementById("cliNome").value.trim(),
-        telefone: document.getElementById("cliTelefone").value.trim(),
-        cep: document.getElementById("cliCep").value.trim(),
-        numero: document.getElementById("cliNumero").value.trim(),
-        endereco: document.getElementById("cliEndereco").value.trim(),
-        observacao: document.getElementById("cliObs").value.trim()
-      });
-      if (ok) {
-        limparFormCliente();
-        alert("Cliente salvo!");
-      }
-    }
-
+    /* GESTÃO DE CLIENTES */
     function limparFormCliente() {
       document.getElementById("clienteEditId").value = "";
       document.getElementById("cliNome").value = "";
@@ -2465,42 +2123,73 @@
       document.getElementById("cliObs").value = "";
     }
 
+    function salvarClienteBase(dados) {
+      if (!dados.nome) {
+        alert("Informe o nome do cliente.");
+        return;
+      }
+
+      if (dados.id) {
+        const idx = clientesBase.findIndex((c) => c.id === dados.id);
+        if (idx >= 0) {
+          clientesBase[idx] = { ...clientesBase[idx], ...dados };
+        }
+      } else {
+        const existente = clientesBase.find(
+          (c) => c.nome.toLowerCase() === dados.nome.toLowerCase()
+        );
+        if (existente) {
+          Object.assign(existente, dados, { id: existente.id });
+        } else {
+          clientesBase.unshift({
+            id: "CLI-" + Date.now(),
+            ...dados
+          });
+        }
+      }
+
+      salvarClientes();
+      renderizarClientes();
+    }
+
     function usarClienteNoPedido(id) {
-      const c = clientesBase.find((item) => item.id === id);
-      if (!c) return;
-      document.getElementById("nome").value = c.nome || "";
-      document.getElementById("telefone").value = c.telefone || "";
-      document.getElementById("cep").value = c.cep || "";
-      document.getElementById("numero").value = c.numero || "";
-      document.getElementById("endereco").value = c.endereco || "";
-      document.getElementById("observacao").value = c.observacao || "";
+      const cli = clientesBase.find((c) => c.id === id);
+      if (!cli) return;
+
+      document.getElementById("nome").value = cli.nome || "";
+      document.getElementById("telefone").value = cli.telefone || "";
+      document.getElementById("cep").value = cli.cep || "";
+      document.getElementById("numero").value = cli.numero || "";
+      document.getElementById("endereco").value = cli.endereco || "";
+      document.getElementById("observacao").value = cli.observacao || "";
+
       calcularTaxaEntrega();
-      ativarAba("pedido");
+      mudarAba("pedido");
     }
 
-    function editarCliente(id) {
-      const c = clientesBase.find((item) => item.id === id);
-      if (!c) return;
-      document.getElementById("clienteEditId").value = c.id;
-      document.getElementById("cliNome").value = c.nome || "";
-      document.getElementById("cliTelefone").value = c.telefone || "";
-      document.getElementById("cliCep").value = c.cep || "";
-      document.getElementById("cliNumero").value = c.numero || "";
-      document.getElementById("cliEndereco").value = c.endereco || "";
-      document.getElementById("cliObs").value = c.observacao || "";
+    function editarClienteBase(id) {
+      const cli = clientesBase.find((c) => c.id === id);
+      if (!cli) return;
+
+      document.getElementById("clienteEditId").value = cli.id;
+      document.getElementById("cliNome").value = cli.nome || "";
+      document.getElementById("cliTelefone").value = cli.telefone || "";
+      document.getElementById("cliCep").value = cli.cep || "";
+      document.getElementById("cliNumero").value = cli.numero || "";
+      document.getElementById("cliEndereco").value = cli.endereco || "";
+      document.getElementById("cliObs").value = cli.observacao || "";
     }
 
-    function excluirCliente(id) {
-      if (!confirm("Remover este cliente da base?")) return;
-      clientesBase = clientesBase.filter((item) => item.id !== id);
+    function excluirClienteBase(id) {
+      if (!confirm("Deseja remover este cliente?")) return;
+      clientesBase = clientesBase.filter((c) => c.id !== id);
       salvarClientes();
       renderizarClientes();
     }
 
     function renderizarClientes() {
       const container = document.getElementById("listaClientes");
-      if (!container) return;
-      const termo = (document.getElementById("buscaCliente")?.value || "").toLowerCase().trim();
+      const termo = (document.getElementById("buscaCliente").value || "").toLowerCase().trim();
 
       const filtrados = clientesBase.filter((c) => {
         if (!termo) return true;
@@ -2511,7 +2200,7 @@
         );
       });
 
-      if (filtrados.length === 0) {
+      if (!filtrados.length) {
         container.innerHTML = '<p style="color: var(--muted);">Nenhum cliente encontrado.</p>';
         return;
       }
@@ -2520,17 +2209,19 @@
         .map(
           (c) => `
           <div class="list-card">
-            <div>
-              <b>${c.nome}</b> ${c.telefone ? `• <span style="color: var(--gold);">${c.telefone}</span>` : ""}<br />
-              <span style="color: var(--muted); font-size: 0.85rem;">
-                ${c.endereco || ""}${c.numero ? ", nº " + c.numero : ""}${c.cep ? " • CEP " + c.cep : ""}
-              </span>
-              ${c.observacao ? `<br /><span style="font-size: 0.85rem;">Obs: ${c.observacao}</span>` : ""}
-            </div>
-            <div class="btn-row">
-              <button type="button" class="gold" onclick="usarClienteNoPedido('${c.id}')">Usar no Pedido</button>
-              <button type="button" class="secondary" onclick="editarCliente('${c.id}')">Editar</button>
-              <button type="button" class="danger" onclick="excluirCliente('${c.id}')">Excluir</button>
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <strong>${c.nome}</strong> ${c.telefone ? `• ${c.telefone}` : ""}<br />
+                <span style="color: var(--muted); font-size: 0.85rem;">
+                  ${c.endereco || ""} ${c.numero ? "nº " + c.numero : ""} ${c.cep ? "• CEP " + c.cep : ""}
+                </span>
+                ${c.observacao ? `<br /><span style="color: var(--gold); font-size: 0.82rem;">Obs: ${c.observacao}</span>` : ""}
+              </div>
+              <div class="btn-row" style="margin-top: 0;">
+                <button class="gold" onclick="usarClienteNoPedido('${c.id}')" type="button">Usar no Pedido</button>
+                <button class="secondary" onclick="editarClienteBase('${c.id}')" type="button">Editar</button>
+                <button class="danger" onclick="excluirClienteBase('${c.id}')" type="button">Excluir</button>
+              </div>
             </div>
           </div>
         `
@@ -2538,500 +2229,1546 @@
         .join("");
     }
 
-
-    let filtroStatusHistorico = "Todos";
-    let indicePedidoEditando = null;
-    let rascunhoItensEdicao = [];
-
-    function selecionarFiltroHistorico(status) {
-      filtroStatusHistorico = status || "Todos";
-      const botoes = document.querySelectorAll("#filtrosStatusHistorico [data-filtro-status]");
-      botoes.forEach((btn) => {
-        const ativo = btn.dataset.filtroStatus === filtroStatusHistorico;
-        btn.className = "status-btn " + (ativo ? "active-feito" : "");
-      });
-      renderizarHistorico();
-    }
-
-    function alterarStatusPedidoHistorico(index, novoStatus) {
-      const pedido = historicoPedidos[index];
-      if (!pedido) return;
-      pedido.status = normalizarStatusPedido(novoStatus);
+    /* HISTÓRICO & CAIXA */
+    function definirStatusHistorico(index, novoStatus) {
+      if (!historicoPedidos[index]) return;
+      const meta = obterMetaStatus(novoStatus);
+      historicoPedidos[index].status = meta.key;
       salvarHistorico();
       renderizarHistorico();
+      popularDatalistRuas();
     }
 
-    function escaparHtml(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+    function alternarStatusPedido(index) {
+      if (!historicoPedidos[index]) return;
+      const atualNorm = normalizarStatusPedido(historicoPedidos[index].status);
+      const idxAtual = ETAPAS_PEDIDO.findIndex((e) => e.key === atualNorm);
+      const prox = ETAPAS_PEDIDO[(idxAtual + 1) % ETAPAS_PEDIDO.length];
+      definirStatusHistorico(index, prox.key);
     }
 
-    function abrirEditorPedidoHistorico(index) {
-      const pedido = historicoPedidos[index];
-      if (!pedido) return;
-      indicePedidoEditando = index;
-      rascunhoItensEdicao = JSON.parse(JSON.stringify(pedido.itens || []));
+    let filtroHistoricoAtual = "Todos";
 
-      document.getElementById("editarPedidoNumero").innerText = pedido.numero || "";
-      document.getElementById("editarTaxaEntrega").value = Number(pedido.taxaEntrega || 0).toFixed(2);
-      document.getElementById("editarClienteHistorico").value = pedido.cliente || "";
-      document.getElementById("editarObservacaoHistorico").value = pedido.observacao || "";
-      document.getElementById("cardEditarPedido").style.display = "block";
-      renderizarItensEdicao();
-      document.getElementById("cardEditarPedido").scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-
-    function fecharEditorPedidoHistorico() {
-      indicePedidoEditando = null;
-      rascunhoItensEdicao = [];
-      const card = document.getElementById("cardEditarPedido");
-      if (card) card.style.display = "none";
-    }
-
-    function atualizarTotaisEdicao() {
-      let subtotal = 0;
-      rascunhoItensEdicao.forEach((it) => {
-        subtotal += Number(it.valor) || 0;
-      });
-      const taxa = Math.max(0, parseFloat(document.getElementById("editarTaxaEntrega")?.value) || 0);
-      const total = subtotal + taxa;
-      document.getElementById("editarSubtotal").innerText = subtotal.toFixed(2);
-      document.getElementById("editarTaxaMostrada").innerText = taxa.toFixed(2);
-      document.getElementById("editarTotal").innerText = total.toFixed(2);
-    }
-
-    function renderizarItensEdicao() {
-      const lista = document.getElementById("editarItensLista");
-      if (!lista) return;
-      if (!rascunhoItensEdicao.length) {
-        lista.innerHTML = '<p style="color: var(--muted);">Sem itens neste pedido. Clique em "+ Adicionar Item".</p>';
-        atualizarTotaisEdicao();
-        return;
-      }
-
-      lista.innerHTML = rascunhoItensEdicao
-        .map(
-          (item, idx) => `
-          <div class="item">
-            <div class="grid-2">
-              <div>
-                <label>Descrição do Item</label>
-                <input type="text" value="${escaparHtml(item.descricao)}" onchange="alterarCampoItemEdicao(${idx}, 'descricao', this.value)" />
-              </div>
-              <div>
-                <label>Valor (R$)</label>
-                <input type="number" step="0.50" min="0" value="${Number(item.valor || 0).toFixed(2)}" onchange="alterarCampoItemEdicao(${idx}, 'valor', this.value)" />
-              </div>
-            </div>
-            <div style="margin-top: 8px; display: flex; justify-content: flex-end;">
-              <button type="button" class="danger" onclick="removerItemEdicao(${idx})">Remover Item</button>
-            </div>
-          </div>
-        `
-        )
-        .join("");
-
-      atualizarTotaisEdicao();
-    }
-
-    function alterarCampoItemEdicao(idx, campo, valor) {
-      if (!rascunhoItensEdicao[idx]) return;
-      if (campo === "valor") {
-        rascunhoItensEdicao[idx].valor = Math.max(0, parseFloat(valor) || 0);
-      } else {
-        rascunhoItensEdicao[idx][campo] = valor;
-      }
-      atualizarTotaisEdicao();
-    }
-
-    function removerItemEdicao(idx) {
-      rascunhoItensEdicao.splice(idx, 1);
-      renderizarItensEdicao();
-    }
-
-    function adicionarItemEdicao() {
-      rascunhoItensEdicao.push({
-        tipo: "pizza",
-        descricao: "Novo Item",
-        ingredientes: "",
-        observacao: "",
-        valor: 0
-      });
-      renderizarItensEdicao();
-    }
-
-    function salvarEdicaoPedidoHistorico() {
-      if (indicePedidoEditando === null || !historicoPedidos[indicePedidoEditando]) return;
-      const pedido = historicoPedidos[indicePedidoEditando];
-      const taxa = Math.max(0, parseFloat(document.getElementById("editarTaxaEntrega").value) || 0);
-      let subtotal = 0;
-      rascunhoItensEdicao.forEach((it) => {
-        subtotal += Number(it.valor) || 0;
-      });
-
-      pedido.itens = JSON.parse(JSON.stringify(rascunhoItensEdicao));
-      pedido.taxaEntrega = taxa;
-      pedido.total = subtotal + taxa;
-      pedido.cliente = document.getElementById("editarClienteHistorico").value.trim();
-      pedido.observacao = document.getElementById("editarObservacaoHistorico").value.trim();
-
-      salvarHistorico();
-      fecharEditorPedidoHistorico();
-      renderizarHistorico();
-      alert(`Pedido ${pedido.numero} atualizado!`);
-    }
-
-    function excluirPedidoHistorico(index) {
-      const pedido = historicoPedidos[index];
-      if (!pedido) return;
-      if (!confirm(`Excluir o pedido ${pedido.numero} do histórico?`)) return;
-      historicoPedidos.splice(index, 1);
-      salvarHistorico();
-      if (indicePedidoEditando === index) {
-        fecharEditorPedidoHistorico();
+    function selecionarFiltroHistorico(filtro) {
+      filtroHistoricoAtual = filtro || "Todos";
+      const barra = document.getElementById("filtrosStatusHistorico");
+      if (barra) {
+        barra.querySelectorAll("button").forEach((b) => {
+          const f = b.dataset.filtroStatus;
+          b.className = "status-btn";
+          if (f === filtroHistoricoAtual) {
+            if (f === "Todos") b.classList.add("active-feito");
+            else {
+              const meta = obterMetaStatus(f);
+              b.classList.add(meta.activeClass);
+            }
+          }
+        });
       }
       renderizarHistorico();
     }
 
     function renderizarHistorico() {
       const container = document.getElementById("listaHistorico");
-      if (!container) return;
+      const termo = (document.getElementById("buscaHistorico").value || "").toLowerCase().trim();
 
-      const termo = (document.getElementById("buscaHistorico")?.value || "").toLowerCase().trim();
-
-      let faturamento = 0;
+      let soma = 0;
       historicoPedidos.forEach((p) => {
-        faturamento += Number(p.total) || 0;
+        const val = Number(String(p.total || 0).replace(",", "."));
+        if (!isNaN(val)) soma += val;
       });
+
       const qtd = historicoPedidos.length;
-      const ticket = qtd > 0 ? faturamento / qtd : 0;
+      const ticket = qtd > 0 ? soma / qtd : 0;
 
       document.getElementById("kpiQtdPedidos").innerText = qtd;
-      document.getElementById("kpiFaturamento").innerText = faturamento.toFixed(2);
+      document.getElementById("kpiFaturamento").innerText = soma.toFixed(2);
       document.getElementById("kpiTicketMedio").innerText = ticket.toFixed(2);
 
-      const pedidosComIndice = historicoPedidos.map((p, idx) => ({ pedido: p, idx }));
-      const filtrados = pedidosComIndice.filter(({ pedido: p }) => {
-        const statusNorm = normalizarStatusPedido(p.status);
-        if (filtroStatusHistorico && filtroStatusHistorico !== "Todos" && statusNorm !== filtroStatusHistorico) {
-          return false;
-        }
-        if (!termo) return true;
-        return (
-          (p.numero || "").toLowerCase().includes(termo) ||
-          (p.cliente || "").toLowerCase().includes(termo) ||
-          statusNorm.toLowerCase().includes(termo)
-        );
-      });
+      const filtrados = historicoPedidos
+        .map((p, idx) => ({ p, idx }))
+        .filter(({ p }) => {
+          const normStatus = normalizarStatusPedido(p.status);
+          if (filtroHistoricoAtual && filtroHistoricoAtual !== "Todos" && normStatus !== filtroHistoricoAtual) {
+            return false;
+          }
+          if (!termo) return true;
+          return (
+            (p.numero || "").toLowerCase().includes(termo) ||
+            (p.cliente || "").toLowerCase().includes(termo) ||
+            (p.status || "").toLowerCase().includes(termo) ||
+            normStatus.toLowerCase().includes(termo)
+          );
+        });
 
-      if (filtrados.length === 0) {
-        container.innerHTML = '<p style="color: var(--muted);">Nenhum pedido encontrado neste filtro.</p>';
+      if (!filtrados.length) {
+        container.innerHTML = '<p style="color: var(--muted);">Nenhum pedido registrado no histórico.</p>';
         return;
       }
 
       container.innerHTML = filtrados
-        .map(({ pedido: p, idx }) => {
-          const statusNorm = normalizarStatusPedido(p.status);
-          const meta = obterMetaStatus(statusNorm);
-          const itensResumo = (p.itens || []).map((i) => i.descricao).join(" • ");
-          const stepperHtml = ETAPAS_PEDIDO.map((etapa) => {
-            const ativo = etapa.key === statusNorm;
-            return `<button type="button" class="status-btn ${ativo ? etapa.activeClass : ""}" onclick="alterarStatusPedidoHistorico(${idx}, '${etapa.key}')">${etapa.label}</button>`;
-          }).join("");
+        .map(
+          ({ p, idx }) => {
+            const meta = obterMetaStatus(p.status);
+            const botoesEtapas = ETAPAS_PEDIDO.map((etapa) => {
+              const ativo = etapa.key === meta.key;
+              return `<button class="status-btn ${ativo ? etapa.activeClass : ""}" onclick="definirStatusHistorico(${idx}, '${etapa.key}')" type="button">${etapa.label}</button>`;
+            }).join("");
 
-          return `
-            <div class="list-card">
+            return `
+          <div class="list-card">
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
               <div>
-                <b>${escaparHtml(p.numero)}</b> — ${escaparHtml(p.cliente || "Cliente não informado")}
-                <span class="status-pill ${meta.pillClass}">${meta.label}</span><br />
-                <span style="color: var(--muted); font-size: 0.82rem;">${escaparHtml(p.data || "")}</span><br />
-                <span style="font-size: 0.88rem;">${escaparHtml(itensResumo || "Sem itens")}</span><br />
-                <strong style="color: var(--gold);">Total: R$ ${Number(p.total || 0).toFixed(2)}</strong>
-                <div class="status-stepper" aria-label="Alterar etapa do pedido ${escaparHtml(p.numero)}">${stepperHtml}</div>
+                <strong>${p.numero || "KV"}</strong> • <span class="status-pill ${meta.pillClass}">${meta.label}</span><br />
+                <span style="font-size: 0.9rem;">Cliente: ${p.cliente || "Não informado"} ${p.telefone ? "• " + p.telefone : ""}</span><br />
+                <span style="color: var(--muted); font-size: 0.82rem;">${p.data || ""}</span>
               </div>
-              <div class="btn-row">
-                <button type="button" class="gold" onclick="imprimirPedidoHistorico(${idx})">🖨️ Imprimir</button>
-                <button type="button" class="secondary" onclick="abrirEditorPedidoHistorico(${idx})">✏️ Editar Itens</button>
-                <button type="button" class="danger" onclick="excluirPedidoHistorico(${idx})">Excluir</button>
+              <div style="text-align: right;">
+                <strong style="color: var(--gold); font-size: 1.05rem;">R$ ${Number(p.total || 0).toFixed(2)}</strong><br />
+                <div class="btn-row" style="margin-top: 6px; justify-content: flex-end;">
+                  <button class="secondary" onclick="alternarStatusPedido(${idx})" type="button">Próxima Etapa</button>
+                  <button class="gold" onclick="editarPedidoHistorico(${idx})" type="button">✏️ Editar Itens</button>
+                  <button class="danger" onclick="excluirPedidoHistorico(${idx})" type="button">🗑️ Excluir Pedido</button>
+                </div>
               </div>
             </div>
-          `;
-        })
+            <div class="status-stepper" aria-label="Alterar status do pedido ${p.numero || ""}">
+              ${botoesEtapas}
+            </div>
+          </div>
+        `;
+          }
+        )
         .join("");
     }
 
-    function baixarArquivo(nomeArquivo, conteudo, mimeType) {
-      const blob = new Blob([conteudo], { type: mimeType });
+    /* ===== EDITAR ITENS DO PEDIDO NO HISTORICO ===== */
+    let indiceEditandoPedido = -1;
+
+    function excluirPedidoHistorico(indice) {
+      const p = historicoPedidos[indice];
+      if (!p) return;
+
+      const resumo = (p.numero || "KV") + " — " + (p.cliente || "sem nome") +
+        " — R$ " + Number(p.total || 0).toFixed(2);
+      if (!confirm("Excluir este pedido do histórico?\n\n" + resumo +
+        "\n\nEle sai do caixa, do faturamento e do ticket médio.")) return;
+
+      historicoPedidos.splice(indice, 1);
+      salvarHistorico();
+
+      // se estava editando justamente este pedido, fecha o painel
+      if (indiceEditandoPedido === indice) fecharEdicaoPedido();
+      else if (indiceEditandoPedido > indice) indiceEditandoPedido--;
+
+      renderizarHistorico();
+      popularDatalistRuas();
+    }
+
+    function editarPedidoHistorico(indice) {
+      const p = historicoPedidos[indice];
+      if (!p) return;
+
+      indiceEditandoPedido = indice;
+      document.getElementById("editarPedidoNumero").innerText = p.numero || "";
+      document.getElementById("editarClienteHistorico").value = p.cliente || "";
+      document.getElementById("editarObservacaoHistorico").value = p.observacao || "";
+      document.getElementById("editarTaxaEntrega").value = Number(p.taxaEntrega || 0).toFixed(2);
+
+      desenharItensEdicao();
+      document.getElementById("cardEditarPedido").style.display = "block";
+      document.getElementById("cardEditarPedido").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function desenharItensEdicao() {
+      const p = historicoPedidos[indiceEditandoPedido];
+      const box = document.getElementById("editarItensLista");
+      if (!p) return;
+
+      const itens = Array.isArray(p.itens) ? p.itens : [];
+
+      if (!itens.length) {
+        box.innerHTML = '<p style="color: var(--muted);">Este pedido não tem itens salvos.</p>';
+        recalcularEdicaoPedido();
+        return;
+      }
+
+      box.innerHTML = itens.map(function (item, i) {
+        return `
+          <div class="item">
+            <label for="editDesc${i}">Item ${i + 1} — descrição</label>
+            <input id="editDesc${i}" value="${String(item.descricao || "").replace(/"/g, "&quot;")}"
+                   oninput="recalcularEdicaoPedido()" />
+            <div class="grid-2">
+              <div>
+                <label for="editValor${i}">Valor (R$)</label>
+                <input id="editValor${i}" type="number" step="0.50" min="0"
+                       value="${Number(item.valor || 0).toFixed(2)}"
+                       oninput="recalcularEdicaoPedido()" />
+              </div>
+              <div>
+                <label for="editObs${i}">Observação do item</label>
+                <input id="editObs${i}" value="${String(item.observacao || "").replace(/"/g, "&quot;")}" />
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="danger" type="button" onclick="removerItemEdicao(${i})">Excluir item</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recalcularEdicaoPedido();
+    }
+
+    function coletarItensEdicao() {
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (!p) return [];
+      const itens = Array.isArray(p.itens) ? p.itens : [];
+      const novos = [];
+
+      itens.forEach(function (item, i) {
+        const campoDesc = document.getElementById("editDesc" + i);
+        const campoValor = document.getElementById("editValor" + i);
+        const campoObs = document.getElementById("editObs" + i);
+        if (!campoDesc) return;
+        novos.push({
+          descricao: campoDesc.value,
+          ingredientes: item.ingredientes || "",
+          observacao: campoObs ? campoObs.value : "",
+          valor: Number(campoValor ? campoValor.value : 0) || 0
+        });
+      });
+      return novos;
+    }
+
+    function recalcularEdicaoPedido() {
+      const itens = coletarItensEdicao();
+      const subtotal = itens.reduce(function (s, i) { return s + (Number(i.valor) || 0); }, 0);
+      const taxa = Number(document.getElementById("editarTaxaEntrega").value) || 0;
+
+      document.getElementById("editarSubtotal").innerText = subtotal.toFixed(2);
+      document.getElementById("editarTaxaMostrada").innerText = taxa.toFixed(2);
+      document.getElementById("editarTotal").innerText = (subtotal + taxa).toFixed(2);
+
+      // mantem a lista editada na memoria do pedido em edicao
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (p) p.itens = itens;
+    }
+
+    function removerItemEdicao(i) {
+      const itens = coletarItensEdicao();
+      itens.splice(i, 1);
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (p) p.itens = itens;
+      desenharItensEdicao();
+    }
+
+    function adicionarItemEdicao() {
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (!p) return;
+      if (!Array.isArray(p.itens)) p.itens = [];
+      p.itens.push({ descricao: "Novo item", ingredientes: "", observacao: "", valor: 0 });
+      desenharItensEdicao();
+    }
+
+    function salvarEdicaoPedido() {
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (!p) return;
+
+      const itens = coletarItensEdicao();
+      const subtotal = itens.reduce(function (s, i) { return s + (Number(i.valor) || 0); }, 0);
+      const taxa = Number(document.getElementById("editarTaxaEntrega").value) || 0;
+
+      p.itens = itens;
+      p.taxaEntrega = taxa;
+      p.total = subtotal + taxa;
+      p.cliente = document.getElementById("editarClienteHistorico").value.trim();
+      p.observacao = document.getElementById("editarObservacaoHistorico").value.trim();
+
+      salvarHistorico();
+      renderizarHistorico();
+      fecharEdicaoPedido();
+      alert("Pedido " + (p.numero || "") + " atualizado. Total: R$ " + p.total.toFixed(2));
+    }
+
+    function fecharEdicaoPedido() {
+      indiceEditandoPedido = -1;
+      document.getElementById("cardEditarPedido").style.display = "none";
+    }
+
+    document.getElementById("btnSalvarEdicaoPedido").addEventListener("click", salvarEdicaoPedido);
+    document.getElementById("btnCancelarEdicaoPedido").addEventListener("click", fecharEdicaoPedido);
+
+    /* EXPORTAÇÃO CSV & BACKUP JSON */
+    function baixarCSV(nomeArquivo, linhas) {
+      const csv = linhas
+        .map((linha) =>
+          linha.map((campo) => `"${String(campo ?? "").replace(/"/g, '""')}"`).join(";")
+        )
+        .join("\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = nomeArquivo;
-      document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
 
-    function exportarPedidosCSV() {
-      const linhas = ["Numero;Data;Status;Cliente;Telefone;Endereco;TaxaEntrega;Total;Itens"];
-      historicoPedidos.forEach((p) => {
-        const itensTxt = (p.itens || []).map((i) => `${i.descricao} (R$ ${Number(i.valor).toFixed(2)})`).join(" | ");
-        const row = [
-          p.numero || "",
-          p.data || "",
-          normalizarStatusPedido(p.status),
-          p.cliente || "",
-          p.telefone || "",
-          `${p.endereco || ""} ${p.numeroCasa || ""}`.trim(),
-          Number(p.taxaEntrega || 0).toFixed(2),
-          Number(p.total || 0).toFixed(2),
-          itensTxt
-        ].map((v) => `"${String(v).replace(/"/g, '""')}"`);
-        linhas.push(row.join(";"));
+    function mudarAba(tabName) {
+      document.querySelectorAll(".nav-tab").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.tab === tabName);
       });
-      baixarArquivo("king-ventura-pedidos.csv", "\uFEFF" + linhas.join("\n"), "text/csv;charset=utf-8;");
-    }
-
-    function exportarSaboresCSV() {
-      const linhas = ["Sabor;Brotinho;Grande;Ingredientes"];
-      Object.keys(SABORES).forEach((nome) => {
-        const s = SABORES[nome];
-        const row = [
-          nome,
-          Number(s.brotinho).toFixed(2),
-          Number(s.grande).toFixed(2),
-          (s.ingredientes || []).join(", ")
-        ].map((v) => `"${String(v).replace(/"/g, '""')}"`);
-        linhas.push(row.join(";"));
+      document.querySelectorAll(".tab-panel").forEach((panel) => {
+        panel.classList.toggle("active", panel.id === "tab-" + tabName);
       });
-      baixarArquivo("king-ventura-sabores.csv", "\uFEFF" + linhas.join("\n"), "text/csv;charset=utf-8;");
     }
 
-    function exportarClientesCSV() {
-      const linhas = ["Nome;Telefone;CEP;Numero;Endereco;Observacao"];
-      clientesBase.forEach((c) => {
-        const row = [
-          c.nome || "",
-          c.telefone || "",
-          c.cep || "",
-          c.numero || "",
-          c.endereco || "",
-          c.observacao || ""
-        ].map((v) => `"${String(v).replace(/"/g, '""')}"`);
-        linhas.push(row.join(";"));
-      });
-      baixarArquivo("king-ventura-clientes.csv", "\uFEFF" + linhas.join("\n"), "text/csv;charset=utf-8;");
-    }
+    /* EVENTOS */
+    document.querySelectorAll(".nav-tab").forEach((btn) => {
+      btn.addEventListener("click", () => mudarAba(btn.dataset.tab));
+    });
 
-    function exportarBackupJSON() {
-      const payload = {
-        sistema: "KING VENTURA PIZZARIA",
-        versao: "V7.2 REBUILD",
-        exportadoEm: new Date().toISOString(),
-        ultimoPedido: Number(localStorage.getItem("ultimoPedido") || 0),
-        sabores: SABORES,
-        clientes: clientesBase,
-        historicoPedidos: historicoPedidos
-      };
-      const jsonStr = JSON.stringify(payload, null, 2);
-      document.getElementById("inputBackupJson").value = jsonStr;
-      baixarArquivo("backup-king-ventura.json", jsonStr, "application/json");
-    }
+    document.getElementById("tamanho").addEventListener("change", carregarSabores);
+    document.getElementById("tipoPizza").addEventListener("change", atualizarVisualPedido);
+    document.getElementById("sabor1").addEventListener("change", atualizarPreviewIngredientes);
+    document.getElementById("sabor2").addEventListener("change", atualizarPreviewIngredientes);
 
-    function restaurarBackupJSON(conteudoTexto) {
-      const raw = (conteudoTexto || document.getElementById("inputBackupJson").value || "").trim();
-      if (!raw) {
-        alert("Cole um JSON de backup ou selecione um arquivo .json.");
+    document.getElementById("btnAdicionarPizza").addEventListener("click", function () {
+      const tamanho = document.getElementById("tamanho").value;
+      const tipo = document.getElementById("tipoPizza").value;
+      const sabor1 = document.getElementById("sabor1").value;
+      const sabor2 = document.getElementById("sabor2").value;
+
+      if (!sabor1 || !SABORES[sabor1]) {
+        alert("Selecione o Sabor 1.");
         return;
       }
 
-      try {
-        const data = JSON.parse(raw);
-        if (!confirm("Restaurar este backup? Isso substituirá sabores, clientes e histórico atuais.")) {
+      let descricao = "";
+      let valor = 0;
+      let ingredientes = "";
+
+      if (tamanho === "brotinho") {
+        descricao = "Brotinho 25cm - " + sabor1;
+        valor = Number(SABORES[sabor1].brotinho);
+        ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
+      } else if (tipo === "meio") {
+        if (!sabor2 || !SABORES[sabor2]) {
+          alert("Selecione o Sabor 2 para pizza Meio a Meio.");
           return;
         }
-
-        if (data.sabores && typeof data.sabores === "object") {
-          SABORES = data.sabores;
-          salvarSaboresStorage();
-        }
-        if (Array.isArray(data.clientes)) {
-          clientesBase = data.clientes;
-          salvarClientes();
-        }
-        if (Array.isArray(data.historicoPedidos)) {
-          historicoPedidos = data.historicoPedidos;
-          salvarHistorico();
-        }
-        if (typeof data.ultimoPedido === "number") {
-          localStorage.setItem("ultimoPedido", String(data.ultimoPedido));
-        }
-
-        carregarSabores();
-        renderizarListaSabores();
-        renderizarClientes();
-        renderizarHistorico();
-        inicializarPedido();
-        alert("Backup restaurado com sucesso!");
-      } catch (e) {
-        alert("JSON inválido. Verifique o conteúdo e tente novamente.");
+        descricao = "Grande 35cm Meio a Meio - " + sabor1 + " / " + sabor2;
+        valor = Math.max(Number(SABORES[sabor1].grande), Number(SABORES[sabor2].grande));
+        ingredientes =
+          "50% " + sabor1 + ": " + (SABORES[sabor1].ingredientes || []).join(", ") +
+          " | 50% " + sabor2 + ": " + (SABORES[sabor2].ingredientes || []).join(", ");
+      } else {
+        descricao = "Grande 35cm - " + sabor1;
+        valor = Number(SABORES[sabor1].grande);
+        ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
       }
+
+      const adicionalEl = document.getElementById("adicional");
+      const valorAdicional = Number(adicionalEl.value) || 0;
+      const nomeAdicional = adicionalEl.options[adicionalEl.selectedIndex].text;
+      const obsPizza = document.getElementById("obsPizza").value.trim();
+
+      adicionarItem({
+        descricao: valorAdicional > 0 ? descricao + " + " + nomeAdicional : descricao,
+        ingredientes: ingredientes,
+        observacao: obsPizza,
+        valor: valor + valorAdicional
+      });
+    });
+
+    document.getElementById("btnAdicionarBebida").addEventListener("click", function () {
+      const sel = document.getElementById("bebida");
+      if (!sel.value) {
+        alert("Selecione uma bebida.");
+        return;
+      }
+      const descricao = sel.options[sel.selectedIndex].text.split(" - R$ ")[0];
+      adicionarItem({
+        descricao: descricao,
+        ingredientes: "",
+        observacao: "",
+        valor: Number(sel.value)
+      });
+      sel.value = "";
+    });
+
+    document.getElementById("btnWhatsApp").addEventListener("click", function () {
+      if (!pedidoAtual.itens.length) {
+        alert("Adicione pelo menos um item antes de enviar.");
+        return;
+      }
+      sincronizarDadosClientePedido();
+      enviarWhatsApp(pedidoAtual);
+    });
+
+    document.getElementById("btnRegistrarHistorico").addEventListener("click", function () {
+      if (!pedidoAtual.itens.length) {
+        alert("Adicione pelo menos um item antes de registrar.");
+        return;
+      }
+      sincronizarDadosClientePedido();
+      const pedido = JSON.parse(JSON.stringify(pedidoAtual));
+      pedido.numero = gerarNumeroPedido();
+      pedido.data = new Date().toLocaleString("pt-BR");
+      registrarPedido(pedido);
+      document.getElementById("numeroPedido").innerText = "KV" + String(Number(localStorage.getItem("ultimoPedido") || 0) + 1).padStart(4, "0");
+      alert("Pedido registrado no histórico.");
+    });
+
+    document.getElementById("btnSalvarClienteRapido").addEventListener("click", function () {
+      const dados = {
+        nome: document.getElementById("nome").value.trim(),
+        telefone: document.getElementById("telefone").value.trim(),
+        cep: document.getElementById("cep").value.trim(),
+        numero: document.getElementById("numero").value.trim(),
+        endereco: document.getElementById("endereco").value.trim(),
+        observacao: document.getElementById("observacao").value.trim()
+      };
+      if (!dados.nome) {
+        alert("Informe o nome do cliente.");
+        return;
+      }
+      salvarClienteBase(dados);
+      alert("Cliente salvo na base.");
+    });
+
+    document.getElementById("btnSalvarCliente").addEventListener("click", function () {
+      const id = document.getElementById("clienteEditId").value;
+      const dados = {
+        nome: document.getElementById("cliNome").value.trim(),
+        telefone: document.getElementById("cliTelefone").value.trim(),
+        cep: document.getElementById("cliCep").value.trim(),
+        numero: document.getElementById("cliNumero").value.trim(),
+        endereco: document.getElementById("cliEndereco").value.trim(),
+        observacao: document.getElementById("cliObs").value.trim()
+      };
+      if (id) dados.id = id;
+      salvarClienteBase(dados);
+      limparFormCliente();
+    });
+
+    document.getElementById("btnLimparClienteForm").addEventListener("click", limparFormCliente);
+
+    document.getElementById("btnSalvarSabor").addEventListener("click", function () {
+      const nome = document.getElementById("cadNomeSabor").value.trim();
+      const brotinho = Number(document.getElementById("cadPrecoBrotinho").value);
+      const grande = Number(document.getElementById("cadPrecoGrande").value);
+      const ingredientes = document.getElementById("cadIngredientes").value
+        .split(",")
+        .map(function (i) { return i.trim(); })
+        .filter(function (i) { return i; });
+      const original = document.getElementById("saborEditandoOriginal").value;
+
+      if (!nome) {
+        alert("Informe o nome do sabor.");
+        return;
+      }
+      if (isNaN(brotinho) || isNaN(grande)) {
+        alert("Informe os preços do brotinho e do grande.");
+        return;
+      }
+
+      if (original && original !== nome) {
+        delete SABORES[original];
+      }
+      SABORES[nome] = { brotinho: brotinho, grande: grande, ingredientes: ingredientes };
+
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+      limparFormSabor();
+      alert("Sabor salvo.");
+    });
+
+    document.getElementById("btnCancelarEdicaoSabor").addEventListener("click", limparFormSabor);
+
+    document.getElementById("btnRestaurarSabores").addEventListener("click", function () {
+      if (!confirm("Restaurar a tabela de sabores e preços padrão? As alterações feitas aqui serão perdidas.")) return;
+      SABORES = JSON.parse(JSON.stringify(SABORES_PADRAO));
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+      alert("Sabores padrão restaurados.");
+    });
+
+    function usarClienteNoPedido(id) {
+      const cli = clientesBase.find((c) => c.id === id);
+      if (!cli) return;
+
+      document.getElementById("nome").value = cli.nome || "";
+      document.getElementById("telefone").value = cli.telefone || "";
+      document.getElementById("cep").value = cli.cep || "";
+      document.getElementById("numero").value = cli.numero || "";
+      document.getElementById("endereco").value = cli.endereco || "";
+      document.getElementById("observacao").value = cli.observacao || "";
+
+      calcularTaxaEntrega();
+      mudarAba("pedido");
     }
 
-    function ativarAba(nomeAba) {
+    function editarClienteBase(id) {
+      const cli = clientesBase.find((c) => c.id === id);
+      if (!cli) return;
+
+      document.getElementById("clienteEditId").value = cli.id;
+      document.getElementById("cliNome").value = cli.nome || "";
+      document.getElementById("cliTelefone").value = cli.telefone || "";
+      document.getElementById("cliCep").value = cli.cep || "";
+      document.getElementById("cliNumero").value = cli.numero || "";
+      document.getElementById("cliEndereco").value = cli.endereco || "";
+      document.getElementById("cliObs").value = cli.observacao || "";
+    }
+
+    function excluirClienteBase(id) {
+      if (!confirm("Deseja remover este cliente?")) return;
+      clientesBase = clientesBase.filter((c) => c.id !== id);
+      salvarClientes();
+      renderizarClientes();
+    }
+
+    function renderizarClientes() {
+      const container = document.getElementById("listaClientes");
+      const termo = (document.getElementById("buscaCliente").value || "").toLowerCase().trim();
+
+      const filtrados = clientesBase.filter((c) => {
+        if (!termo) return true;
+        return (
+          (c.nome || "").toLowerCase().includes(termo) ||
+          (c.telefone || "").toLowerCase().includes(termo) ||
+          (c.endereco || "").toLowerCase().includes(termo)
+        );
+      });
+
+      if (!filtrados.length) {
+        container.innerHTML = '<p style="color: var(--muted);">Nenhum cliente encontrado.</p>';
+        return;
+      }
+
+      container.innerHTML = filtrados
+        .map(
+          (c) => `
+          <div class="list-card">
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <strong>${c.nome}</strong> ${c.telefone ? `• ${c.telefone}` : ""}<br />
+                <span style="color: var(--muted); font-size: 0.85rem;">
+                  ${c.endereco || ""} ${c.numero ? "nº " + c.numero : ""} ${c.cep ? "• CEP " + c.cep : ""}
+                </span>
+                ${c.observacao ? `<br /><span style="color: var(--gold); font-size: 0.82rem;">Obs: ${c.observacao}</span>` : ""}
+              </div>
+              <div class="btn-row" style="margin-top: 0;">
+                <button class="gold" onclick="usarClienteNoPedido('${c.id}')" type="button">Usar no Pedido</button>
+                <button class="secondary" onclick="editarClienteBase('${c.id}')" type="button">Editar</button>
+                <button class="danger" onclick="excluirClienteBase('${c.id}')" type="button">Excluir</button>
+              </div>
+            </div>
+          </div>
+        `
+        )
+        .join("");
+    }
+
+    /* HISTÓRICO & CAIXA */
+    function definirStatusHistorico(index, novoStatus) {
+      if (!historicoPedidos[index]) return;
+      const meta = obterMetaStatus(novoStatus);
+      historicoPedidos[index].status = meta.key;
+      salvarHistorico();
+      renderizarHistorico();
+      popularDatalistRuas();
+    }
+
+    function alternarStatusPedido(index) {
+      if (!historicoPedidos[index]) return;
+      const atualNorm = normalizarStatusPedido(historicoPedidos[index].status);
+      const idxAtual = ETAPAS_PEDIDO.findIndex((e) => e.key === atualNorm);
+      const prox = ETAPAS_PEDIDO[(idxAtual + 1) % ETAPAS_PEDIDO.length];
+      definirStatusHistorico(index, prox.key);
+    }
+
+    let filtroHistoricoAtual = "Todos";
+
+    function selecionarFiltroHistorico(filtro) {
+      filtroHistoricoAtual = filtro || "Todos";
+      const barra = document.getElementById("filtrosStatusHistorico");
+      if (barra) {
+        barra.querySelectorAll("button").forEach((b) => {
+          const f = b.dataset.filtroStatus;
+          b.className = "status-btn";
+          if (f === filtroHistoricoAtual) {
+            if (f === "Todos") b.classList.add("active-feito");
+            else {
+              const meta = obterMetaStatus(f);
+              b.classList.add(meta.activeClass);
+            }
+          }
+        });
+      }
+      renderizarHistorico();
+    }
+
+    function renderizarHistorico() {
+      const container = document.getElementById("listaHistorico");
+      const termo = (document.getElementById("buscaHistorico").value || "").toLowerCase().trim();
+
+      let soma = 0;
+      historicoPedidos.forEach((p) => {
+        const val = Number(String(p.total || 0).replace(",", "."));
+        if (!isNaN(val)) soma += val;
+      });
+
+      const qtd = historicoPedidos.length;
+      const ticket = qtd > 0 ? soma / qtd : 0;
+
+      document.getElementById("kpiQtdPedidos").innerText = qtd;
+      document.getElementById("kpiFaturamento").innerText = soma.toFixed(2);
+      document.getElementById("kpiTicketMedio").innerText = ticket.toFixed(2);
+
+      const filtrados = historicoPedidos
+        .map((p, idx) => ({ p, idx }))
+        .filter(({ p }) => {
+          const normStatus = normalizarStatusPedido(p.status);
+          if (filtroHistoricoAtual && filtroHistoricoAtual !== "Todos" && normStatus !== filtroHistoricoAtual) {
+            return false;
+          }
+          if (!termo) return true;
+          return (
+            (p.numero || "").toLowerCase().includes(termo) ||
+            (p.cliente || "").toLowerCase().includes(termo) ||
+            (p.status || "").toLowerCase().includes(termo) ||
+            normStatus.toLowerCase().includes(termo)
+          );
+        });
+
+      if (!filtrados.length) {
+        container.innerHTML = '<p style="color: var(--muted);">Nenhum pedido registrado no histórico.</p>';
+        return;
+      }
+
+      container.innerHTML = filtrados
+        .map(
+          ({ p, idx }) => {
+            const meta = obterMetaStatus(p.status);
+            const botoesEtapas = ETAPAS_PEDIDO.map((etapa) => {
+              const ativo = etapa.key === meta.key;
+              return `<button class="status-btn ${ativo ? etapa.activeClass : ""}" onclick="definirStatusHistorico(${idx}, '${etapa.key}')" type="button">${etapa.label}</button>`;
+            }).join("");
+
+            return `
+          <div class="list-card">
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <strong>${p.numero || "KV"}</strong> • <span class="status-pill ${meta.pillClass}">${meta.label}</span><br />
+                <span style="font-size: 0.9rem;">Cliente: ${p.cliente || "Não informado"} ${p.telefone ? "• " + p.telefone : ""}</span><br />
+                <span style="color: var(--muted); font-size: 0.82rem;">${p.data || ""}</span>
+              </div>
+              <div style="text-align: right;">
+                <strong style="color: var(--gold); font-size: 1.05rem;">R$ ${Number(p.total || 0).toFixed(2)}</strong><br />
+                <div class="btn-row" style="margin-top: 6px; justify-content: flex-end;">
+                  <button class="secondary" onclick="alternarStatusPedido(${idx})" type="button">Próxima Etapa</button>
+                  <button class="gold" onclick="editarPedidoHistorico(${idx})" type="button">✏️ Editar Itens</button>
+                  <button class="danger" onclick="excluirPedidoHistorico(${idx})" type="button">🗑️ Excluir Pedido</button>
+                </div>
+              </div>
+            </div>
+            <div class="status-stepper" aria-label="Alterar status do pedido ${p.numero || ""}">
+              ${botoesEtapas}
+            </div>
+          </div>
+        `;
+          }
+        )
+        .join("");
+    }
+
+    /* ===== EDITAR ITENS DO PEDIDO NO HISTORICO ===== */
+    let indiceEditandoPedido = -1;
+
+    function excluirPedidoHistorico(indice) {
+      const p = historicoPedidos[indice];
+      if (!p) return;
+
+      const resumo = (p.numero || "KV") + " — " + (p.cliente || "sem nome") +
+        " — R$ " + Number(p.total || 0).toFixed(2);
+      if (!confirm("Excluir este pedido do histórico?\n\n" + resumo +
+        "\n\nEle sai do caixa, do faturamento e do ticket médio.")) return;
+
+      historicoPedidos.splice(indice, 1);
+      salvarHistorico();
+
+      // se estava editando justamente este pedido, fecha o painel
+      if (indiceEditandoPedido === indice) fecharEdicaoPedido();
+      else if (indiceEditandoPedido > indice) indiceEditandoPedido--;
+
+      renderizarHistorico();
+      popularDatalistRuas();
+    }
+
+    function editarPedidoHistorico(indice) {
+      const p = historicoPedidos[indice];
+      if (!p) return;
+
+      indiceEditandoPedido = indice;
+      document.getElementById("editarPedidoNumero").innerText = p.numero || "";
+      document.getElementById("editarClienteHistorico").value = p.cliente || "";
+      document.getElementById("editarObservacaoHistorico").value = p.observacao || "";
+      document.getElementById("editarTaxaEntrega").value = Number(p.taxaEntrega || 0).toFixed(2);
+
+      desenharItensEdicao();
+      document.getElementById("cardEditarPedido").style.display = "block";
+      document.getElementById("cardEditarPedido").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function desenharItensEdicao() {
+      const p = historicoPedidos[indiceEditandoPedido];
+      const box = document.getElementById("editarItensLista");
+      if (!p) return;
+
+      const itens = Array.isArray(p.itens) ? p.itens : [];
+
+      if (!itens.length) {
+        box.innerHTML = '<p style="color: var(--muted);">Este pedido não tem itens salvos.</p>';
+        recalcularEdicaoPedido();
+        return;
+      }
+
+      box.innerHTML = itens.map(function (item, i) {
+        return `
+          <div class="item">
+            <label for="editDesc${i}">Item ${i + 1} — descrição</label>
+            <input id="editDesc${i}" value="${String(item.descricao || "").replace(/"/g, "&quot;")}"
+                   oninput="recalcularEdicaoPedido()" />
+            <div class="grid-2">
+              <div>
+                <label for="editValor${i}">Valor (R$)</label>
+                <input id="editValor${i}" type="number" step="0.50" min="0"
+                       value="${Number(item.valor || 0).toFixed(2)}"
+                       oninput="recalcularEdicaoPedido()" />
+              </div>
+              <div>
+                <label for="editObs${i}">Observação do item</label>
+                <input id="editObs${i}" value="${String(item.observacao || "").replace(/"/g, "&quot;")}" />
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="danger" type="button" onclick="removerItemEdicao(${i})">Excluir item</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      recalcularEdicaoPedido();
+    }
+
+    function coletarItensEdicao() {
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (!p) return [];
+      const itens = Array.isArray(p.itens) ? p.itens : [];
+      const novos = [];
+
+      itens.forEach(function (item, i) {
+        const campoDesc = document.getElementById("editDesc" + i);
+        const campoValor = document.getElementById("editValor" + i);
+        const campoObs = document.getElementById("editObs" + i);
+        if (!campoDesc) return;
+        novos.push({
+          descricao: campoDesc.value,
+          ingredientes: item.ingredientes || "",
+          observacao: campoObs ? campoObs.value : "",
+          valor: Number(campoValor ? campoValor.value : 0) || 0
+        });
+      });
+      return novos;
+    }
+
+    function recalcularEdicaoPedido() {
+      const itens = coletarItensEdicao();
+      const subtotal = itens.reduce(function (s, i) { return s + (Number(i.valor) || 0); }, 0);
+      const taxa = Number(document.getElementById("editarTaxaEntrega").value) || 0;
+
+      document.getElementById("editarSubtotal").innerText = subtotal.toFixed(2);
+      document.getElementById("editarTaxaMostrada").innerText = taxa.toFixed(2);
+      document.getElementById("editarTotal").innerText = (subtotal + taxa).toFixed(2);
+
+      // mantem a lista editada na memoria do pedido em edicao
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (p) p.itens = itens;
+    }
+
+    function removerItemEdicao(i) {
+      const itens = coletarItensEdicao();
+      itens.splice(i, 1);
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (p) p.itens = itens;
+      desenharItensEdicao();
+    }
+
+    function adicionarItemEdicao() {
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (!p) return;
+      if (!Array.isArray(p.itens)) p.itens = [];
+      p.itens.push({ descricao: "Novo item", ingredientes: "", observacao: "", valor: 0 });
+      desenharItensEdicao();
+    }
+
+    function salvarEdicaoPedido() {
+      const p = historicoPedidos[indiceEditandoPedido];
+      if (!p) return;
+
+      const itens = coletarItensEdicao();
+      const subtotal = itens.reduce(function (s, i) { return s + (Number(i.valor) || 0); }, 0);
+      const taxa = Number(document.getElementById("editarTaxaEntrega").value) || 0;
+
+      p.itens = itens;
+      p.taxaEntrega = taxa;
+      p.total = subtotal + taxa;
+      p.cliente = document.getElementById("editarClienteHistorico").value.trim();
+      p.observacao = document.getElementById("editarObservacaoHistorico").value.trim();
+
+      salvarHistorico();
+      renderizarHistorico();
+      fecharEdicaoPedido();
+      alert("Pedido " + (p.numero || "") + " atualizado. Total: R$ " + p.total.toFixed(2));
+    }
+
+    function fecharEdicaoPedido() {
+      indiceEditandoPedido = -1;
+      document.getElementById("cardEditarPedido").style.display = "none";
+    }
+
+    document.getElementById("btnSalvarEdicaoPedido").addEventListener("click", salvarEdicaoPedido);
+    document.getElementById("btnCancelarEdicaoPedido").addEventListener("click", fecharEdicaoPedido);
+
+    /* EXPORTAÇÃO CSV & BACKUP JSON */
+    function baixarCSV(nomeArquivo, linhas) {
+      const csv = linhas
+        .map((linha) =>
+          linha.map((campo) => `"${String(campo ?? "").replace(/"/g, '""')}"`).join(";")
+        )
+        .join("\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = nomeArquivo;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function mudarAba(tabName) {
       document.querySelectorAll(".nav-tab").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.tab === nomeAba);
+        btn.classList.toggle("active", btn.dataset.tab === tabName);
       });
       document.querySelectorAll(".tab-panel").forEach((panel) => {
-        panel.classList.toggle("active", panel.id === "tab-" + nomeAba);
+        panel.classList.toggle("active", panel.id === "tab-" + tabName);
       });
-      if (nomeAba === "rotas") {
-        atualizarStatusChaveUi();
-        listarRotasPedidosHoje();
+    }
+
+    /* EVENTOS */
+    document.querySelectorAll(".nav-tab").forEach((btn) => {
+      btn.addEventListener("click", () => mudarAba(btn.dataset.tab));
+    });
+
+    document.getElementById("tamanho").addEventListener("change", carregarSabores);
+    document.getElementById("tipoPizza").addEventListener("change", atualizarVisualPedido);
+    document.getElementById("sabor1").addEventListener("change", atualizarPreviewIngredientes);
+    document.getElementById("sabor2").addEventListener("change", atualizarPreviewIngredientes);
+
+    document.getElementById("btnAdicionarPizza").addEventListener("click", function () {
+      const tamanho = document.getElementById("tamanho").value;
+      const tipo = document.getElementById("tipoPizza").value;
+      const sabor1 = document.getElementById("sabor1").value;
+      const sabor2 = document.getElementById("sabor2").value;
+
+      if (!sabor1 || !SABORES[sabor1]) {
+        alert("Selecione o Sabor 1.");
+        return;
+      }
+
+      let descricao = "";
+      let valor = 0;
+      let ingredientes = "";
+
+      if (tamanho === "brotinho") {
+        descricao = "Brotinho 25cm - " + sabor1;
+        valor = Number(SABORES[sabor1].brotinho);
+        ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
+      } else if (tipo === "meio") {
+        if (!sabor2 || !SABORES[sabor2]) {
+          alert("Selecione o Sabor 2 para pizza Meio a Meio.");
+          return;
+        }
+        descricao = "Grande 35cm Meio a Meio - " + sabor1 + " / " + sabor2;
+        valor = Math.max(Number(SABORES[sabor1].grande), Number(SABORES[sabor2].grande));
+        ingredientes =
+          "50% " + sabor1 + ": " + (SABORES[sabor1].ingredientes || []).join(", ") +
+          " | 50% " + sabor2 + ": " + (SABORES[sabor2].ingredientes || []).join(", ");
+      } else {
+        descricao = "Grande 35cm - " + sabor1;
+        valor = Number(SABORES[sabor1].grande);
+        ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
+      }
+
+      const adicionalEl = document.getElementById("adicional");
+      const valorAdicional = Number(adicionalEl.value) || 0;
+      const nomeAdicional = adicionalEl.options[adicionalEl.selectedIndex].text;
+      const obsPizza = document.getElementById("obsPizza").value.trim();
+
+      adicionarItem({
+        descricao: valorAdicional > 0 ? descricao + " + " + nomeAdicional : descricao,
+        ingredientes: ingredientes,
+        observacao: obsPizza,
+        valor: valor + valorAdicional
+      });
+    });
+
+    document.getElementById("btnAdicionarBebida").addEventListener("click", function () {
+      const sel = document.getElementById("bebida");
+      if (!sel.value) {
+        alert("Selecione uma bebida.");
+        return;
+      }
+      const descricao = sel.options[sel.selectedIndex].text.split(" - R$ ")[0];
+      adicionarItem({
+        descricao: descricao,
+        ingredientes: "",
+        observacao: "",
+        valor: Number(sel.value)
+      });
+      sel.value = "";
+    });
+
+    document.getElementById("btnWhatsApp").addEventListener("click", function () {
+      if (!pedidoAtual.itens.length) {
+        alert("Adicione pelo menos um item antes de enviar.");
+        return;
+      }
+      sincronizarDadosClientePedido();
+      enviarWhatsApp(pedidoAtual);
+    });
+
+    document.getElementById("btnRegistrarHistorico").addEventListener("click", function () {
+      if (!pedidoAtual.itens.length) {
+        alert("Adicione pelo menos um item antes de registrar.");
+        return;
+      }
+      sincronizarDadosClientePedido();
+      const pedido = JSON.parse(JSON.stringify(pedidoAtual));
+      pedido.numero = gerarNumeroPedido();
+      pedido.data = new Date().toLocaleString("pt-BR");
+      registrarPedido(pedido);
+      document.getElementById("numeroPedido").innerText = "KV" + String(Number(localStorage.getItem("ultimoPedido") || 0) + 1).padStart(4, "0");
+      alert("Pedido registrado no histórico.");
+    });
+
+    document.getElementById("btnSalvarClienteRapido").addEventListener("click", function () {
+      const dados = {
+        nome: document.getElementById("nome").value.trim(),
+        telefone: document.getElementById("telefone").value.trim(),
+        cep: document.getElementById("cep").value.trim(),
+        numero: document.getElementById("numero").value.trim(),
+        endereco: document.getElementById("endereco").value.trim(),
+        observacao: document.getElementById("observacao").value.trim()
+      };
+      if (!dados.nome) {
+        alert("Informe o nome do cliente.");
+        return;
+      }
+      salvarClienteBase(dados);
+      alert("Cliente salvo na base.");
+    });
+
+    document.getElementById("btnSalvarCliente").addEventListener("click", function () {
+      const id = document.getElementById("clienteEditId").value;
+      const dados = {
+        nome: document.getElementById("cliNome").value.trim(),
+        telefone: document.getElementById("cliTelefone").value.trim(),
+        cep: document.getElementById("cliCep").value.trim(),
+        numero: document.getElementById("cliNumero").value.trim(),
+        endereco: document.getElementById("cliEndereco").value.trim(),
+        observacao: document.getElementById("cliObs").value.trim()
+      };
+      if (id) dados.id = id;
+      salvarClienteBase(dados);
+      limparFormCliente();
+    });
+
+    document.getElementById("btnLimparClienteForm").addEventListener("click", limparFormCliente);
+
+    document.getElementById("btnSalvarSabor").addEventListener("click", function () {
+      const nome = document.getElementById("cadNomeSabor").value.trim();
+      const brotinho = Number(document.getElementById("cadPrecoBrotinho").value);
+      const grande = Number(document.getElementById("cadPrecoGrande").value);
+      const ingredientes = document.getElementById("cadIngredientes").value
+        .split(",")
+        .map(function (i) { return i.trim(); })
+        .filter(function (i) { return i; });
+      const original = document.getElementById("saborEditandoOriginal").value;
+
+      if (!nome) {
+        alert("Informe o nome do sabor.");
+        return;
+      }
+      if (isNaN(brotinho) || isNaN(grande)) {
+        alert("Informe os preços do brotinho e do grande.");
+        return;
+      }
+
+      if (original && original !== nome) {
+        delete SABORES[original];
+      }
+      SABORES[nome] = { brotinho: brotinho, grande: grande, ingredientes: ingredientes };
+
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+      limparFormSabor();
+      alert("Sabor salvo.");
+    });
+
+    document.getElementById("btnCancelarEdicaoSabor").addEventListener("click", limparFormSabor);
+
+    document.getElementById("btnRestaurarSabores").addEventListener("click", function () {
+      if (!confirm("Restaurar a tabela de sabores e preços padrão? As alterações feitas aqui serão perdidas.")) return;
+      SABORES = JSON.parse(JSON.stringify(SABORES_PADRAO));
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+      alert("Sabores padrão restaurados.");
+    });
+
+    document.getElementById("buscaCliente").addEventListener("input", renderizarClientes);
+    document.getElementById("buscaHistorico").addEventListener("input", renderizarHistorico);
+
+    document.getElementById("btnImportarWhats").addEventListener("click", importarPedidoWhats);
+
+    document.getElementById("btnExportarPedidosCSV").addEventListener("click", function () {
+      const linhas = [["Codigo", "Data", "Status", "Cliente", "Telefone", "CEP", "Endereco", "Numero", "Observacao", "Taxa Entrega", "Total", "Itens"]];
+      historicoPedidos.forEach(function (p) {
+        const itens = (p.itens || []).map(function (i) { return i.descricao + " R$ " + Number(i.valor).toFixed(2); }).join(" | ");
+        linhas.push([p.numero, p.data, normalizarStatusPedido(p.status), p.cliente, p.telefone, p.cep, p.endereco, p.numeroCasa, p.observacao, Number(p.taxaEntrega || 0).toFixed(2), Number(p.total || 0).toFixed(2), itens]);
+      });
+      baixarCSV("king_ventura_pedidos.csv", linhas);
+    });
+
+    document.getElementById("btnExportarSaboresCSV").addEventListener("click", function () {
+      const linhas = [["Sabor", "Brotinho 25cm", "Grande 35cm", "Ingredientes"]];
+      Object.keys(SABORES).forEach(function (nome) {
+        const s = SABORES[nome];
+        linhas.push([nome, Number(s.brotinho).toFixed(2), Number(s.grande).toFixed(2), (s.ingredientes || []).join(", ")]);
+      });
+      baixarCSV("king_ventura_sabores.csv", linhas);
+    });
+
+    document.getElementById("btnExportarClientesCSV").addEventListener("click", function () {
+      const linhas = [["Nome", "Telefone", "CEP", "Endereco", "Numero", "Observacao"]];
+      clientesBase.forEach(function (c) {
+        linhas.push([c.nome, c.telefone, c.cep, c.endereco, c.numero, c.observacao]);
+      });
+      baixarCSV("king_ventura_clientes.csv", linhas);
+    });
+
+    document.getElementById("btnExportarBackup").addEventListener("click", function () {
+      const backup = {
+        versao: "V7.2",
+        geradoEm: new Date().toLocaleString("pt-BR"),
+        sabores: SABORES,
+        clientes: clientesBase,
+        historico: historicoPedidos,
+        ultimoPedido: Number(localStorage.getItem("ultimoPedido") || 0)
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "king_ventura_backup.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    function aplicarBackup(backup) {
+      if (!backup || typeof backup !== "object") {
+        alert("Backup inválido.");
+        return;
+      }
+      if (backup.sabores) {
+        SABORES = backup.sabores;
+        salvarSaboresStorage();
+      }
+      if (backup.clientes) {
+        clientesBase = backup.clientes;
+        salvarClientes();
+      }
+      if (backup.historico) {
+        historicoPedidos = backup.historico;
+        salvarHistorico();
+      }
+      if (backup.ultimoPedido !== undefined) {
+        localStorage.setItem("ultimoPedido", Number(backup.ultimoPedido) || 0);
+      }
+      carregarSabores();
+      renderizarListaSabores();
+      renderizarClientes();
+      renderizarHistorico();
+      popularDatalistRuas();
+      alert("Backup restaurado com sucesso.");
+    }
+
+    document.getElementById("btnImportarBackup").addEventListener("click", function () {
+      const texto = document.getElementById("inputBackupJson").value.trim();
+      if (!texto) {
+        alert("Cole o conteúdo JSON do backup ou selecione um arquivo .json.");
+        return;
+      }
+      try {
+        aplicarBackup(JSON.parse(texto));
+      } catch (e) {
+        alert("Não foi possível ler o JSON informado.");
+      }
+    });
+
+    document.getElementById("fileBackupJson").addEventListener("change", function (ev) {
+      const arquivo = ev.target.files && ev.target.files[0];
+      if (!arquivo) return;
+      const leitor = new FileReader();
+      leitor.onload = function () {
+        try {
+          aplicarBackup(JSON.parse(String(leitor.result)));
+        } catch (e) {
+          alert("Não foi possível ler o arquivo JSON.");
+        }
+      };
+      leitor.readAsText(arquivo);
+    });
+
+    /* ===== ROTAS DO ENTREGADOR ===== */
+    function obterChaveRota() {
+      return (localStorage.getItem(ORS_CHAVE_LOCAL) || "").trim();
+    }
+
+    function atualizarStatusChaveRota() {
+      const el = document.getElementById("statusChaveRota");
+      if (!el) return;
+      const chave = obterChaveRota();
+      if (chave) {
+        el.innerHTML = "✅ Chave salva neste aparelho (" + chave.length +
+          " caracteres, termina em ..." + chave.slice(-6) + ").";
+      } else {
+        el.innerHTML = "⚠️ Nenhuma chave salva. Sem ela o cálculo de distância não funciona.";
       }
     }
+
+    function validarChaveRota(chave) {
+      const limpa = String(chave || "").trim();
+      // Chaves do OpenRouteService sao base64: letras, numeros, + / e = no fim.
+      return limpa.length >= 40;
+    }
+
+    // Endereco -> coordenadas (geocodificacao gratuita do OpenStreetMap)
+    let ultimaGeo = 0;
+    async function geocodificar(endereco) {
+      // respeita o limite de 1 requisicao por segundo do servico publico
+      const agora = Date.now();
+      const espera = Math.max(0, 1000 - (agora - ultimaGeo));
+      if (espera > 0) {
+        await new Promise(function (r) { setTimeout(r, espera); });
+      }
+      ultimaGeo = Date.now();
+
+      const termo = endereco + ", Campo Grande - MS, Brasil";
+
+      // 1) Nominatim (sem chave)
+      const urlNominatim = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q=" +
+        encodeURIComponent(termo);
+      try {
+        const resposta = await fetch(urlNominatim, { headers: { "Accept": "application/json" } });
+        if (resposta.ok) {
+          const lista = await resposta.json();
+          if (Array.isArray(lista) && lista.length) {
+            return { lat: Number(lista[0].lat), lng: Number(lista[0].lon), achado: lista[0].display_name };
+          }
+        }
+      } catch (e) {
+        console.log("Nominatim falhou, tentando ViaCEP", e);
+      }
+
+      // 2) ViaCEP -> coordenadas pelo CEP (sem chave)
+      const cepNum = (String(endereco).match(/\d{8}/) || [])[0] ||
+        (String(endereco).match(/\d{5}-?\d{3}/) || [])[0];
+      if (cepNum) {
+        const so = String(cepNum).replace(/[^0-9]/g, "");
+        try {
+          const r = await fetch("https://viacep.com.br/ws/" + so + "/json/");
+          const d = await r.json();
+          if (!d.erro && d.localidade) {
+            const alvo = [d.logradouro, d.bairro, d.localidade, d.uf].filter(Boolean).join(", ");
+            const r2 = await fetch(
+              "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=" +
+              encodeURIComponent(alvo + ", Brasil"));
+            if (r2.ok) {
+              const l2 = await r2.json();
+              if (Array.isArray(l2) && l2.length) {
+                return { lat: Number(l2[0].lat), lng: Number(l2[0].lon), achado: l2[0].display_name };
+              }
+            }
+          }
+        } catch (e) {
+          console.log("Busca por CEP falhou", e);
+        }
+      }
+
+      throw new Error("Endereco nao encontrado. Confira o CEP e o numero.");
+    }
+
+    // Coordenadas -> distancia de rota em km
+    async function calcularRotaAteOrigem(lat, lng) {
+      const chave = obterChaveRota();
+      if (!chave) throw new Error("Cadastre a chave da API na aba Rotas do Entregador.");
+
+      const origem = await obterOrigemReal();
+
+      const url = ORS_ENDPOINT + "/v2/directions/" + ORS_PROFILE + "/geojson";
+      const corpo = {
+        coordinates: [
+          [origem.lng, origem.lat],
+          [lng, lat]
+        ],
+        units: "km"
+      };
+
+      const resposta = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Authorization": chave,
+          "Content-Type": "application/json",
+          "Accept": "application/json, application/geo+json"
+        },
+        body: JSON.stringify(corpo)
+      });
+
+      if (!resposta.ok) {
+        if (resposta.status === 401 || resposta.status === 403) {
+          throw new Error("Chave recusada pela API. Confira a chave salva.");
+        }
+        if (resposta.status === 429) {
+          throw new Error("Limite de consultas por minuto atingido. Aguarde alguns segundos.");
+        }
+        throw new Error("A API de rotas nao respondeu (" + resposta.status + ").");
+      }
+
+      const dados = await resposta.json();
+      const feat = dados.features && dados.features[0];
+      if (!feat || !feat.properties || !feat.properties.summary) {
+        throw new Error("A rota nao pode ser calculada para este endereco.");
+      }
+
+      const s = feat.properties.summary;
+      const tempoSeg = Number(s.duration) || 0;
+      const distanciaKm = Number(s.distance) || 0;
+
+      return {
+        distanciaKm: distanciaKm,          // distancia de ida — base da taxa
+        duracao: Math.max(1, Math.round(tempoSeg / 60)),
+        geometria: feat.geometry
+      };
+    }
+
+    function formatarTaxa(km) {
+      const valor = calcularTaxaPorDistancia(km);
+      if (valor === 0) return "Grátis (até " + REPASSE_ATE_KM + " km)";
+      return "R$ " + valor.toFixed(2);
+    }
+
+    async function calcularRotaDoEndereco(endereco, cliente) {
+      const box = document.getElementById("resultadoRota");
+      box.style.display = "block";
+      box.innerHTML = '<span style="color: var(--muted);">Calculando a rota...</span>';
+
+      try {
+        const ponto = await geocodificar(endereco);
+        const rota = await calcularRotaAteOrigem(ponto.lat, ponto.lng);
+
+        const dentro = dentroDaAreaDeEntrega(rota.distanciaKm);
+        const taxa = dentro ? calcularTaxaPorDistancia(rota.distanciaKm) : null;
+
+        const origemUsada = await obterOrigemReal();
+        const linkMapa = "https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=" +
+          origemUsada.lat + "%2C" + origemUsada.lng + "%3B" + ponto.lat + "%2C" + ponto.lng;
+
+        box.innerHTML = `
+          <div class="summary-line"><span>Cliente</span><span>${cliente ? cliente : "—"}</span></div>
+          <div class="summary-line"><span>Endereço</span><span style="text-align:right;max-width:60%;">${ponto.achado}</span></div>
+          <div class="summary-line"><span>Distância (ida)</span><span>${rota.distanciaKm.toFixed(1)} km</span></div>
+          <div class="summary-line"><span>Taxa calculada sobre</span><span>${rota.distanciaKm.toFixed(1)} km (só ida)</span></div>
+          <div class="summary-line"><span>Tempo estimado</span><span>${rota.duracao} min</span></div>
+          <div class="summary-total"><span>Taxa de entrega</span><span>${dentro ? formatarTaxa(rota.distanciaKm) : "FORA DA ÁREA"}</span></div>
+          ${dentro ? "" : '<p style="color: var(--danger); font-size: 0.9rem; margin-top: 6px;">⚠️ Passa do limite de ' + RAIO_MAXIMO_KM + ' km de atendimento.</p>'}
+          <div class="btn-row">
+            <button class="gold" type="button" onclick="window.open('${linkMapa}', '_blank')">🗺️ Abrir rota no mapa</button>
+            <button class="secondary" type="button" onclick="enviarRotaWhats('${endereco.replace(/'/g, "")}', ${rota.distanciaKm}, ${rota.duracao})">📲 Enviar ao entregador</button>
+          </div>
+        `;
+      } catch (erro) {
+        box.innerHTML = '<span style="color: var(--danger);">⚠️ ' + erro.message + '</span>';
+      }
+    }
+
+    function enviarRotaWhats(endereco, km, minutos) {
+      let msg = "🛵 ROTA DE ENTREGA — KING VENTURA\n\n";
+      msg += "Saída: " + ORIGEM_COORDS.endereco + "\n";
+      msg += "Entrega: " + endereco + "\n";
+      msg += "Distância: " + Number(km).toFixed(1) + " km\n";
+      msg += "Tempo estimado: " + minutos + " min\n";
+      window.open("https://wa.me/" + NUMERO_WHATSAPP + "?text=" + encodeURIComponent(msg), "_blank");
+    }
+
+    async function carregarRotasDoDia() {
+      const box = document.getElementById("listaRotasDia");
+      if (!box) return;
+
+      const hoje = new Date().toLocaleDateString("pt-BR");
+      const doDia = historicoPedidos.filter(function (p) {
+        return String(p.data || "").startsWith(hoje);
+      }).filter(function (p) {
+        return p.endereco;
+      });
+
+      if (!doDia.length) {
+        box.innerHTML = '<p style="color: var(--muted);">Nenhum pedido com endereço registrado hoje.</p>';
+        return;
+      }
+
+      box.innerHTML = '<p style="color: var(--muted); font-size: 0.88rem;">' +
+        doDia.length + " entrega(s) hoje. Calculando...</p>";
+
+      let html = "";
+      for (let i = 0; i < doDia.length; i++) {
+        const p = doDia[i];
+        const enderecoCompleto = [p.endereco, p.numeroCasa].filter(Boolean).join(", ");
+        try {
+          const ponto = await geocodificar(enderecoCompleto);
+          const rota = await calcularRotaAteOrigem(ponto.lat, ponto.lng);
+          const dentro = dentroDaAreaDeEntrega(rota.distanciaKm);
+          html += `
+            <div class="list-card">
+              <strong>${p.numero || "KV"}</strong> • ${p.cliente || "Sem nome"}<br />
+              <span style="color: var(--muted); font-size: 0.85rem;">${enderecoCompleto}</span><br />
+              <span style="color: var(--gold); font-size: 0.9rem;">
+                ${rota.distanciaKm.toFixed(1)} km • ${rota.duracao} min
+                ${dentro ? "• Taxa " + formatarTaxa(rota.distanciaKm) : "• FORA DA ÁREA"}
+              </span>
+            </div>`;
+        } catch (erro) {
+          html += `
+            <div class="list-card">
+              <strong>${p.numero || "KV"}</strong> • ${p.cliente || "Sem nome"}<br />
+              <span style="color: var(--muted); font-size: 0.85rem;">${enderecoCompleto}</span><br />
+              <span style="color: var(--danger); font-size: 0.85rem;">Não foi possível calcular.</span>
+            </div>`;
+        }
+      }
+      box.innerHTML = html;
+    }
+
+    document.getElementById("btnCalcularRota").addEventListener("click", function () {
+      const endereco = document.getElementById("rotaEndereco").value.trim();
+      if (endereco.length < 4) {
+        alert("Informe o endereço de entrega.");
+        return;
+      }
+      calcularRotaDoEndereco(endereco, document.getElementById("rotaCliente").value.trim());
+    });
+
+    document.getElementById("btnUsarEnderecoPedido").addEventListener("click", function () {
+      const rua = document.getElementById("endereco").value.trim();
+      const numero = document.getElementById("numero").value.trim();
+      if (!rua) {
+        alert("O pedido atual ainda não tem endereço preenchido.");
+        return;
+      }
+      const completo = [rua, numero].filter(Boolean).join(", ");
+      document.getElementById("rotaEndereco").value = completo;
+      document.getElementById("rotaCliente").value = document.getElementById("nome").value.trim() +
+        (document.getElementById("numeroPedido").innerText ? " - " + document.getElementById("numeroPedido").innerText : "");
+      calcularRotaDoEndereco(completo, document.getElementById("rotaCliente").value);
+    });
+
+    document.getElementById("btnRotasDoDia").addEventListener("click", carregarRotasDoDia);
+
+    /* ===== TESTE DE CONEXAO DAS APIs ===== */
+    function linhaTeste(nome, ok, detalhe) {
+      const marca = ok ? "✅" : "❌";
+      return '<div class="summary-line"><span>' + marca + " " + nome + '</span><span style="text-align:right;max-width:60%;">' + detalhe + '</span></div>';
+    }
+
+    document.getElementById("btnTestarApis").addEventListener("click", async function () {
+      const box = document.getElementById("resultadoTesteApis");
+      box.innerHTML = '<span style="color: var(--muted);">Testando os serviços...</span>';
+
+      let html = "";
+
+      // 1) ViaCEP — usado para CEP -> rua
+      try {
+        const r = await fetch("https://viacep.com.br/ws/79097240/json/");
+        const d = await r.json();
+        if (d && !d.erro && d.logradouro) {
+          html += linhaTeste("ViaCEP (CEP vira rua)", true, d.logradouro + " - " + d.bairro);
+        } else {
+          html += linhaTeste("ViaCEP (CEP vira rua)", false, "respondeu, mas sem dados");
+        }
+      } catch (e) {
+        html += linhaTeste("ViaCEP (CEP vira rua)", false, "sem conexão: " + e.message);
+      }
+
+      // 2) Nominatim — usado para achar a coordenada do endereço
+      try {
+        const url = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=br&q=" +
+          encodeURIComponent("Rua Delamare 129, Campo Grande - MS");
+        const r = await fetch(url, { headers: { "Accept": "application/json" } });
+        const l = await r.json();
+        if (Array.isArray(l) && l.length) {
+          html += linhaTeste("OpenStreetMap (endereço vira ponto)", true, l[0].lat + ", " + l[0].lon);
+        } else {
+          html += linhaTeste("OpenStreetMap (endereço vira ponto)", false, "não achou o endereço");
+        }
+      } catch (e) {
+        html += linhaTeste("OpenStreetMap (endereço vira ponto)", false, "sem conexão: " + e.message);
+      }
+
+      // 3) Chave salva
+      const chave = obterChaveRota();
+      html += linhaTeste("Chave da API de rotas salva", !!chave,
+        chave ? chave.length + " caracteres" : "nenhuma chave cadastrada");
+
+      // 4) API de rotas — chave + distância
+      if (chave) {
+        try {
+          const r = await fetch(ORS_ENDPOINT + "/v2/directions/" + ORS_PROFILE + "/geojson", {
+            method: "POST",
+            headers: {
+              "Authorization": chave,
+              "Content-Type": "application/json",
+              "Accept": "application/json, application/geo+json"
+            },
+            body: JSON.stringify({
+              coordinates: [[-54.6727293, -20.5440728], [-54.6725, -20.5445]],
+              units: "km"
+            })
+          });
+          if (r.ok) {
+            html += linhaTeste("API de rotas (calcula km)", true, "chave válida e respondendo");
+          } else if (r.status === 401 || r.status === 403) {
+            html += linhaTeste("API de rotas (calcula km)", false, "chave recusada (" + r.status + ")");
+          } else {
+            html += linhaTeste("API de rotas (calcula km)", false, "erro " + r.status);
+          }
+        } catch (e) {
+          html += linhaTeste("API de rotas (calcula km)", false, "sem conexão: " + e.message);
+        }
+      } else {
+        html += linhaTeste("API de rotas (calcula km)", false, "sem chave para testar");
+      }
+
+      // diagnóstico final
+      html += '<p style="margin-top: 8px; font-size: 0.88rem; color: var(--muted);">' +
+        "Se algum item acima está com ❌, é ele que impede a taxa de calcular.</p>";
+
+      box.innerHTML = html;
+    });
+
+    document.getElementById("btnSalvarChaveRota").addEventListener("click", function () {
+      const chave = document.getElementById("inputChaveRota").value.trim();
+      if (!validarChaveRota(chave)) {
+        alert("Essa chave não parece válida. Ela é longa, com letras e números.");
+        return;
+      }
+      localStorage.setItem(ORS_CHAVE_LOCAL, chave);
+      atualizarStatusChaveRota();
+      alert("Chave salva neste aparelho.");
+    });
+
+    document.getElementById("btnTestarChaveRota").addEventListener("click", async function () {
+      const el = document.getElementById("statusChaveRota");
+      const chave = document.getElementById("inputChaveRota").value.trim() || obterChaveRota();
+      if (!validarChaveRota(chave)) {
+        el.innerHTML = "⚠️ Informe uma chave antes de testar.";
+        return;
+      }
+      el.innerHTML = "Testando...";
+      try {
+        const resposta = await fetch(ORS_ENDPOINT + "/v2/directions/" + ORS_PROFILE + "/geojson", {
+          method: "POST",
+          headers: {
+            "Authorization": chave,
+            "Content-Type": "application/json",
+            "Accept": "application/json, application/geo+json"
+          },
+          body: JSON.stringify({
+            coordinates: [[ORIGEM_COORDS.lng, ORIGEM_COORDS.lat], [ORIGEM_COORDS.lng + 0.01, ORIGEM_COORDS.lat]],
+            units: "km"
+          })
+        });
+        if (resposta.ok) {
+          el.innerHTML = "✅ Chave funcionando! Já pode calcular as rotas.";
+        } else if (resposta.status === 401 || resposta.status === 403) {
+          el.innerHTML = "⚠️ Chave recusada pela API. Confira se copiou ela inteira.";
+        } else {
+          el.innerHTML = "⚠️ A API respondeu com erro " + resposta.status + ".";
+        }
+      } catch (erro) {
+        el.innerHTML = "⚠️ Sem conexão com a API de rotas agora.";
+      }
+    });
+
+    document.getElementById("btnApagarChaveRota").addEventListener("click", function () {
+      if (!confirm("Apagar a chave de rotas salva neste aparelho?")) return;
+      localStorage.removeItem(ORS_CHAVE_LOCAL);
+      document.getElementById("inputChaveRota").value = "";
+      atualizarStatusChaveRota();
+    });
+
+        /* ===== TEMA CLARO / ESCURO ===== */
+    const TEMA_LOCAL = "kv_tema";
 
     function aplicarTema(tema) {
       const escolhido = tema === "claro" ? "claro" : "escuro";
       document.body.setAttribute("data-tema", escolhido);
-      try {
-        localStorage.setItem("kv_tema", escolhido);
-      } catch (e) {}
       const btn = document.getElementById("btnTema");
       if (btn) {
-        btn.innerText = escolhido === "escuro" ? "🌙 Escuro" : "☀️ Claro";
+        btn.innerText = escolhido === "claro" ? "☀️ Claro" : "🌙 Escuro";
       }
+      localStorage.setItem(TEMA_LOCAL, escolhido);
     }
 
-    function inicializarEventos() {
-      document.getElementById("btnTema")?.addEventListener("click", () => {
-        const atual = document.body.getAttribute("data-tema") || "escuro";
-        aplicarTema(atual === "escuro" ? "claro" : "escuro");
-      });
-
-      document.querySelectorAll(".nav-tab").forEach((btn) => {
-        btn.addEventListener("click", () => ativarAba(btn.dataset.tab));
-      });
-
-      document.getElementById("tamanho").addEventListener("change", carregarSabores);
-      document.getElementById("tipoPizza").addEventListener("change", atualizarVisualPedido);
-      document.getElementById("sabor1").addEventListener("change", atualizarPreviewIngredientes);
-      document.getElementById("sabor2").addEventListener("change", atualizarPreviewIngredientes);
-
-      document.getElementById("btnAdicionarPizza").addEventListener("click", adicionarPizza);
-      document.getElementById("btnAdicionarBebida").addEventListener("click", adicionarBebida);
-      document.getElementById("btnWhatsApp").addEventListener("click", enviarWhatsApp);
-      document.getElementById("btnRegistrarHistorico").addEventListener("click", registrarPedidoAtualNoHistorico);
-      document.getElementById("btnImportarWhats").addEventListener("click", importarPedidoWhatsApp);
-      document.getElementById("btnSalvarClienteRapido").addEventListener("click", salvarClienteDoPedido);
-
-      document.getElementById("cep").addEventListener("input", () => {
-        const digitos = document.getElementById("cep").value.replace(/[^0-9]/g, "");
-        if (digitos.length === 8) {
-          buscarCEP();
-          agendarCalculoTaxaReal();
-        }
-      });
-      document.getElementById("cep").addEventListener("blur", () => {
-        buscarCEP();
-        agendarCalculoTaxaReal();
-      });
-      document.getElementById("endereco").addEventListener("input", () => {
-        agendarCalculoTaxaReal();
-        agendarBuscaCepPorRua();
-      });
-      document.getElementById("endereco").addEventListener("change", () => {
-        buscarCEPPorRua();
-        agendarCalculoTaxaReal();
-      });
-      document.getElementById("endereco").addEventListener("blur", () => {
-        buscarCEPPorRua();
-        agendarCalculoTaxaReal();
-      });
-      document.getElementById("numero").addEventListener("input", agendarCalculoTaxaReal);
-      document.getElementById("numero").addEventListener("blur", agendarCalculoTaxaReal);
-      document.getElementById("btnBuscarCepDaRua").addEventListener("click", buscarCEPPorRua);
-
-      document.getElementById("btnSalvarSabor").addEventListener("click", salvarSaborForm);
-      document.getElementById("btnCancelarEdicaoSabor").addEventListener("click", limparFormSabor);
-      document.getElementById("btnRestaurarSabores").addEventListener("click", restaurarSaboresPadrao);
-
-      document.getElementById("btnSalvarCliente").addEventListener("click", salvarClienteDaAba);
-      document.getElementById("btnLimparClienteForm").addEventListener("click", limparFormCliente);
-      document.getElementById("buscaCliente").addEventListener("input", renderizarClientes);
-
-      document.getElementById("buscaHistorico").addEventListener("input", renderizarHistorico);
-      document.getElementById("editarTaxaEntrega")?.addEventListener("input", atualizarTotaisEdicao);
-      document.getElementById("btnSalvarEdicaoPedido")?.addEventListener("click", salvarEdicaoPedidoHistorico);
-      document.getElementById("btnCancelarEdicaoPedido")?.addEventListener("click", fecharEditorPedidoHistorico);
-
-      // Rotas do Entregador
-      document.getElementById("btnCalcularRota")?.addEventListener("click", () => {
-        renderizarRotaNaTela(
-          document.getElementById("rotaEndereco").value,
-          document.getElementById("rotaCliente").value
-        );
-      });
-      document.getElementById("btnUsarEnderecoPedido")?.addEventListener("click", usarEnderecoPedidoAtual);
-      document.getElementById("btnRotasDoDia")?.addEventListener("click", listarRotasPedidosHoje);
-      document.getElementById("btnTestarApis")?.addEventListener("click", testarConexaoApis);
-      document.getElementById("btnSalvarChaveRota")?.addEventListener("click", () => {
-        salvarChaveOrs(document.getElementById("inputChaveRota").value);
-        atualizarStatusChaveUi();
-        alert("Chave salva neste aparelho!");
-      });
-      document.getElementById("btnTestarChaveRota")?.addEventListener("click", () => {
-        salvarChaveOrs(document.getElementById("inputChaveRota").value);
-        atualizarStatusChaveUi();
-        testarConexaoApis();
-      });
-      document.getElementById("btnApagarChaveRota")?.addEventListener("click", () => {
-        document.getElementById("inputChaveRota").value = "";
-        salvarChaveOrs("");
-        atualizarStatusChaveUi();
-      });
-
-      document.getElementById("btnExportarPedidosCSV").addEventListener("click", exportarPedidosCSV);
-      document.getElementById("btnExportarSaboresCSV").addEventListener("click", exportarSaboresCSV);
-      document.getElementById("btnExportarClientesCSV").addEventListener("click", exportarClientesCSV);
-      document.getElementById("btnExportarBackup").addEventListener("click", exportarBackupJSON);
-      document.getElementById("btnImportarBackup").addEventListener("click", () => restaurarBackupJSON());
-
-      document.getElementById("fileBackupJson").addEventListener("change", (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          document.getElementById("inputBackupJson").value = ev.target.result;
-          restaurarBackupJSON(ev.target.result);
-        };
-        reader.readAsText(file);
-      });
+    function alternarTema() {
+      const atual = document.body.getAttribute("data-tema") === "claro" ? "claro" : "escuro";
+      aplicarTema(atual === "claro" ? "escuro" : "claro");
     }
 
-    (function init() {
-      let temaSalvo = "escuro";
-      try {
-        temaSalvo = localStorage.getItem("kv_tema") || "escuro";
-      } catch (e) {}
-      aplicarTema(temaSalvo);
-      carregarSaboresStorage();
-      carregarHistorico();
-      carregarClientes();
-      inicializarEventos();
-      inicializarPedido();
-      carregarSabores();
-      popularDatalistRuas();
-      renderizarListaSabores();
-      renderizarClientes();
-      renderizarHistorico();
-      atualizarCarrinho();
-      atualizarStatusChaveUi();
-      listarRotasPedidosHoje();
-    })();
+    document.getElementById("btnTema").addEventListener("click", alternarTema);
+
+    /* INICIALIZAÇÃO */
+    carregarSaboresStorage();
+    carregarHistorico();
+    carregarClientes();
+    inicializarPedido();
+    carregarSabores();
+    renderizarListaSabores();
+    renderizarClientes();
+    renderizarHistorico();
+    popularDatalistRuas();
+    ligarCamposEndereco();
+    atualizarStatusChaveRota();
+    aplicarTema(localStorage.getItem(TEMA_LOCAL) || "escuro");
   </script>
 </body>
 </html>
