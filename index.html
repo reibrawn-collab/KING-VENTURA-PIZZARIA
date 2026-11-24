@@ -1,1098 +1,1650 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KING VENTURA PIZZARIA — Sistema Operacional</title>
+  <style>
+    :root {
+      --bg: #120d0a;
+      --surface: #1d1510;
+      --surface-2: #271c16;
+      --border: #3d2c22;
+      --text: #f7efe8;
+      --muted: #c2aea0;
+      --gold: #e09f3e;
+      --terracotta: #c84b31;
+      --green: #2ea043;
+      --amber: #d29922;
+      --danger: #cf4638;
+    }
 
-<meta charset="UTF-8">
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      line-height: 1.45;
+    }
 
-<title>KING VENTURA PIZZARIA</title>
+    .app-container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
 
-<link rel="stylesheet"
-href="css/style.css">
+    .brand-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
 
-<script src="js/sabores.js"></script>
-<script src="js/pedidos.js"></script>
-<script src="js/historico.js"></script>
-<script src="js/whatsapp.js"></script>
+    .brand-logo {
+      display: block;
+      width: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .brand-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--gold);
+    }
+
+    .badge-version {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .nav-tab {
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: 0.15s ease;
+    }
+
+    .nav-tab:hover {
+      border-color: var(--gold);
+      color: var(--text);
+    }
+
+    .nav-tab.active {
+      background: var(--gold);
+      color: #160f0a;
+      border-color: var(--gold);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+      color: var(--gold);
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      margin: 12px 0 8px;
+      color: var(--text);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+      margin-top: 8px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+    }
+
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+
+    button {
+      background: var(--terracotta);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    button:hover {
+      filter: brightness(1.08);
+    }
+
+    button.secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    button.gold {
+      background: var(--gold);
+      color: #160f0a;
+    }
+
+    button.danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .item, .list-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .summary-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--gold);
+      border-top: 1px solid var(--border);
+      padding-top: 8px;
+      margin-top: 6px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .kpi-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .kpi-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .kpi-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--gold);
+      margin-top: 4px;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: rgba(210, 153, 34, 0.18);
+      color: var(--amber);
+    }
+
+    .ingredients-preview {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    @media print {
+      .nav-tabs, #cardImportarWhats, .btn-row, #btnImportarWhats {
+        display: none !important;
+      }
+      body {
+        background: #fff;
+        color: #000;
+      }
+      .card, .item, .summary-box {
+        background: #fff;
+        color: #000;
+        border-color: #ccc;
+      }
+    }
+  </style>
 </head>
-
 <body>
-<img
-    src="logo01.jpeg"
-    alt="King Ventura Pizzaria"
-    style="
-        display:block;
-        width:100%;
-        max-width:100%;
-        height:auto;
-        border-radius:15px;
-        margin-bottom:15px;
-    "
->
-<h1>KING VENTURA PIZZARIA</h1>
-    
-<div class="card">
-    <h2 id="numeroPedido">
-        Pedido #0001
-    </h2>
-
-    <p id="dataPedido"></p>
-
-    <p id="statusPedido">
-        🟡 Aberto
-    </p>
-</div>
-    
-<div class="card">
-
-<h2>📥 Importar Pedido WhatsApp</h2>
-
-<textarea
-    id="pedidoWhats"
-    rows="8"
-    placeholder="Cole aqui a mensagem recebida no WhatsApp">
-</textarea>
-
-<button id="btnImportarWhats">
-    Importar Pedido
-</button>
-
-</div>
-    
-<h2>Cliente</h2>
-
-<label>Nome</label>
-<input id="nome" placeholder="Nome">
-
-<label>Telefone</label>
-<input id="telefone" placeholder="Telefone">
-    
-<label>CEP</label>
-<input id="cep">
-    
-<label>Número</label>
-<input id="numero" placeholder="129">
-    
-<label>Endereço</label>
-<input id="endereco" placeholder="Endereço">
-
-<label>Observação</label>
-<textarea id="observacao"></textarea>
-
-</div>
-
-<div class="card">
-
-<h2>Pedido</h2>
-
-<select id="tamanho">
-
-<option value="brotinho">
-Brotinho 25cm
-</option>
-
-<option value="grande">
-Grande 35cm
-</option>
-
-</select>
-
-<select id="tipoPizza">
-
-<option value="inteira">
-Inteira
-</option>
-
-<option value="meio">
-Meio a Meio
-</option>
-
-</select>
-
-<select id="sabor1"></select>
-
-<select
-id="sabor2"
-style="display:none">
-</select>
-<h3>Adicionais</h3>
-
-<select id="adicional">
-
-    <option value="0">
-        Nenhum adicional
-    </option>
-
-    <option value="4">
-        Catupiry Extra (+R$ 4,00)
-    </option>
-
-    <option value="4">
-        Presunto Extra (+R$ 4,00)
-    </option>
-
-    <option value="4">
-        Cebola Extra (+R$ 4,00)
-    </option>
-
-    <option value="4">
-        Milho Extra (+R$ 4,00)
-    </option>
-
-    <option value="4">
-        Ervilha Extra (+R$ 4,00)
-    </option>
-
-    <option value="5">
-        Muçarela Extra (+R$ 5,00)
-    </option>
-
-    <option value="5">
-        Bacon Extra (+R$ 5,00)
-    </option>
-
-</select>
-
-<h3>Observação</h3>
-
-<textarea
-  id="obsPizza"
-  placeholder="Ex: sem cebola, assar bem, borda crocante">
-</textarea>
-
-<div id="ingredientes"></div>
-</div>
-
-<button
-id="btnAdicionarPizza">
-
-Adicionar Pizza
-
-</button>
-
-</div>
-
-<div class="card">
-
-<h2>Bebidas</h2>
-
-<select id="bebida">
-    
-<option value="">
-Nenhuma bebida
-</option>
-    
-<option value="16">
-Coca-Cola 2 Litros - R$ 16,00
-</option>
-
-<option value="10">
-Guaraná Antarctica 1 Litro - R$ 10,00
-</option>
-
-<option value="6">
-Coca-Cola Lata 310ml - R$ 6,00
-</option>
-
-</select>
-
-<button
-id="btnAdicionarBebida">
-
-Adicionar Bebida
-
-</button>
-
-</div>
-
-<div class="card">
-
-<h2>Carrinho</h2>
-
-<div id="carrinho"></div>
-
-<h3>
-Taxa de Entrega:
-R$ <span id="taxaEntrega">0,00</span>
-</h3>
-
-<h3>
-Total do Pedido:
-R$ <span id="totalPedido">0,00</span>
-</h3>
-
-<div id="mensagemEntrega"></div>
-
-<button id="btnWhatsApp">
-Enviar WhatsApp
-</button>
-
-<button onclick="window.print()">
-Imprimir Pedido
-</button>
-    
-<button onclick="novoPedido()">
-🆕 Novo Pedido
-</button>
-    
-</div>
-<script>
-
-function inicializarPedido() {
-
-    const hoje = new Date();
-
-    const dataKey =
-        hoje.getFullYear() +
-        String(
-            hoje.getMonth() + 1
-        ).padStart(2, "0") +
-        String(
-            hoje.getDate()
-        ).padStart(2, "0");
-
-    const ultimaData =
-        localStorage.getItem(
-            "dataPedidos"
-        );
-
-    let ultimoPedido = 0;
-
-    if (ultimaData === dataKey) {
-
-        ultimoPedido =
-            parseInt(
-                localStorage.getItem(
-                    "ultimoPedido"
-                )
-            ) || 0;
-
+  <div class="app-container">
+    <header class="brand-header">
+      <img
+        src="logo01.jpeg"
+        alt="King Ventura Pizzaria"
+        class="brand-logo"
+        onerror="this.style.display='none'"
+      />
+      <div class="brand-top">
+        <div>
+          <h1 class="brand-title">KING VENTURA PIZZARIA</h1>
+          <p style="color: var(--muted); font-size: 0.88rem;">Sistema Operacional • WhatsApp: 5567991476156</p>
+        </div>
+        <span class="badge-version">V7.2 REBUILD</span>
+      </div>
+    </header>
+
+    <nav class="nav-tabs" aria-label="Navegação do sistema">
+      <button class="nav-tab active" data-tab="pedido">🍕 Pedido</button>
+      <button class="nav-tab" data-tab="sabores">📋 Sabores & Preços</button>
+      <button class="nav-tab" data-tab="clientes">👤 Clientes</button>
+      <button class="nav-tab" data-tab="historico">📊 Histórico & Caixa</button>
+      <button class="nav-tab" data-tab="relatorios">💾 Relatórios & Backup</button>
+    </nav>
+
+    <!-- ABA 1: PEDIDO -->
+    <section id="tab-pedido" class="tab-panel active">
+      <div class="card">
+        <div class="brand-top">
+          <h2 id="numeroPedido" style="margin-bottom: 0;">KV0001</h2>
+          <span id="statusPedido" class="status-pill">🟡 Aberto</span>
+        </div>
+        <p id="dataPedido" style="color: var(--muted); font-size: 0.88rem; margin-top: 6px;"></p>
+      </div>
+
+      <div id="cardImportarWhats" class="card">
+        <h2>📥 Importar Pedido WhatsApp</h2>
+        <textarea
+          id="pedidoWhats"
+          rows="6"
+          placeholder="Cole aqui a mensagem recebida no WhatsApp..."
+        ></textarea>
+        <div class="btn-row">
+          <button id="btnImportarWhats" class="secondary">Importar Pedido</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Cliente</h2>
+        <div class="grid-2">
+          <div>
+            <label for="nome">Nome</label>
+            <input id="nome" placeholder="Nome do cliente" />
+          </div>
+          <div>
+            <label for="telefone">Telefone</label>
+            <input id="telefone" placeholder="(67) 99999-9999" />
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div>
+            <label for="cep">CEP</label>
+            <input id="cep" placeholder="79097-000" />
+          </div>
+          <div>
+            <label for="numero">Número</label>
+            <input id="numero" placeholder="129" />
+          </div>
+          <div>
+            <label for="endereco">Endereço</label>
+            <input id="endereco" placeholder="Rua / Bairro" />
+          </div>
+        </div>
+
+        <label for="observacao">Observação do Cliente</label>
+        <textarea id="observacao" placeholder="Ponto de referência, troco, etc."></textarea>
+
+        <div class="btn-row">
+          <button id="btnSalvarClienteRapido" class="secondary" type="button">Salvar Cliente na Base</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Montar Pizza</h2>
+        <div class="grid-2">
+          <div>
+            <label for="tamanho">Tamanho</label>
+            <select id="tamanho">
+              <option value="brotinho">Brotinho 25cm (Apenas 1 sabor)</option>
+              <option value="grande">Grande 35cm</option>
+            </select>
+          </div>
+          <div>
+            <label for="tipoPizza">Tipo</label>
+            <select id="tipoPizza">
+              <option value="inteira">Inteira</option>
+              <option value="meio">Meio a Meio</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label for="sabor1">Sabor 1</label>
+            <select id="sabor1"></select>
+          </div>
+          <div id="boxSabor2" style="display: none;">
+            <label for="sabor2">Sabor 2 (Meio a Meio)</label>
+            <select id="sabor2"></select>
+          </div>
+        </div>
+
+        <div id="ingredientes" class="ingredients-preview"></div>
+
+        <div class="grid-2">
+          <div>
+            <label for="adicional">Adicional</label>
+            <select id="adicional">
+              <option value="0">Nenhum adicional</option>
+              <option value="4">Catupiry Extra (+R$ 4,00)</option>
+              <option value="4">Presunto Extra (+R$ 4,00)</option>
+              <option value="4">Cebola Extra (+R$ 4,00)</option>
+              <option value="4">Milho Extra (+R$ 4,00)</option>
+              <option value="4">Ervilha Extra (+R$ 4,00)</option>
+              <option value="5">Muçarela Extra (+R$ 5,00)</option>
+              <option value="5">Bacon Extra (+R$ 5,00)</option>
+            </select>
+          </div>
+          <div>
+            <label for="obsPizza">Observação da Pizza</label>
+            <input id="obsPizza" placeholder="Ex: sem cebola, assar bem" />
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnAdicionarPizza" class="gold" type="button">Adicionar Pizza</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Bebidas</h2>
+        <div class="grid-2">
+          <div>
+            <label for="bebida">Selecionar Bebida</label>
+            <select id="bebida">
+              <option value="">Nenhuma bebida</option>
+              <option value="16">Coca-Cola 2 Litros - R$ 16,00</option>
+              <option value="10">Guaraná Antarctica 1 Litro - R$ 10,00</option>
+              <option value="6">Coca-Cola Lata 310ml - R$ 6,00</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: flex-end;">
+            <button id="btnAdicionarBebida" type="button" style="width: 100%;">Adicionar Bebida</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Carrinho</h2>
+        <div id="carrinho"></div>
+
+        <div class="summary-box">
+          <div class="summary-line">
+            <span>Taxa de Entrega:</span>
+            <span>R$ <span id="taxaEntrega">0.00</span></span>
+          </div>
+          <div id="mensagemEntrega" style="font-size: 0.85rem; color: var(--gold); margin-bottom: 6px;"></div>
+          <div class="summary-total">
+            <span>Total do Pedido:</span>
+            <span>R$ <span id="totalPedido">0.00</span></span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnWhatsApp" class="gold" type="button">Enviar WhatsApp</button>
+          <button id="btnRegistrarHistorico" type="button">Registrar no Histórico</button>
+          <button onclick="window.print()" class="secondary" type="button">Imprimir Pedido</button>
+          <button onclick="novoPedido()" class="secondary" type="button">🆕 Novo Pedido</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 2: SABORES & PREÇOS -->
+    <section id="tab-sabores" class="tab-panel">
+      <div class="card">
+        <h2>Cadastrar / Editar Sabor</h2>
+        <input type="hidden" id="saborEditandoOriginal" />
+        <div class="grid-3">
+          <div>
+            <label for="cadNomeSabor">Nome do Sabor</label>
+            <input id="cadNomeSabor" placeholder="Ex: Portuguesa" />
+          </div>
+          <div>
+            <label for="cadPrecoBrotinho">Brotinho 25cm (R$)</label>
+            <input id="cadPrecoBrotinho" type="number" step="0.50" min="0" placeholder="20.00" />
+          </div>
+          <div>
+            <label for="cadPrecoGrande">Grande 35cm (R$)</label>
+            <input id="cadPrecoGrande" type="number" step="0.50" min="0" placeholder="40.00" />
+          </div>
+        </div>
+        <label for="cadIngredientes">Ingredientes (separados por vírgula)</label>
+        <input id="cadIngredientes" placeholder="Molho, Muçarela, Presunto, Ovo, Cebola, Azeitonas, Orégano" />
+
+        <div class="btn-row">
+          <button id="btnSalvarSabor" class="gold" type="button">Salvar Sabor</button>
+          <button id="btnCancelarEdicaoSabor" class="secondary" type="button">Limpar Campos</button>
+          <button id="btnRestaurarSabores" class="secondary" type="button">Restaurar Sabores Padrão</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Sabores Cadastrados</h2>
+        <div id="listaSabores"></div>
+      </div>
+    </section>
+
+    <!-- ABA 3: CLIENTES -->
+    <section id="tab-clientes" class="tab-panel">
+      <div class="card">
+        <h2>Cadastrar / Editar Cliente</h2>
+        <input type="hidden" id="clienteEditId" />
+        <div class="grid-2">
+          <div>
+            <label for="cliNome">Nome</label>
+            <input id="cliNome" placeholder="Nome completo" />
+          </div>
+          <div>
+            <label for="cliTelefone">Telefone</label>
+            <input id="cliTelefone" placeholder="(67) 99999-9999" />
+          </div>
+        </div>
+        <div class="grid-3">
+          <div>
+            <label for="cliCep">CEP</label>
+            <input id="cliCep" placeholder="79097-000" />
+          </div>
+          <div>
+            <label for="cliNumero">Número</label>
+            <input id="cliNumero" placeholder="129" />
+          </div>
+          <div>
+            <label for="cliEndereco">Endereço</label>
+            <input id="cliEndereco" placeholder="Rua / Bairro" />
+          </div>
+        </div>
+        <label for="cliObs">Observação</label>
+        <input id="cliObs" placeholder="Preferências ou ponto de referência" />
+        <div class="btn-row">
+          <button id="btnSalvarCliente" class="gold" type="button">Salvar Cliente</button>
+          <button id="btnLimparClienteForm" class="secondary" type="button">Limpar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Base de Clientes</h2>
+        <input id="buscaCliente" placeholder="Buscar cliente por nome, telefone ou endereço..." />
+        <div id="listaClientes" style="margin-top: 12px;"></div>
+      </div>
+    </section>
+
+    <!-- ABA 4: HISTÓRICO & CAIXA -->
+    <section id="tab-historico" class="tab-panel">
+      <div class="card">
+        <h2>Resumo do Caixa</h2>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Pedidos Registrados</div>
+            <div id="kpiQtdPedidos" class="kpi-value">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Faturamento Total</div>
+            <div class="kpi-value">R$ <span id="kpiFaturamento">0.00</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Ticket Médio</div>
+            <div class="kpi-value">R$ <span id="kpiTicketMedio">0.00</span></div>
+          </div>
+        </div>
+        <input id="buscaHistorico" placeholder="Buscar pedido por código (KV...), cliente ou status..." />
+      </div>
+
+      <div class="card">
+        <h2>Histórico de Pedidos</h2>
+        <div id="listaHistorico"></div>
+      </div>
+    </section>
+
+    <!-- ABA 5: RELATÓRIOS & BACKUP -->
+    <section id="tab-relatorios" class="tab-panel">
+      <div class="card">
+        <h2>Exportar Relatórios CSV</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 10px;">
+          Baixe planilhas CSV compatíveis com Excel para controle financeiro e de clientes.
+        </p>
+        <div class="btn-row">
+          <button id="btnExportarPedidosCSV" class="gold" type="button">Baixar Histórico de Pedidos (CSV)</button>
+          <button id="btnExportarSaboresCSV" class="secondary" type="button">Baixar Tabela de Sabores (CSV)</button>
+          <button id="btnExportarClientesCSV" class="secondary" type="button">Baixar Base de Clientes (CSV)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Backup e Restauração (JSON)</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 10px;">
+          Salve todo o sistema (sabores, preços, clientes, histórico e numeração) ou restaure um arquivo JSON.
+        </p>
+        <div class="btn-row">
+          <button id="btnExportarBackup" class="gold" type="button">Exportar Backup JSON</button>
+          <button id="btnImportarBackup" class="secondary" type="button">Restaurar Backup JSON</button>
+        </div>
+        <label for="inputBackupJson">Conteúdo JSON para Restauração</label>
+        <textarea id="inputBackupJson" rows="6" placeholder="Cole aqui o JSON de backup ou selecione um arquivo abaixo..."></textarea>
+        <label for="fileBackupJson">Ou escolher arquivo .json</label>
+        <input id="fileBackupJson" type="file" accept=".json,application/json" />
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const NUMERO_WHATSAPP = "5567991476156";
+
+    const SABORES_PADRAO = {
+      "Muçarela": {
+        brotinho: 15,
+        grande: 35,
+        ingredientes: ["Molho", "Muçarela", "Azeitonas", "Orégano"]
+      },
+      "Calabresa": {
+        brotinho: 20,
+        grande: 35,
+        ingredientes: ["Molho", "Muçarela", "Calabresa", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Catupiry": {
+        brotinho: 20,
+        grande: 35,
+        ingredientes: ["Molho", "Muçarela", "Catupiry", "Azeitonas", "Orégano"]
+      },
+      "Calabresa com Catupiry": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Calabresa", "Catupiry", "Azeitonas", "Orégano"]
+      },
+      "Frango com Catupiry": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Frango Desfiado", "Catupiry", "Azeitonas", "Orégano"]
+      },
+      "Presunto": {
+        brotinho: 20,
+        grande: 35,
+        ingredientes: ["Molho", "Muçarela", "Presunto", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Presunto com Catupiry": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Presunto", "Catupiry", "Azeitonas", "Orégano"]
+      },
+      "Brasileira": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Milho Verde", "Ervilha", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Frango com Milho e Tomate": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Frango Desfiado", "Milho Verde", "Tomate", "Azeitonas", "Orégano"]
+      },
+      "Baiana": {
+        brotinho: 23,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Calabresa", "Bacon", "Molho de Pimenta", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Bacon": {
+        brotinho: 23,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Bacon", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Cremosa": {
+        brotinho: 23,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Catupiry", "Creme de Leite", "Azeitonas", "Orégano"]
+      },
+      "Lombo ao Creme": {
+        brotinho: 23,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Lombinho", "Creme de Leite", "Azeitonas", "Orégano"]
+      }
+    };
+
+    let SABORES = {};
+    let historicoPedidos = [];
+    let clientesBase = [];
+    let taxaEntrega = 0;
+
+    let pedidoAtual = {
+      numero: "",
+      data: "",
+      status: "Aberto",
+      cliente: "",
+      telefone: "",
+      cep: "",
+      endereco: "",
+      numeroCasa: "",
+      observacao: "",
+      taxaEntrega: 0,
+      itens: [],
+      total: 0
+    };
+
+    function carregarSaboresStorage() {
+      const salvo = localStorage.getItem("kv_sabores");
+      if (salvo) {
+        try {
+          SABORES = JSON.parse(salvo);
+          return;
+        } catch (e) {}
+      }
+      SABORES = JSON.parse(JSON.stringify(SABORES_PADRAO));
+      salvarSaboresStorage();
     }
 
-    ultimoPedido++;
-
-    localStorage.setItem(
-        "dataPedidos",
-        dataKey
-    );
-
-    localStorage.setItem(
-        "ultimoPedido",
-        ultimoPedido
-    );
-
-    const codigoPedido =
-        "KV" +
-        dataKey +
-        "-" +
-        String(
-            ultimoPedido
-        ).padStart(
-            4,
-            "0"
-        );
-
-    document.getElementById(
-        "numeroPedido"
-    ).innerText =
-        codigoPedido;
-
-    document.getElementById(
-        "dataPedido"
-    ).innerText =
-        hoje.toLocaleString(
-            "pt-BR"
-        );
-}
-
-function carregarSabores(){
-
-    const tamanho =
-        document.getElementById(
-            "tamanho"
-        ).value;
-
-    const sabor1 =
-        document.getElementById(
-            "sabor1"
-        );
-
-    const sabor2 =
-        document.getElementById(
-            "sabor2"
-        );
-
-sabor1.innerHTML =
-'<option value="">🍕 Selecione um sabor</option>';
-
-sabor2.innerHTML =
-'<option value="">🍕 Selecione um sabor</option>';
-
-    Object.keys(
-        SABORES
-    ).forEach(nome => {
-
-        const preco =
-            tamanho === "brotinho"
-            ? SABORES[nome].brotinho
-            : SABORES[nome].grande;
-
-        sabor1.innerHTML +=
-            `<option value="${nome}">
-            ${nome} - R$ ${preco.toFixed(2)}
-            </option>`;
-
-        sabor2.innerHTML +=
-            `<option value="${nome}">
-            ${nome} - R$ ${preco.toFixed(2)}
-            </option>`;
-    });
-
-    atualizarVisualPedido();
-}
-
-function atualizarVisualPedido(){
-
-    const tamanho =
-        document.getElementById(
-            "tamanho"
-        ).value;
-
-    const tipo =
-        document.getElementById(
-            "tipoPizza"
-        ).value;
-
-    const sabor2 =
-        document.getElementById(
-            "sabor2"
-        );
-
-    if(tamanho === "brotinho"){
-
-        document
-        .getElementById(
-            "tipoPizza"
-        )
-        .disabled = true;
-
-        document
-        .getElementById(
-            "tipoPizza"
-        )
-        .value = "inteira";
-
-        sabor2.style.display =
-            "none";
-
-    }else{
-
-        document
-        .getElementById(
-            "tipoPizza"
-        )
-        .disabled = false;
-
-        sabor2.style.display =
-            tipo === "meio"
-            ? "block"
-            : "none";
+    function salvarSaboresStorage() {
+      localStorage.setItem("kv_sabores", JSON.stringify(SABORES));
     }
-}
 
-document
-.getElementById(
-    "btnAdicionarPizza"
-)
-.addEventListener(
-    "click",
-    function(){
-
-        const tamanho =
-            document
-            .getElementById(
-                "tamanho"
-            )
-            .value;
-
-        const tipo =
-            document
-            .getElementById(
-                "tipoPizza"
-            )
-            .value;
-
-        const sabor1 =
-            document
-            .getElementById(
-                "sabor1"
-            )
-            .value;
-
-        const sabor2 =
-            document
-            .getElementById(
-                "sabor2"
-            )
-            .value;
-
-        let descricao = "";
-        let valor = 0;
-        let ingredientes = "";
-
-        if(
-            tamanho === "brotinho"
-        ){
-
-            descricao =
-                "Brotinho 25cm - "
-                + sabor1;
-
-            valor =
-                SABORES[sabor1]
-                .brotinho;
-
-            ingredientes =
-                SABORES[sabor1]
-                .ingredientes
-                .join(", ");
-
-        }else{
-
-            if(tipo === "meio"){
-
-                descricao =
-                    "Grande 35cm Meio a Meio - "
-                    + sabor1
-                    + " / "
-                    + sabor2;
-
-                valor =
-                    Math.max(
-                        SABORES[
-                            sabor1
-                        ].grande,
-
-                        SABORES[
-                            sabor2
-                        ].grande
-                    );
-
-                ingredientes =
-                    "50% "
-                    + sabor1
-                    + ": "
-                    + SABORES[
-                        sabor1
-                    ].ingredientes.join(", ")
-
-                    +
-
-                    " | 50% "
-
-                    + sabor2
-
-                    + ": "
-
-                    + SABORES[
-                        sabor2
-                    ].ingredientes.join(", ");
-
-            }else{
-
-                descricao =
-                    "Grande 35cm - "
-                    + sabor1;
-
-                valor =
-                    SABORES[
-                        sabor1
-                    ].grande;
-
-                ingredientes =
-                    SABORES[
-                        sabor1
-                    ].ingredientes.join(", ");
-            }
+    function carregarHistorico() {
+      const dados = localStorage.getItem("historicoPedidos");
+      if (dados) {
+        try {
+          historicoPedidos = JSON.parse(dados);
+        } catch (e) {
+          historicoPedidos = [];
         }
-const adicional =
-document.getElementById(
-    "adicional"
-);
-
-const valorAdicionais =
-Number(adicional.value);
-
-const nomeAdicional =
-adicional.options[
-    adicional.selectedIndex
-].text;
-
-adicionarItem({
-    descricao:
-        valorAdicionais > 0
-        ? descricao + " + " + nomeAdicional
-        : descricao,
-
-    valor:
-        valor +
-        valorAdicionais,
-
-    ingredientes,
-
-    observacao:
-        document
-        .getElementById(
-            "obsPizza"
-        )
-        .value
-});
-
-document.getElementById("adicional").selectedIndex = 0;
-document.getElementById("obsPizza").value = "";
-
-atualizarTotal();
-
+      }
     }
-);
 
-document
-.getElementById(
-    "btnAdicionarBebida"
-)
-.addEventListener(
-    "click",
-    function(){
-
-        const bebida =
-            document
-            .getElementById(
-                "bebida"
-            );
-if (!bebida.value) {
-    return;
-}
-        adicionarItem({
-
-            descricao:
-                bebida.options[
-                    bebida.selectedIndex
-                ].text,
-
-            valor:
-                Number(
-                    bebida.value
-                ),
-
-            ingredientes: ""
-
-        });
-        atualizarTotal();
+    function salvarHistorico() {
+      localStorage.setItem("historicoPedidos", JSON.stringify(historicoPedidos));
     }
-);
 
-document
-.getElementById(
-    "btnWhatsApp"
-)
-.addEventListener(
-    "click",
-    function(){
-
-        pedidoAtual.cliente =
-            document.getElementById("nome").value;
-
-        pedidoAtual.telefone =
-            document.getElementById("telefone").value;
-
-        pedidoAtual.cep =
-            document.getElementById("cep").value;
-
-        pedidoAtual.numero =
-            document.getElementById("numero").value;
-
-        pedidoAtual.endereco =
-            document.getElementById("endereco").value;
-
-        pedidoAtual.observacao =
-            document.getElementById("observacao").value;
-        
-        pedidoAtual.taxaEntrega =
-            taxaEntrega;
-        
-        enviarWhatsApp(
-            pedidoAtual
-        );
-    }
-);
-document
-.getElementById(
-    "tamanho"
-)
-.addEventListener(
-    "change",
-    carregarSabores
-);
-
-document
-.getElementById(
-    "tipoPizza"
-)
-.addEventListener(
-    "change",
-    atualizarVisualPedido
-);
-let taxaEntrega = 0;
-function atualizarTotal() {
-
-    let subtotal = 0;
-
-    pedidoAtual.itens.forEach(
-        item => {
-            subtotal += item.valor;
+    function carregarClientes() {
+      const dados = localStorage.getItem("kv_clientes");
+      if (dados) {
+        try {
+          clientesBase = JSON.parse(dados);
+        } catch (e) {
+          clientesBase = [];
         }
-    );
+      }
+    }
 
-    const total =
-        subtotal +
-        taxaEntrega;
+    function salvarClientes() {
+      localStorage.setItem("kv_clientes", JSON.stringify(clientesBase));
+    }
 
-    document
-    .getElementById(
-        "totalPedido"
-    )
-    .innerText =
-        total.toFixed(2);
-}
-function calcularTaxaEntrega() {
+    function gerarNumeroPedido() {
+      let numero = Number(localStorage.getItem("ultimoPedido") || 0);
+      numero++;
+      localStorage.setItem("ultimoPedido", numero);
+      return "KV" + String(numero).padStart(4, "0");
+    }
 
-    const cep =
-        document
-        .getElementById(
-            "cep"
-        )
-        .value
-        .replace(
-            /[^0-9]/g,
-            ""
-        );
+    function registrarPedido(pedido) {
+      pedido.numero = pedido.numero || gerarNumeroPedido();
+      pedido.data = pedido.data || new Date().toLocaleString("pt-BR");
+      pedido.status = pedido.status || "Aberto";
+      historicoPedidos.unshift(pedido);
+      salvarHistorico();
+      renderizarHistorico();
+    }
 
-    if (
-        cep.length < 8
-    ) {
+    function inicializarPedido() {
+      const agora = new Date();
+      let proximoNum = Number(localStorage.getItem("ultimoPedido") || 0) + 1;
+      const codigo = "KV" + String(proximoNum).padStart(4, "0");
+
+      pedidoAtual.numero = codigo;
+      pedidoAtual.data = agora.toLocaleString("pt-BR");
+      pedidoAtual.status = "Aberto";
+
+      document.getElementById("numeroPedido").innerText = codigo;
+      document.getElementById("dataPedido").innerText = pedidoAtual.data;
+      document.getElementById("statusPedido").innerText = "🟡 Aberto";
+    }
+
+    function carregarSabores() {
+      const tamanho = document.getElementById("tamanho").value;
+      const sabor1 = document.getElementById("sabor1");
+      const sabor2 = document.getElementById("sabor2");
+
+      const prev1 = sabor1.value;
+      const prev2 = sabor2.value;
+
+      sabor1.innerHTML = '<option value="">🍕 Selecione um sabor</option>';
+      sabor2.innerHTML = '<option value="">🍕 Selecione um sabor</option>';
+
+      Object.keys(SABORES).forEach((nome) => {
+        const preco = tamanho === "brotinho" ? Number(SABORES[nome].brotinho) : Number(SABORES[nome].grande);
+        sabor1.innerHTML += `<option value="${nome}">${nome} - R$ ${preco.toFixed(2)}</option>`;
+        sabor2.innerHTML += `<option value="${nome}">${nome} - R$ ${preco.toFixed(2)}</option>`;
+      });
+
+      if (prev1 && SABORES[prev1]) sabor1.value = prev1;
+      if (prev2 && SABORES[prev2]) sabor2.value = prev2;
+
+      atualizarVisualPedido();
+      atualizarPreviewIngredientes();
+    }
+
+    function atualizarVisualPedido() {
+      const tamanho = document.getElementById("tamanho").value;
+      const tipoSelect = document.getElementById("tipoPizza");
+      const boxSabor2 = document.getElementById("boxSabor2");
+
+      if (tamanho === "brotinho") {
+        tipoSelect.disabled = true;
+        tipoSelect.value = "inteira";
+        boxSabor2.style.display = "none";
+      } else {
+        tipoSelect.disabled = false;
+        boxSabor2.style.display = tipoSelect.value === "meio" ? "block" : "none";
+      }
+
+      atualizarPreviewIngredientes();
+    }
+
+    function atualizarPreviewIngredientes() {
+      const el = document.getElementById("ingredientes");
+      const tamanho = document.getElementById("tamanho").value;
+      const tipo = document.getElementById("tipoPizza").value;
+      const s1 = document.getElementById("sabor1").value;
+      const s2 = document.getElementById("sabor2").value;
+
+      if (!s1 || !SABORES[s1]) {
+        el.innerText = "";
         return;
+      }
+
+      if (tamanho === "grande" && tipo === "meio" && s2 && SABORES[s2]) {
+        el.innerText =
+          `Ingredientes — 50% ${s1}: ${SABORES[s1].ingredientes.join(", ")} | ` +
+          `50% ${s2}: ${SABORES[s2].ingredientes.join(", ")}`;
+      } else {
+        el.innerText = `Ingredientes: ${SABORES[s1].ingredientes.join(", ")}`;
+      }
     }
 
-    if (
-        cep.startsWith(
-            "79097"
-        )
-    ) {
+    function adicionarItem(item) {
+      pedidoAtual.itens.push(item);
+      atualizarCarrinho();
+    }
 
+    function removerItem(indice) {
+      pedidoAtual.itens.splice(indice, 1);
+      atualizarCarrinho();
+    }
+
+    function limparPedido() {
+      pedidoAtual.itens = [];
+      atualizarCarrinho();
+    }
+
+    function atualizarCarrinho() {
+      const carrinho = document.getElementById("carrinho");
+      if (!carrinho) return;
+
+      let html = "";
+      pedidoAtual.itens.forEach((item, index) => {
+        html += `
+          <div class="item">
+            <b>${item.descricao}</b><br />
+            ${item.ingredientes ? `<span style="color: var(--muted); font-size: 0.85rem;">${item.ingredientes}</span><br />` : ""}
+            ${item.observacao ? `<span style="color: var(--gold); font-size: 0.85rem;">Obs: ${item.observacao}</span><br />` : ""}
+            <div style="margin-top: 6px; display: flex; justify-content: space-between; align-items: center;">
+              <strong>Valor: R$ ${Number(item.valor).toFixed(2)}</strong>
+              <button class="danger" onclick="removerItem(${index})" type="button">Excluir</button>
+            </div>
+          </div>
+        `;
+      });
+
+      carrinho.innerHTML = html || '<p style="color: var(--muted);">Nenhum item adicionado ainda.</p>';
+      atualizarTotal();
+    }
+
+    function atualizarTotal() {
+      let subtotal = 0;
+      pedidoAtual.itens.forEach((item) => {
+        subtotal += Number(item.valor) || 0;
+      });
+
+      const total = subtotal + taxaEntrega;
+      pedidoAtual.taxaEntrega = taxaEntrega;
+      pedidoAtual.total = total;
+
+      document.getElementById("taxaEntrega").innerText = taxaEntrega.toFixed(2);
+      document.getElementById("totalPedido").innerText = total.toFixed(2);
+    }
+
+    function calcularTaxaEntrega() {
+      const cep = document.getElementById("cep").value.replace(/[^0-9]/g, "");
+      if (cep.length < 8) {
+        return;
+      }
+
+      if (cep.startsWith("79097")) {
         taxaEntrega = 0;
-
-        document
-        .getElementById(
-            "mensagemEntrega"
-        )
-        .innerHTML =
-        "🎉 Você ganhou ENTREGA GRÁTIS";
-
-    } else {
-
+        document.getElementById("mensagemEntrega").innerHTML = "🎉 Você ganhou ENTREGA GRÁTIS";
+      } else {
         taxaEntrega = 5;
+        document.getElementById("mensagemEntrega").innerHTML = "Taxa de Entrega: R$ 5,00";
+      }
 
-        document
-        .getElementById(
-            "mensagemEntrega"
-        )
-        .innerHTML =
-        "Taxa de Entrega: R$ 5,00";
-
+      atualizarTotal();
     }
 
-    document
-    .getElementById(
-        "taxaEntrega"
-    )
-    .innerText =
-    taxaEntrega.toFixed(2);
-    
-atualizarTotal();
-}
+    async function buscarCEP() {
+      const cep = document.getElementById("cep").value.replace(/\D/g, "");
+      if (cep.length !== 8) return;
 
-document
-.getElementById(
-    "cep"
-)
-.addEventListener(
-    "blur",
-    async function(){
-
-        await buscarCEP();
-
-        calcularTaxaEntrega();
- 
-}
-);
-
-async function buscarCEP() {
-
-    const cep =
-        document
-        .getElementById(
-            "cep"
-        )
-        .value
-        .replace(
-            /\D/g,
-            ""
-        );
-
-    if (
-        cep.length !== 8
-    ) {
-        return;
-    }
-
-    try {
-
-      const resposta = await fetch(
-    "https://viacep.com.br/ws/" +
-    cep +
-    "/json/"
-);
-
-        const dados =
-            await resposta.json();
-
-        if (
-            !dados.erro
-        ) {
-
-            document
-            .getElementById(
-                "endereco"
-            )
-            .value =
-                dados.logradouro +
-                " - " +
-                dados.bairro;
-
+      try {
+        const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const dados = await resposta.json();
+        if (!dados.erro) {
+          document.getElementById("endereco").value = `${dados.logradouro} - ${dados.bairro}`;
         }
-
-    } catch (erro) {
-
-        console.log(
-            "Erro CEP",
-            erro
-        );
-
+      } catch (erro) {
+        console.log("Erro CEP", erro);
+      }
     }
-}    
-inicializarPedido();
-carregarSabores();
 
-document
-.getElementById(
-    "btnImportarWhats"
-)
-.addEventListener(
-    "click",
-    importarPedidoWhats
-);
+    function sincronizarDadosClientePedido() {
+      pedidoAtual.cliente = document.getElementById("nome").value.trim();
+      pedidoAtual.telefone = document.getElementById("telefone").value.trim();
+      pedidoAtual.cep = document.getElementById("cep").value.trim();
+      pedidoAtual.endereco = document.getElementById("endereco").value.trim();
+      pedidoAtual.numeroCasa = document.getElementById("numero").value.trim();
+      pedidoAtual.observacao = document.getElementById("observacao").value.trim();
+      pedidoAtual.taxaEntrega = taxaEntrega;
+    }
 
-function importarPedidoWhats(){
+    function enviarWhatsApp(pedido) {
+      let mensagem = "KING VENTURA PIZZARIA\n\n";
+      mensagem += "Pedido: " + (pedido.numero || document.getElementById("numeroPedido").innerText) + "\n";
+      mensagem += "Cliente: " + (pedido.cliente || "") + "\n";
+      mensagem += "Telefone: " + (pedido.telefone || "") + "\n";
+      mensagem += "CEP: " + (pedido.cep || "") + "\n";
+      mensagem += "Endereço: " + (pedido.endereco || "") + "\n";
+      mensagem += "Número: " + (pedido.numeroCasa || "") + "\n";
+      mensagem += "Observação: " + (pedido.observacao || "") + "\n";
+      mensagem += "Taxa de Entrega: R$ " + Number(pedido.taxaEntrega || 0).toFixed(2) + "\n\n";
+      mensagem += "ITENS:\n[KV-ITENS]\n";
 
-    const texto =
-        document
-        .getElementById(
-            "pedidoWhats"
-        )
-        .value;
-
-    pedidoAtual.itens = [];
-
-    document.getElementById(
-        "carrinho"
-    ).innerHTML = "";
-
-    const nome =
-        texto.match(
-            /Cliente:\s*(.*)/i
-        );
-
-    const telefone =
-        texto.match(
-            /Telefone:\s*(.*)/i
-        );
-
-    const cep =
-        texto.match(
-            /CEP:\s*(.*)/i
-        );
-
-    const numero =
-        texto.match(
-            /Número:\s*(.*)/i
-        );
-
-    document.getElementById("nome")
-        .value =
-        nome ? nome[1].trim() : "";
-
-    document.getElementById("telefone")
-        .value =
-        telefone ? telefone[1].trim() : "";
-
-    document.getElementById("cep")
-        .value =
-        cep ? cep[1].trim() : "";
-
-    document.getElementById("numero")
-        .value =
-        numero ? numero[1].trim() : "";
-
-    const linhas =
-        texto.split("\n");
-
-    linhas.forEach(linha => {
-
-        linha = linha.trim();
-
-        /* BROTINHO */
-
-        if (
-            linha.startsWith(
-            
-                "Brotinho 25cm - "
-            )
-        ) {
-
-            const sabor =
-                linha
-                    .split(" - R$ ")[0]
-                    .replace(
-                        "Brotinho 25cm - ",
-                        ""
-                    )
-                    .split(" + ")[0]
-                    .trim();
-
-            document.getElementById(
-                "tamanho"
-            ).value = "brotinho";
-
-            carregarSabores();
-
-            document.getElementById(
-                "sabor1"
-            ).value = sabor;
-
-            document.getElementById(
-                "btnAdicionarPizza"
-            ).click();
-
+      (pedido.itens || []).forEach((item) => {
+        mensagem += item.descricao + " - R$ " + Number(item.valor).toFixed(2) + "\n";
+        if (item.adicionais && item.adicionais.length) {
+          mensagem += "Adicionais: " + item.adicionais.join(", ") + "\n";
         }
+        if (item.observacao) {
+          mensagem += "Obs: " + item.observacao + "\n";
+        }
+        mensagem += "\n";
+      });
 
-/* MEIO A MEIO */
-else if (
-    linha.startsWith(
-        "Grande 35cm Meio a Meio - "
-    )
-) {
+      mensagem += "\nTOTAL: R$ " + Number(pedido.total || 0).toFixed(2);
 
-    const descricaoPizza =
-        linha
+      window.open(
+        "https://wa.me/" + NUMERO_WHATSAPP + "?text=" + encodeURIComponent(mensagem),
+        "_blank"
+      );
+    }
+
+    function importarPedidoWhats() {
+      const texto = document.getElementById("pedidoWhats").value;
+      if (!texto.trim()) return;
+
+      limparPedido();
+
+      const nome = texto.match(/Cliente:\s*(.*)/i);
+      const telefone = texto.match(/Telefone:\s*(.*)/i);
+      const cep = texto.match(/CEP:\s*(.*)/i);
+      const numero = texto.match(/N[uú]mero:\s*(.*)/i);
+      const endereco = texto.match(/Endere[cç]o:\s*(.*)/i);
+      const obs = texto.match(/Observa[cç][aã]o:\s*(.*)/i);
+
+      document.getElementById("nome").value = nome ? nome[1].trim() : "";
+      document.getElementById("telefone").value = telefone ? telefone[1].trim() : "";
+      document.getElementById("cep").value = cep ? cep[1].trim() : "";
+      document.getElementById("numero").value = numero ? numero[1].trim() : "";
+      if (endereco && endereco[1].trim()) {
+        document.getElementById("endereco").value = endereco[1].trim();
+      }
+      if (obs && obs[1].trim()) {
+        document.getElementById("observacao").value = obs[1].trim();
+      }
+
+      const linhas = texto.split("\n");
+      linhas.forEach((rawLinha) => {
+        const linha = rawLinha.trim();
+
+        if (linha.startsWith("Brotinho 25cm - ")) {
+          const sabor = linha
             .split(" - R$ ")[0]
-            .replace(
-                "Grande 35cm Meio a Meio - ",
-                ""
-            );
-
-    const sabores =
-        descricaoPizza
+            .replace("Brotinho 25cm - ", "")
             .split(" + ")[0]
-            .split(" / ");
+            .trim();
 
-    document.getElementById(
-        "tamanho"
-    ).value = "grande";
-
-    document.getElementById(
-        "tipoPizza"
-    ).value = "meio";
-
-    carregarSabores();
-
-    atualizarVisualPedido();
-
-    document.getElementById(
-        "sabor1"
-    ).value = sabores[0].trim();
-
-    document.getElementById(
-        "sabor2"
-    ).value = sabores[1].trim();
-
-    document.getElementById(
-        "btnAdicionarPizza"
-    ).click();
-}
-        /* GRANDE INTEIRA */
-
-        else if (
-            linha.startsWith(
-                "Grande 35cm - "
-            )
-        ) {
-
-            const sabor =
-                linha
-                    .split(" - R$ ")[0]
-                    .replace(
-                        "Grande 35cm - ",
-                        ""
-                    )
-                    .split(" + ")[0]
-                    .trim();
-
-            document.getElementById(
-                "tamanho"
-            ).value = "grande";
-
-            document.getElementById(
-                "tipoPizza"
-            ).value = "inteira";
-
+          if (SABORES[sabor]) {
+            document.getElementById("tamanho").value = "brotinho";
             carregarSabores();
+            document.getElementById("sabor1").value = sabor;
+            document.getElementById("btnAdicionarPizza").click();
+          }
+        } else if (linha.startsWith("Grande 35cm Meio a Meio - ")) {
+          const descricaoPizza = linha
+            .split(" - R$ ")[0]
+            .replace("Grande 35cm Meio a Meio - ", "");
+          const partes = descricaoPizza.split(" + ")[0].split(" / ");
 
-            document.getElementById(
-                "sabor1"
-            ).value = sabor;
+          if (partes.length === 2 && SABORES[partes[0].trim()] && SABORES[partes[1].trim()]) {
+            document.getElementById("tamanho").value = "grande";
+            document.getElementById("tipoPizza").value = "meio";
+            carregarSabores();
+            atualizarVisualPedido();
+            document.getElementById("sabor1").value = partes[0].trim();
+            document.getElementById("sabor2").value = partes[1].trim();
+            document.getElementById("btnAdicionarPizza").click();
+          }
+        } else if (linha.startsWith("Grande 35cm - ")) {
+          const sabor = linha
+            .split(" - R$ ")[0]
+            .replace("Grande 35cm - ", "")
+            .split(" + ")[0]
+            .trim();
 
-            document.getElementById(
-                "btnAdicionarPizza"
-            ).click();
+          if (SABORES[sabor]) {
+            document.getElementById("tamanho").value = "grande";
+            document.getElementById("tipoPizza").value = "inteira";
+            carregarSabores();
+            document.getElementById("sabor1").value = sabor;
+            document.getElementById("btnAdicionarPizza").click();
+          }
+        }
+      });
 
+      const bebidaSelect = document.getElementById("bebida");
+      for (let i = 1; i < bebidaSelect.options.length; i++) {
+        const optText = bebidaSelect.options[i].text.split(" - R$ ")[0];
+        if (texto.includes(optText)) {
+          bebidaSelect.selectedIndex = i;
+          document.getElementById("btnAdicionarBebida").click();
+        }
+      }
+
+      buscarCEP();
+      calcularTaxaEntrega();
+      alert("Pedido importado!");
+    }
+
+    function novoPedido() {
+      if (!confirm("Deseja limpar o pedido atual e iniciar um novo pedido?")) {
+        return;
+      }
+      location.reload();
+    }
+
+    /* GESTÃO DE SABORES & PREÇOS */
+    function renderizarListaSabores() {
+      const container = document.getElementById("listaSabores");
+      const nomes = Object.keys(SABORES);
+
+      if (!nomes.length) {
+        container.innerHTML = '<p style="color: var(--muted);">Nenhum sabor cadastrado.</p>';
+        return;
+      }
+
+      container.innerHTML = nomes
+        .map((nome) => {
+          const s = SABORES[nome];
+          return `
+            <div class="list-card">
+              <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <strong>${nome}</strong><br />
+                  <span style="color: var(--gold); font-size: 0.9rem;">
+                    Brotinho 25cm: R$ ${Number(s.brotinho).toFixed(2)} | Grande 35cm: R$ ${Number(s.grande).toFixed(2)}
+                  </span><br />
+                  <span style="color: var(--muted); font-size: 0.85rem;">
+                    Ingredientes: ${(s.ingredientes || []).join(", ")}
+                  </span>
+                </div>
+                <div class="btn-row" style="margin-top: 0;">
+                  <button class="secondary" onclick="prepararEdicaoSabor('${nome.replace(/'/g, "\\'")}')" type="button">Editar</button>
+                  <button class="danger" onclick="excluirSabor('${nome.replace(/'/g, "\\'")}')" type="button">Excluir</button>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    }
+
+    function prepararEdicaoSabor(nome) {
+      const s = SABORES[nome];
+      if (!s) return;
+      document.getElementById("saborEditandoOriginal").value = nome;
+      document.getElementById("cadNomeSabor").value = nome;
+      document.getElementById("cadPrecoBrotinho").value = s.brotinho;
+      document.getElementById("cadPrecoGrande").value = s.grande;
+      document.getElementById("cadIngredientes").value = (s.ingredientes || []).join(", ");
+    }
+
+    function limparFormSabor() {
+      document.getElementById("saborEditandoOriginal").value = "";
+      document.getElementById("cadNomeSabor").value = "";
+      document.getElementById("cadPrecoBrotinho").value = "";
+      document.getElementById("cadPrecoGrande").value = "";
+      document.getElementById("cadIngredientes").value = "";
+    }
+
+    function excluirSabor(nome) {
+      if (!confirm(`Excluir o sabor "${nome}"?`)) return;
+      delete SABORES[nome];
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+    }
+
+    /* GESTÃO DE CLIENTES */
+    function salvarClienteBase(dados) {
+      if (!dados.nome) {
+        alert("Informe o nome do cliente.");
+        return;
+      }
+
+      if (dados.id) {
+        const idx = clientesBase.findIndex((c) => c.id === dados.id);
+        if (idx >= 0) {
+          clientesBase[idx] = { ...clientesBase[idx], ...dados };
+        }
+      } else {
+        const existente = clientesBase.find(
+          (c) => c.nome.toLowerCase() === dados.nome.toLowerCase()
+        );
+        if (existente) {
+          Object.assign(existente, dados, { id: existente.id });
+        } else {
+          clientesBase.unshift({
+            id: "CLI-" + Date.now(),
+            ...dados
+          });
+        }
+      }
+
+      salvarClientes();
+      renderizarClientes();
+    }
+
+    function usarClienteNoPedido(id) {
+      const cli = clientesBase.find((c) => c.id === id);
+      if (!cli) return;
+
+      document.getElementById("nome").value = cli.nome || "";
+      document.getElementById("telefone").value = cli.telefone || "";
+      document.getElementById("cep").value = cli.cep || "";
+      document.getElementById("numero").value = cli.numero || "";
+      document.getElementById("endereco").value = cli.endereco || "";
+      document.getElementById("observacao").value = cli.observacao || "";
+
+      calcularTaxaEntrega();
+      mudarAba("pedido");
+    }
+
+    function editarClienteBase(id) {
+      const cli = clientesBase.find((c) => c.id === id);
+      if (!cli) return;
+
+      document.getElementById("clienteEditId").value = cli.id;
+      document.getElementById("cliNome").value = cli.nome || "";
+      document.getElementById("cliTelefone").value = cli.telefone || "";
+      document.getElementById("cliCep").value = cli.cep || "";
+      document.getElementById("cliNumero").value = cli.numero || "";
+      document.getElementById("cliEndereco").value = cli.endereco || "";
+      document.getElementById("cliObs").value = cli.observacao || "";
+    }
+
+    function excluirClienteBase(id) {
+      if (!confirm("Deseja remover este cliente?")) return;
+      clientesBase = clientesBase.filter((c) => c.id !== id);
+      salvarClientes();
+      renderizarClientes();
+    }
+
+    function renderizarClientes() {
+      const container = document.getElementById("listaClientes");
+      const termo = (document.getElementById("buscaCliente").value || "").toLowerCase().trim();
+
+      const filtrados = clientesBase.filter((c) => {
+        if (!termo) return true;
+        return (
+          (c.nome || "").toLowerCase().includes(termo) ||
+          (c.telefone || "").toLowerCase().includes(termo) ||
+          (c.endereco || "").toLowerCase().includes(termo)
+        );
+      });
+
+      if (!filtrados.length) {
+        container.innerHTML = '<p style="color: var(--muted);">Nenhum cliente encontrado.</p>';
+        return;
+      }
+
+      container.innerHTML = filtrados
+        .map(
+          (c) => `
+          <div class="list-card">
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <strong>${c.nome}</strong> ${c.telefone ? `• ${c.telefone}` : ""}<br />
+                <span style="color: var(--muted); font-size: 0.85rem;">
+                  ${c.endereco || ""} ${c.numero ? "nº " + c.numero : ""} ${c.cep ? "• CEP " + c.cep : ""}
+                </span>
+                ${c.observacao ? `<br /><span style="color: var(--gold); font-size: 0.82rem;">Obs: ${c.observacao}</span>` : ""}
+              </div>
+              <div class="btn-row" style="margin-top: 0;">
+                <button class="gold" onclick="usarClienteNoPedido('${c.id}')" type="button">Usar no Pedido</button>
+                <button class="secondary" onclick="editarClienteBase('${c.id}')" type="button">Editar</button>
+                <button class="danger" onclick="excluirClienteBase('${c.id}')" type="button">Excluir</button>
+              </div>
+            </div>
+          </div>
+        `
+        )
+        .join("");
+    }
+
+    /* HISTÓRICO & CAIXA */
+    function alternarStatusPedido(index) {
+      const ordem = ["Aberto", "Em Preparo", "Saiu para Entrega", "Concluído"];
+      const atual = historicoPedidos[index].status || "Aberto";
+      const prox = ordem[(ordem.indexOf(atual) + 1) % ordem.length];
+      historicoPedidos[index].status = prox;
+      salvarHistorico();
+      renderizarHistorico();
+    }
+
+    function renderizarHistorico() {
+      const container = document.getElementById("listaHistorico");
+      const termo = (document.getElementById("buscaHistorico").value || "").toLowerCase().trim();
+
+      let soma = 0;
+      historicoPedidos.forEach((p) => {
+        const val = Number(String(p.total || 0).replace(",", "."));
+        if (!isNaN(val)) soma += val;
+      });
+
+      const qtd = historicoPedidos.length;
+      const ticket = qtd > 0 ? soma / qtd : 0;
+
+      document.getElementById("kpiQtdPedidos").innerText = qtd;
+      document.getElementById("kpiFaturamento").innerText = soma.toFixed(2);
+      document.getElementById("kpiTicketMedio").innerText = ticket.toFixed(2);
+
+      const filtrados = historicoPedidos
+        .map((p, idx) => ({ p, idx }))
+        .filter(({ p }) => {
+          if (!termo) return true;
+          return (
+            (p.numero || "").toLowerCase().includes(termo) ||
+            (p.cliente || "").toLowerCase().includes(termo) ||
+            (p.status || "").toLowerCase().includes(termo)
+          );
+        });
+
+      if (!filtrados.length) {
+        container.innerHTML = '<p style="color: var(--muted);">Nenhum pedido registrado no histórico.</p>';
+        return;
+      }
+
+      container.innerHTML = filtrados
+        .map(
+          ({ p, idx }) => `
+          <div class="list-card">
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <strong>${p.numero || "KV"}</strong> • <span class="status-pill">${p.status || "Aberto"}</span><br />
+                <span style="font-size: 0.9rem;">Cliente: ${p.cliente || "Não informado"} ${p.telefone ? "• " + p.telefone : ""}</span><br />
+                <span style="color: var(--muted); font-size: 0.82rem;">${p.data || ""}</span>
+              </div>
+              <div style="text-align: right;">
+                <strong style="color: var(--gold); font-size: 1.05rem;">R$ ${Number(p.total || 0).toFixed(2)}</strong><br />
+                <button class="secondary" style="margin-top: 6px;" onclick="alternarStatusPedido(${idx})" type="button">
+                  Mudar Status
+                </button>
+              </div>
+            </div>
+          </div>
+        `
+        )
+        .join("");
+    }
+
+    /* EXPORTAÇÃO CSV & BACKUP JSON */
+    function baixarCSV(nomeArquivo, linhas) {
+      const csv = linhas
+        .map((linha) =>
+          linha.map((campo) => `"${String(campo ?? "").replace(/"/g, '""')}"`).join(";")
+        )
+        .join("\n");
+
+      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = nomeArquivo;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function mudarAba(tabName) {
+      document.querySelectorAll(".nav-tab").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.tab === tabName);
+      });
+      document.querySelectorAll(".tab-panel").forEach((panel) => {
+        panel.classList.toggle("active", panel.id === "tab-" + tabName);
+      });
+    }
+
+    /* EVENTOS */
+    document.querySelectorAll(".nav-tab").forEach((btn) => {
+      btn.addEventListener("click", () => mudarAba(btn.dataset.tab));
+    });
+
+    document.getElementById("tamanho").addEventListener("change", carregarSabores);
+    document.getElementById("tipoPizza").addEventListener("change", atualizarVisualPedido);
+    document.getElementById("sabor1").addEventListener("change", atualizarPreviewIngredientes);
+    document.getElementById("sabor2").addEventListener("change", atualizarPreviewIngredientes);
+
+    document.getElementById("btnAdicionarPizza").addEventListener("click", function () {
+      const tamanho = document.getElementById("tamanho").value;
+      const tipo = document.getElementById("tipoPizza").value;
+      const sabor1 = document.getElementById("sabor1").value;
+      const sabor2 = document.getElementById("sabor2").value;
+
+      if (!sabor1 || !SABORES[sabor1]) {
+        alert("Selecione o Sabor 1.");
+        return;
+      }
+
+      let descricao = "";
+      let valor = 0;
+      let ingredientes = "";
+
+      if (tamanho === "brotinho") {
+        descricao = "Brotinho 25cm - " + sabor1;
+        valor = Number(SABORES[sabor1].brotinho);
+        ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
+      } else if (tipo === "meio") {
+        if (!sabor2 || !SABORES[sabor2]) {
+          alert("Selecione o Sabor 2 para pizza Meio a Meio.");
+          return;
+        }
+        descricao = "Grande 35cm Meio a Meio - " + sabor1 + " / " + sabor2;
+        valor = Math.max(Number(SABORES[sabor1].grande), Number(SABORES[sabor2].grande));
+        ingredientes =
+          "50% " + sabor1 + ": " + (SABORES[sabor1].ingredientes || []).join(", ") +
+          " | 50% " + sabor2 + ": " + (SABORES[sabor2].ingredientes || []).join(", ");
+      } else {
+        descricao = "Grande 35cm - " + sabor1;
+        valor = Number(SABORES[sabor1].grande);
+        ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
+      }
+
+      const adicionalEl = document.getElementById("adicional");
+      const valorAdicional = Number(adicionalEl.value) || 0;
+      const nomeAdicional = adicionalEl.options[adicionalEl.selectedIndex].text;
+      const obsPizza = document.getElementById("obsPizza").value.trim();
+
+      adicionarItem({
+        descricao: valorAdicional > 0 ? descricao + " + " + nomeAdicional : descricao,
+        valor: valor + valorAdicional,
+        ingredientes,
+        adicionais: valorAdicional > 0 ? [nomeAdicional] : [],
+        observacao: obsPizza
+      });
+
+      adicionalEl.selectedIndex = 0;
+      document.getElementById("obsPizza").value = "";
+    });
+
+    document.getElementById("btnAdicionarBebida").addEventListener("click", function () {
+      const bebidaEl = document.getElementById("bebida");
+      if (!bebidaEl.value) return;
+
+      adicionarItem({
+        descricao: bebidaEl.options[bebidaEl.selectedIndex].text,
+        valor: Number(bebidaEl.value),
+        ingredientes: ""
+      });
+    });
+
+    document.getElementById("btnWhatsApp").addEventListener("click", function () {
+      sincronizarDadosClientePedido();
+      enviarWhatsApp(pedidoAtual);
+    });
+
+    document.getElementById("btnRegistrarHistorico").addEventListener("click", function () {
+      if (!pedidoAtual.itens.length) {
+        alert("Adicione ao menos um item antes de registrar.");
+        return;
+      }
+      sincronizarDadosClientePedido();
+      const copia = JSON.parse(JSON.stringify(pedidoAtual));
+      registrarPedido(copia);
+      alert("Pedido " + copia.numero + " registrado no histórico!");
+    });
+
+    document.getElementById("cep").addEventListener("blur", async function () {
+      await buscarCEP();
+      calcularTaxaEntrega();
+    });
+
+    document.getElementById("btnImportarWhats").addEventListener("click", importarPedidoWhats);
+
+    document.getElementById("btnSalvarClienteRapido").addEventListener("click", function () {
+      salvarClienteBase({
+        nome: document.getElementById("nome").value.trim(),
+        telefone: document.getElementById("telefone").value.trim(),
+        cep: document.getElementById("cep").value.trim(),
+        numero: document.getElementById("numero").value.trim(),
+        endereco: document.getElementById("endereco").value.trim(),
+        observacao: document.getElementById("observacao").value.trim()
+      });
+      alert("Cliente salvo na base!");
+    });
+
+    document.getElementById("btnSalvarSabor").addEventListener("click", function () {
+      const original = document.getElementById("saborEditandoOriginal").value.trim();
+      const nome = document.getElementById("cadNomeSabor").value.trim();
+      const brotinho = Number(document.getElementById("cadPrecoBrotinho").value);
+      const grande = Number(document.getElementById("cadPrecoGrande").value);
+      const ingredientes = document
+        .getElementById("cadIngredientes")
+        .value.split(",")
+        .map((i) => i.trim())
+        .filter(Boolean);
+
+      if (!nome || isNaN(brotinho) || isNaN(grande)) {
+        alert("Preencha o nome do sabor e os preços de Brotinho e Grande.");
+        return;
+      }
+
+      if (original && original !== nome && SABORES[original]) {
+        delete SABORES[original];
+      }
+
+      SABORES[nome] = {
+        brotinho,
+        grande,
+        ingredientes: ingredientes.length ? ingredientes : ["Molho", "Muçarela", "Orégano"]
+      };
+
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+      limparFormSabor();
+      alert("Sabor salvo com sucesso!");
+    });
+
+    document.getElementById("btnCancelarEdicaoSabor").addEventListener("click", limparFormSabor);
+
+    document.getElementById("btnRestaurarSabores").addEventListener("click", function () {
+      if (!confirm("Restaurar os 13 sabores padrão da King Ventura?")) return;
+      SABORES = JSON.parse(JSON.stringify(SABORES_PADRAO));
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+      limparFormSabor();
+    });
+
+    document.getElementById("btnSalvarCliente").addEventListener("click", function () {
+      salvarClienteBase({
+        id: document.getElementById("clienteEditId").value.trim(),
+        nome: document.getElementById("cliNome").value.trim(),
+        telefone: document.getElementById("cliTelefone").value.trim(),
+        cep: document.getElementById("cliCep").value.trim(),
+        numero: document.getElementById("cliNumero").value.trim(),
+        endereco: document.getElementById("cliEndereco").value.trim(),
+        observacao: document.getElementById("cliObs").value.trim()
+      });
+
+      document.getElementById("clienteEditId").value = "";
+      document.getElementById("cliNome").value = "";
+      document.getElementById("cliTelefone").value = "";
+      document.getElementById("cliCep").value = "";
+      document.getElementById("cliNumero").value = "";
+      document.getElementById("cliEndereco").value = "";
+      document.getElementById("cliObs").value = "";
+      alert("Cliente salvo!");
+    });
+
+    document.getElementById("btnLimparClienteForm").addEventListener("click", function () {
+      document.getElementById("clienteEditId").value = "";
+      document.getElementById("cliNome").value = "";
+      document.getElementById("cliTelefone").value = "";
+      document.getElementById("cliCep").value = "";
+      document.getElementById("cliNumero").value = "";
+      document.getElementById("cliEndereco").value = "";
+      document.getElementById("cliObs").value = "";
+    });
+
+    document.getElementById("buscaCliente").addEventListener("input", renderizarClientes);
+    document.getElementById("buscaHistorico").addEventListener("input", renderizarHistorico);
+
+    document.getElementById("btnExportarPedidosCSV").addEventListener("click", function () {
+      const linhas = [
+        ["Numero", "Data", "Status", "Cliente", "Telefone", "Endereco", "TaxaEntrega", "Total"],
+        ...historicoPedidos.map((p) => [
+          p.numero || "",
+          p.data || "",
+          p.status || "Aberto",
+          p.cliente || "",
+          p.telefone || "",
+          `${p.endereco || ""} ${p.numeroCasa || ""}`.trim(),
+          Number(p.taxaEntrega || 0).toFixed(2).replace(".", ","),
+          Number(p.total || 0).toFixed(2).replace(".", ",")
+        ])
+      ];
+      baixarCSV("king-ventura-pedidos.csv", linhas);
+    });
+
+    document.getElementById("btnExportarSaboresCSV").addEventListener("click", function () {
+      const linhas = [
+        ["Sabor", "Brotinho25cm", "Grande35cm", "Ingredientes"],
+        ...Object.keys(SABORES).map((nome) => [
+          nome,
+          Number(SABORES[nome].brotinho).toFixed(2).replace(".", ","),
+          Number(SABORES[nome].grande).toFixed(2).replace(".", ","),
+          (SABORES[nome].ingredientes || []).join(", ")
+        ])
+      ];
+      baixarCSV("king-ventura-sabores.csv", linhas);
+    });
+
+    document.getElementById("btnExportarClientesCSV").addEventListener("click", function () {
+      const linhas = [
+        ["Nome", "Telefone", "CEP", "Numero", "Endereco", "Observacao"],
+        ...clientesBase.map((c) => [
+          c.nome || "",
+          c.telefone || "",
+          c.cep || "",
+          c.numero || "",
+          c.endereco || "",
+          c.observacao || ""
+        ])
+      ];
+      baixarCSV("king-ventura-clientes.csv", linhas);
+    });
+
+    document.getElementById("btnExportarBackup").addEventListener("click", function () {
+      const payload = {
+        sistema: "KING VENTURA PIZZARIA",
+        versao: "V7.2 REBUILD",
+        exportadoEm: new Date().toISOString(),
+        ultimoPedido: Number(localStorage.getItem("ultimoPedido") || 0),
+        sabores: SABORES,
+        clientes: clientesBase,
+        historicoPedidos
+      };
+      const jsonStr = JSON.stringify(payload, null, 2);
+      document.getElementById("inputBackupJson").value = jsonStr;
+
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "king-ventura-backup.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("fileBackupJson").addEventListener("change", function (e) {
+      const arquivo = e.target.files && e.target.files[0];
+      if (!arquivo) return;
+      const leitor = new FileReader();
+      leitor.onload = function (ev) {
+        document.getElementById("inputBackupJson").value = ev.target.result || "";
+      };
+      leitor.readAsText(arquivo);
+    });
+
+    document.getElementById("btnImportarBackup").addEventListener("click", function () {
+      const raw = document.getElementById("inputBackupJson").value.trim();
+      if (!raw) {
+        alert("Cole ou carregue um JSON de backup primeiro.");
+        return;
+      }
+
+      try {
+        const dados = JSON.parse(raw);
+        if (dados.sabores && typeof dados.sabores === "object") {
+          SABORES = dados.sabores;
+          salvarSaboresStorage();
+        }
+        if (Array.isArray(dados.clientes)) {
+          clientesBase = dados.clientes;
+          salvarClientes();
+        }
+        if (Array.isArray(dados.historicoPedidos)) {
+          historicoPedidos = dados.historicoPedidos;
+          salvarHistorico();
+        }
+        if (typeof dados.ultimoPedido === "number") {
+          localStorage.setItem("ultimoPedido", String(dados.ultimoPedido));
         }
 
+        carregarSabores();
+        renderizarListaSabores();
+        renderizarClientes();
+        renderizarHistorico();
+        inicializarPedido();
+        atualizarCarrinho();
+        alert("Backup restaurado com sucesso!");
+      } catch (err) {
+        alert("JSON inválido: " + err.message);
+      }
     });
 
-    /* BEBIDAS */
-
-    if (
-        texto.includes(
-            "Coca-Cola 2 Litros"
-        )
-    ) {
-
-        document.getElementById(
-            "bebida"
-        ).selectedIndex = 1;
-
-        document.getElementById(
-            "btnAdicionarBebida"
-        ).click();
-    }
-
-    if (
-        texto.includes(
-            "Guaraná Antarctica 1 Litro"
-        )
-    ) {
-
-        document.getElementById(
-            "bebida"
-        ).selectedIndex = 2;
-
-        document.getElementById(
-            "btnAdicionarBebida"
-        ).click();
-    }
-
-    if (
-        texto.includes(
-            "Coca-Cola Lata 310ml"
-        )
-    ) {
-
-        document.getElementById(
-            "bebida"
-        ).selectedIndex = 3;
-
-        document.getElementById(
-            "btnAdicionarBebida"
-        ).click();
-    }
-
-    buscarCEP();
-    calcularTaxaEntrega();
-
-    alert("Pedido importado!");
-
-}
-function novoPedido() {
-
-    if (!confirm("Deseja limpar o pedido atual e iniciar um novo pedido?")) {
-        return;
-    }
-
-    location.reload();
-}
-function salvarHistoricoPedido() {
-
-    const historico =
-        JSON.parse(
-            localStorage.getItem(
-                "historicoPedidos"
-            ) || "[]"
-        );
-
-    historico.push({
-
-        codigo:
-            document.getElementById(
-                "numeroPedido"
-            ).innerText,
-
-        data:
-            document.getElementById(
-                "dataPedido"
-            ).innerText,
-
-        cliente:
-            document.getElementById(
-                "nome"
-            ).value,
-
-        telefone:
-            document.getElementById(
-                "telefone"
-            ).value,
-
-        total:
-            document.getElementById(
-                "totalPedido"
-            ).innerText,
-
-        status:
-            "Aberto"
-
-    });
-
-    localStorage.setItem(
-        "historicoPedidos",
-        JSON.stringify(
-            historico
-        )
-    );
-
-}
-</script>
-
+    /* INICIALIZAÇÃO */
+    carregarSaboresStorage();
+    carregarHistorico();
+    carregarClientes();
+    inicializarPedido();
+    carregarSabores();
+    atualizarCarrinho();
+    renderizarListaSabores();
+    renderizarClientes();
+    renderizarHistorico();
+  </script>
 </body>
 </html>
