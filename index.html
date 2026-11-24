@@ -870,7 +870,7 @@
           e cole aqui. A chave fica salva apenas neste aparelho.
         </p>
         <label for="inputChaveRota">Chave da API</label>
-        <input id="inputChaveRota" placeholder="Cole aqui a sua chave" />
+        <input id="inputChaveRota" placeholder="Cole aqui a sua chave" autocomplete="off" spellcheck="false" />
         <div class="btn-row">
           <button id="btnSalvarChaveRota" class="gold" type="button">Salvar Chave</button>
           <button id="btnTestarChaveRota" class="secondary" type="button">Testar Chave</button>
@@ -2350,14 +2350,17 @@
       if (!el) return;
       const chave = obterChaveRota();
       if (chave) {
-        el.innerHTML = "✅ Chave salva neste aparelho (" + chave.slice(0, 6) + "••••" + chave.slice(-4) + ").";
+        el.innerHTML = "✅ Chave salva neste aparelho (" + chave.length +
+          " caracteres, termina em ..." + chave.slice(-6) + ").";
       } else {
         el.innerHTML = "⚠️ Nenhuma chave salva. Sem ela o cálculo de distância não funciona.";
       }
     }
 
     function validarChaveRota(chave) {
-      return /^[A-Za-z0-9]{20,}$/.test(String(chave || "").trim());
+      const limpa = String(chave || "").trim();
+      // Chaves do OpenRouteService sao base64: letras, numeros, + / e = no fim.
+      return limpa.length >= 40;
     }
 
     // Endereco -> coordenadas (geocodificacao gratuita do OpenStreetMap)
