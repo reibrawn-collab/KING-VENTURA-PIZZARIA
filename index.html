@@ -6,17 +6,20 @@
   <title>KING VENTURA PIZZARIA — Sistema Operacional</title>
   <style>
     :root {
-      --bg: #120d0a;
-      --surface: #1d1510;
-      --surface-2: #271c16;
-      --border: #3d2c22;
-      --text: #f7efe8;
-      --muted: #c2aea0;
-      --gold: #e09f3e;
-      --terracotta: #c84b31;
+      /* Paleta Grêmio: azul, preto e branco */
+      --bg: #05080f;
+      --surface: #0b1526;
+      --surface-2: #132241;
+      --border: #1e3560;
+      --text: #ffffff;
+      --muted: #9fb4d6;
+      --gold: #4a90e2;        /* azul gremista (destaque principal) */
+      --terracotta: #1b4f9c;  /* azul profundo (botoes) */
       --green: #2ea043;
-      --amber: #d29922;
+      --amber: #6aa9f0;
       --danger: #cf4638;
+      --azul-claro: #7fb8f5;
+      --azul-escuro: #08203f;
     }
 
     * {
@@ -31,6 +34,16 @@
       color: var(--text);
       padding: 16px;
       line-height: 1.45;
+    }
+
+    ::selection {
+      background: var(--gold);
+      color: #ffffff;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid var(--gold);
+      outline-offset: 1px;
     }
 
     .app-container {
@@ -106,8 +119,8 @@
     }
 
     .nav-tab.active {
-      background: var(--gold);
-      color: #160f0a;
+      background: var(--terracotta);
+      color: #ffffff;
       border-color: var(--gold);
     }
 
@@ -174,6 +187,15 @@
       resize: vertical;
     }
 
+    input::placeholder, textarea::placeholder {
+      color: #6b86ad;
+    }
+
+    select option {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
     button {
       background: var(--terracotta);
       color: #fff;
@@ -197,8 +219,8 @@
     }
 
     button.gold {
-      background: var(--gold);
-      color: #160f0a;
+      background: var(--terracotta);
+      color: #ffffff;
     }
 
     button.danger {
@@ -284,8 +306,8 @@
       border-radius: 999px;
       font-size: 0.78rem;
       font-weight: 700;
-      background: rgba(210, 153, 34, 0.18);
-      color: var(--amber);
+      background: rgba(74, 144, 226, 0.18);
+      color: var(--azul-claro);
     }
 
     .ingredients-preview {
@@ -295,25 +317,26 @@
     }
 
     
+    /* Etapas na paleta Grêmio: azul claro -> azul -> branco -> branco cheio */
     .status-pill.status-feito {
-      background: rgba(210, 153, 34, 0.2);
-      color: #f0b429;
-      border: 1px solid rgba(240, 180, 41, 0.45);
+      background: rgba(127, 184, 245, 0.18);
+      color: var(--azul-claro);
+      border: 1px solid rgba(127, 184, 245, 0.45);
     }
     .status-pill.status-producao {
-      background: rgba(224, 159, 62, 0.22);
-      color: #ff9f1c;
-      border: 1px solid rgba(255, 159, 28, 0.5);
+      background: rgba(74, 144, 226, 0.22);
+      color: #a8cdf7;
+      border: 1px solid rgba(74, 144, 226, 0.55);
     }
     .status-pill.status-entrega {
-      background: rgba(56, 139, 253, 0.2);
-      color: #58a6ff;
-      border: 1px solid rgba(88, 166, 255, 0.45);
+      background: rgba(11, 21, 38, 0.85);
+      color: #ffffff;
+      border: 1px solid rgba(127, 184, 245, 0.6);
     }
     .status-pill.status-finalizado {
-      background: rgba(46, 160, 67, 0.22);
-      color: #3fb950;
-      border: 1px solid rgba(63, 185, 80, 0.5);
+      background: #ffffff;
+      color: #05080f;
+      border: 1px solid #ffffff;
     }
     .status-stepper {
       display: flex;
@@ -331,24 +354,24 @@
       font-weight: 700;
     }
     .status-btn.active-feito {
-      background: #d29922;
-      color: #160f0a;
-      border-color: #d29922;
+      background: var(--azul-claro);
+      color: #05080f;
+      border-color: var(--azul-claro);
     }
     .status-btn.active-producao {
-      background: #e09f3e;
-      color: #160f0a;
-      border-color: #e09f3e;
+      background: var(--gold);
+      color: #ffffff;
+      border-color: var(--gold);
     }
     .status-btn.active-entrega {
-      background: #2f81f7;
-      color: #fff;
-      border-color: #2f81f7;
+      background: var(--terracotta);
+      color: #ffffff;
+      border-color: var(--terracotta);
     }
     .status-btn.active-finalizado {
-      background: #2ea043;
-      color: #fff;
-      border-color: #2ea043;
+      background: #ffffff;
+      color: #05080f;
+      border-color: #ffffff;
     }
 
     #cupomTermico {
