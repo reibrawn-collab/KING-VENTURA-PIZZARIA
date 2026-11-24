@@ -5,21 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KING VENTURA PIZZARIA — Sistema Operacional</title>
   <style>
-    :root {
-      /* Paleta Grêmio: azul, preto e branco */
+    /* Paleta Grêmio: azul, preto e branco. Escuro (padrao) ou claro. */
+    :root,
+    body[data-tema="escuro"] {
       --bg: #05080f;
       --surface: #0b1526;
       --surface-2: #132241;
       --border: #1e3560;
       --text: #ffffff;
       --muted: #9fb4d6;
-      --gold: #4a90e2;        /* azul gremista (destaque principal) */
-      --terracotta: #1b4f9c;  /* azul profundo (botoes) */
-      --green: #2ea043;
-      --amber: #6aa9f0;
+      --gold: #4a90e2;
+      --terracotta: #1b4f9c;
       --danger: #cf4638;
       --azul-claro: #7fb8f5;
-      --azul-escuro: #08203f;
+      --placeholder: #6b86ad;
+      --sombra: rgba(0, 0, 0, 0.5);
+    }
+
+    body[data-tema="claro"] {
+      --bg: #eef3fb;
+      --surface: #ffffff;
+      --surface-2: #e3ecf9;
+      --border: #b9cdea;
+      --text: #08203f;
+      --muted: #4a6a94;
+      --gold: #1b4f9c;
+      --terracotta: #1b4f9c;
+      --danger: #b8302a;
+      --azul-claro: #4a90e2;
+      --placeholder: #8ba3c4;
+      --sombra: rgba(11, 21, 38, 0.12);
     }
 
     * {
@@ -39,6 +54,13 @@
     ::selection {
       background: var(--gold);
       color: #ffffff;
+    }
+
+    body[data-tema="claro"] .card,
+    body[data-tema="claro"] .brand-header,
+    body[data-tema="claro"] .item,
+    body[data-tema="claro"] .list-card {
+      box-shadow: 0 1px 3px var(--sombra);
     }
 
     input:focus, select:focus, textarea:focus {
@@ -188,7 +210,7 @@
     }
 
     input::placeholder, textarea::placeholder {
-      color: #6b86ad;
+      color: var(--placeholder);
     }
 
     select option {
@@ -381,7 +403,7 @@
     /* no papel, o cupom e o unico elemento visivel */
     @media print {
       @page {
-        margin: 2mm 0 2mm 0 !important;
+        margin: 0 !important;
         size: 58mm auto;
       }
       html, body {
@@ -399,27 +421,24 @@
       }
       #cupomTermico {
         display: block !important;
-        visibility: visible !important;
         position: static !important;
-        width: 48mm !important;
-        max-width: 48mm !important;
+        width: 52mm !important;
+        max-width: 52mm !important;
         height: auto !important;
         min-height: 0 !important;
-        max-height: none !important;
         overflow: visible !important;
-        page-break-after: auto !important;
-        break-after: auto !important;
-        page-break-inside: auto !important;
-        break-inside: auto !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
         font-family: "Courier New", Courier, monospace !important;
         font-size: 12px !important;
         font-weight: 900 !important;
-        line-height: 1.3 !important;
+        line-height: 1.15 !important;
         color: #000000 !important;
         background: #ffffff !important;
-        padding: 2mm 1mm 4mm 2mm !important;
+        padding: 1mm 0 1mm 1mm !important;
         margin: 0 !important;
-        box-sizing: border-box !important;
       }
       #cupomTermico, #cupomTermico * {
         font-weight: 900 !important;
@@ -429,133 +448,15 @@
         print-color-adjust: exact !important;
       }
       .cupom-linha {
-        border: 0 !important;
         border-top: 1px dashed #000000 !important;
-        margin: 4px 0 !important;
-        height: 1px !important;
-        min-height: 1px !important;
-        line-height: 0 !important;
-        font-size: 0 !important;
-        overflow: hidden !important;
+        margin: 3px 0 !important;
+        height: 0 !important;
       }
       .cupom-item {
-        margin-bottom: 4px !important;
-      }
-      #cupomTermico div {
-        page-break-inside: auto !important;
-        break-inside: auto !important;
+        margin-bottom: 3px !important;
       }
     }
 
-    /* ---------- AJUSTES PARA CELULAR ---------- */
-    @media (max-width: 720px) {
-      body {
-        padding: 10px;
-        font-size: 16px;
-      }
-
-      .app-container {
-        max-width: 100%;
-      }
-
-      .brand-header,
-      .card {
-        padding: 12px;
-        border-radius: 12px;
-        margin-bottom: 12px;
-      }
-
-      .brand-logo {
-        max-height: 150px;
-      }
-
-      .brand-title {
-        font-size: 1.15rem;
-        line-height: 1.25;
-      }
-
-      .brand-top {
-        gap: 8px;
-      }
-
-      .grid-2,
-      .grid-3,
-      .kpi-grid {
-        grid-template-columns: 1fr;
-        gap: 10px;
-      }
-
-      .kpi-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      /* 16px evita o zoom automatico do iPhone ao focar o campo */
-      input, select, textarea {
-        font-size: 16px;
-        padding: 12px;
-      }
-
-      label {
-        font-size: 0.9rem;
-      }
-
-      button {
-        font-size: 0.95rem;
-        padding: 12px 14px;
-      }
-
-      .nav-tabs {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .nav-tab {
-        padding: 12px 10px;
-        font-size: 0.85rem;
-        text-align: center;
-        line-height: 1.2;
-      }
-
-      .btn-row {
-        flex-direction: column;
-      }
-
-      .btn-row button {
-        width: 100%;
-      }
-
-      .summary-line,
-      .summary-total {
-        font-size: 1rem;
-      }
-
-      .summary-total {
-        font-size: 1.1rem;
-      }
-
-      .status-stepper button {
-        flex: 1 1 auto;
-      }
-    }
-
-    @media (max-width: 400px) {
-      .brand-title {
-        font-size: 1rem;
-      }
-
-      .kpi-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .nav-tabs {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Campos de endereco: o texto longo nao estoura o cartao */
-    textarea, input, select {
-      max-width: 100%;
-      word-break: break-word;
-    }
   </style>
 </head>
 <body>
@@ -572,7 +473,10 @@
           <h1 class="brand-title">KING VENTURA PIZZARIA</h1>
           <p style="color: var(--muted); font-size: 0.88rem;">Sistema Operacional • WhatsApp: 5567991476156</p>
         </div>
-        <span class="badge-version">V7.2 REBUILD</span>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button id="btnTema" class="secondary" type="button" style="padding: 6px 12px;">🌙 Escuro</button>
+          <span class="badge-version">V7.2 REBUILD</span>
+        </div>
       </div>
     </header>
 
@@ -3063,7 +2967,27 @@
       atualizarStatusChaveRota();
     });
 
-        /* INICIALIZAÇÃO */
+        /* ===== TEMA CLARO / ESCURO ===== */
+    const TEMA_LOCAL = "kv_tema";
+
+    function aplicarTema(tema) {
+      const escolhido = tema === "claro" ? "claro" : "escuro";
+      document.body.setAttribute("data-tema", escolhido);
+      const btn = document.getElementById("btnTema");
+      if (btn) {
+        btn.innerText = escolhido === "claro" ? "☀️ Claro" : "🌙 Escuro";
+      }
+      localStorage.setItem(TEMA_LOCAL, escolhido);
+    }
+
+    function alternarTema() {
+      const atual = document.body.getAttribute("data-tema") === "claro" ? "claro" : "escuro";
+      aplicarTema(atual === "claro" ? "escuro" : "claro");
+    }
+
+    document.getElementById("btnTema").addEventListener("click", alternarTema);
+
+    /* INICIALIZAÇÃO */
     carregarSaboresStorage();
     carregarHistorico();
     carregarClientes();
@@ -3074,6 +2998,7 @@
     renderizarHistorico();
     popularDatalistRuas();
     atualizarStatusChaveRota();
+    aplicarTema(localStorage.getItem(TEMA_LOCAL) || "escuro");
   </script>
 </body>
 </html>
