@@ -922,10 +922,13 @@
     const NUMERO_WHATSAPP = "5567991476156";
 
     /* ===== ENTREGA: PONTO DE PARTIDA E REGRA DE TAXA ===== */
-    // Origem das entregas — Rua Delamare, 129
+    // Origem das entregas — Rua Delamare, 129, Tarumã, CEP 79097-240.
+    // TODA rota parte daqui, em qualquer tela.
     const ORIGEM_ENTREGA = {
       endereco: "Rua Delamare, 129 - Jardim Tarumã, Campo Grande - MS",
-      cep: "79097-240"
+      cep: "79097-240",
+      rua: "Rua Delamare",
+      numero: "129"
     };
 
     // Regra de taxa: até 3 km é grátis; de 3 a 4 km cobra R$ 5,00;
@@ -2432,9 +2435,8 @@
       const distanciaKm = Number(s.distance) || 0;
 
       return {
-        distanciaKm: distanciaKm,
+        distanciaKm: distanciaKm,          // distancia de ida — base da taxa
         duracao: Math.max(1, Math.round(tempoSeg / 60)),
-        idaEVoltaKm: distanciaKm * 2,
         geometria: feat.geometry
       };
     }
@@ -2464,8 +2466,8 @@
           <div class="summary-line"><span>Cliente</span><span>${cliente ? cliente : "—"}</span></div>
           <div class="summary-line"><span>Endereço</span><span style="text-align:right;max-width:60%;">${ponto.achado}</span></div>
           <div class="summary-line"><span>Distância (ida)</span><span>${rota.distanciaKm.toFixed(1)} km</span></div>
+          <div class="summary-line"><span>Taxa calculada sobre</span><span>${rota.distanciaKm.toFixed(1)} km (só ida)</span></div>
           <div class="summary-line"><span>Tempo estimado</span><span>${rota.duracao} min</span></div>
-          <div class="summary-line"><span>Ida e volta (entregador)</span><span>${rota.idaEVoltaKm.toFixed(1)} km</span></div>
           <div class="summary-total"><span>Taxa de entrega</span><span>${dentro ? formatarTaxa(rota.distanciaKm) : "FORA DA ÁREA"}</span></div>
           ${dentro ? "" : '<p style="color: var(--danger); font-size: 0.9rem; margin-top: 6px;">⚠️ Passa do limite de ' + RAIO_MAXIMO_KM + ' km de atendimento.</p>'}
           <div class="btn-row">
@@ -2483,7 +2485,6 @@
       msg += "Saída: " + ORIGEM_COORDS.endereco + "\n";
       msg += "Entrega: " + endereco + "\n";
       msg += "Distância: " + Number(km).toFixed(1) + " km\n";
-      msg += "Ida e volta: " + (Number(km) * 2).toFixed(1) + " km\n";
       msg += "Tempo estimado: " + minutos + " min\n";
       window.open("https://wa.me/" + NUMERO_WHATSAPP + "?text=" + encodeURIComponent(msg), "_blank");
     }
