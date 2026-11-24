@@ -1,4 +1,1583 @@
-        // O ViaCEP exige o logradouro SEM o tipo (Rua, Avenida, Travessa...)
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KING VENTURA PIZZARIA — Sistema Operacional</title>
+  <style>
+    /* Paleta Grêmio: azul, preto e branco. Escuro (padrao) ou claro. */
+    :root,
+    body[data-tema="escuro"] {
+      --bg: #05080f;
+      --surface: #0b1526;
+      --surface-2: #132241;
+      --border: #1e3560;
+      --text: #ffffff;
+      --muted: #9fb4d6;
+      --gold: #4a90e2;
+      --terracotta: #1b4f9c;
+      --danger: #cf4638;
+      --azul-claro: #7fb8f5;
+      --placeholder: #6b86ad;
+      --sombra: rgba(0, 0, 0, 0.5);
+    }
+
+    body[data-tema="claro"] {
+      --bg: #eef3fb;
+      --surface: #ffffff;
+      --surface-2: #e3ecf9;
+      --border: #b9cdea;
+      --text: #08203f;
+      --muted: #4a6a94;
+      --gold: #1b4f9c;
+      --terracotta: #1b4f9c;
+      --danger: #b8302a;
+      --azul-claro: #4a90e2;
+      --placeholder: #8ba3c4;
+      --sombra: rgba(11, 21, 38, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      line-height: 1.45;
+    }
+
+    ::selection {
+      background: var(--gold);
+      color: #ffffff;
+    }
+
+    body[data-tema="claro"] .card,
+    body[data-tema="claro"] .brand-header,
+    body[data-tema="claro"] .item,
+    body[data-tema="claro"] .list-card {
+      box-shadow: 0 1px 3px var(--sombra);
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid var(--gold);
+      outline-offset: 1px;
+    }
+
+    .app-container {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .brand-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .brand-logo {
+      display: block;
+      width: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .brand-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--gold);
+    }
+
+    .badge-version {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .nav-tabs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .nav-tab {
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: 0.15s ease;
+    }
+
+    .nav-tab:hover {
+      border-color: var(--gold);
+      color: var(--text);
+    }
+
+    .nav-tab.active {
+      background: var(--terracotta);
+      color: #ffffff;
+      border-color: var(--gold);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      font-size: 1.15rem;
+      margin-bottom: 12px;
+      color: var(--gold);
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      margin: 12px 0 8px;
+      color: var(--text);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+      margin-top: 8px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+    }
+
+    textarea {
+      min-height: 76px;
+      resize: vertical;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: var(--placeholder);
+    }
+
+    select option {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    button {
+      background: var(--terracotta);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    button:hover {
+      filter: brightness(1.08);
+    }
+
+    button.secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    button.gold {
+      background: var(--terracotta);
+      color: #ffffff;
+    }
+
+    button.danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .item, .list-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      overflow-wrap: anywhere;
+    }
+
+    .list-card > div:first-child {
+      min-width: 0;
+    }
+
+    .summary-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--gold);
+      border-top: 1px solid var(--border);
+      padding-top: 8px;
+      margin-top: 6px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .kpi-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .kpi-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .kpi-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--gold);
+      margin-top: 4px;
+    }
+
+    .status-pill {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: rgba(74, 144, 226, 0.18);
+      color: var(--azul-claro);
+    }
+
+    .ingredients-preview {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    
+    /* Etapas na paleta Grêmio: azul claro -> azul -> branco -> branco cheio */
+    .status-pill.status-feito {
+      background: rgba(127, 184, 245, 0.18);
+      color: var(--azul-claro);
+      border: 1px solid rgba(127, 184, 245, 0.45);
+    }
+    .status-pill.status-producao {
+      background: rgba(74, 144, 226, 0.22);
+      color: #a8cdf7;
+      border: 1px solid rgba(74, 144, 226, 0.55);
+    }
+    .status-pill.status-entrega {
+      background: rgba(11, 21, 38, 0.85);
+      color: #ffffff;
+      border: 1px solid rgba(127, 184, 245, 0.6);
+    }
+    .status-pill.status-finalizado {
+      background: #ffffff;
+      color: #05080f;
+      border: 1px solid #ffffff;
+    }
+    .status-stepper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .status-btn {
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      font-weight: 700;
+    }
+    .status-btn.active-feito {
+      background: var(--azul-claro);
+      color: #05080f;
+      border-color: var(--azul-claro);
+    }
+    .status-btn.active-producao {
+      background: var(--gold);
+      color: #ffffff;
+      border-color: var(--gold);
+    }
+    .status-btn.active-entrega {
+      background: var(--terracotta);
+      color: #ffffff;
+      border-color: var(--terracotta);
+    }
+    .status-btn.active-finalizado {
+      background: #ffffff;
+      color: #05080f;
+      border-color: #ffffff;
+    }
+
+    #cupomTermico {
+      display: none;
+    }
+
+    /* no papel, o cupom e o unico elemento visivel */
+    @media print {
+      @page {
+        margin: 0 !important;
+        size: 58mm auto;
+      }
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 58mm !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+        background: #ffffff !important;
+      }
+      body > *:not(#cupomTermico) {
+        display: none !important;
+      }
+      #cupomTermico {
+        display: block !important;
+        position: static !important;
+        width: 52mm !important;
+        max-width: 52mm !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        font-family: "Courier New", Courier, monospace !important;
+        font-size: 12px !important;
+        font-weight: 900 !important;
+        line-height: 1.15 !important;
+        color: #000000 !important;
+        background: #ffffff !important;
+        padding: 1mm 0 1mm 1mm !important;
+        margin: 0 !important;
+      }
+      #cupomTermico, #cupomTermico * {
+        font-weight: 900 !important;
+        color: #000000 !important;
+        background: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .cupom-linha {
+        border-top: 1px dashed #000000 !important;
+        margin: 3px 0 !important;
+        height: 0 !important;
+      }
+      .cupom-item {
+        margin-bottom: 3px !important;
+      }
+    }
+
+
+    /* ---------- AJUSTES PARA CELULAR ---------- */
+    @media (max-width: 720px) {
+      body { padding: 10px; font-size: 16px; }
+      .app-container { max-width: 100%; }
+      .brand-header, .card { padding: 12px; border-radius: 12px; margin-bottom: 12px; }
+      .brand-logo { max-height: 150px; }
+      .brand-title { font-size: 1.15rem; line-height: 1.25; }
+      .grid-2, .grid-3, .kpi-grid { grid-template-columns: 1fr; gap: 10px; }
+      .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      input, select, textarea { font-size: 16px; padding: 12px; }
+      label { font-size: 0.9rem; }
+      button { font-size: 0.95rem; padding: 12px 14px; }
+      .nav-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .nav-tab { padding: 12px 10px; font-size: 0.85rem; text-align: center; line-height: 1.2; }
+      .btn-row { flex-direction: column; }
+      .btn-row button { width: 100%; }
+      .summary-line, .summary-total { font-size: 1rem; }
+      .summary-total { font-size: 1.1rem; }
+      .status-stepper button { flex: 1 1 auto; }
+      #cupomTermico { display: none; }
+    }
+
+    @media (max-width: 400px) {
+      .brand-title { font-size: 1rem; }
+      .kpi-grid { grid-template-columns: 1fr; }
+      .nav-tabs { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="brand-header">
+      <img
+        src="logo01.jpeg"
+        alt="King Ventura Pizzaria"
+        class="brand-logo"
+        onerror="this.style.display='none'"
+      />
+      <div class="brand-top">
+        <div>
+          <h1 class="brand-title">KING VENTURA PIZZARIA</h1>
+          <p style="color: var(--muted); font-size: 0.88rem;">Sistema Operacional • WhatsApp: 5567991476156</p>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button id="btnTema" class="secondary" type="button" style="padding: 6px 12px;">🌙 Escuro</button>
+          <span class="badge-version">V7.2 REBUILD</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="nav-tabs" aria-label="Navegação do sistema">
+      <button class="nav-tab active" data-tab="pedido">🍕 Pedido</button>
+      <button class="nav-tab" data-tab="sabores">📋 Sabores & Preços</button>
+      <button class="nav-tab" data-tab="clientes">👤 Clientes</button>
+      <button class="nav-tab" data-tab="historico">📊 Histórico & Caixa</button>
+      <button class="nav-tab" data-tab="rotas">🛵 Rotas do Entregador</button>
+      <button class="nav-tab" data-tab="relatorios">💾 Relatórios & Backup</button>
+    </nav>
+
+    <!-- ABA 1: PEDIDO -->
+    <section id="tab-pedido" class="tab-panel active">
+      <div class="card">
+        <div class="brand-top">
+          <h2 id="numeroPedido" style="margin-bottom: 0;">KV0001</h2>
+          <span id="statusPedido" class="status-pill status-feito">📥 Gerado</span>
+        </div>
+        <p id="dataPedido" style="color: var(--muted); font-size: 0.88rem; margin-top: 6px;"></p>
+        <div id="botoesStatusPedidoAtual" class="status-stepper" aria-label="Etapas do pedido atual"></div>
+      </div>
+
+      <div id="cardImportarWhats" class="card">
+        <h2>📥 Importar Pedido WhatsApp</h2>
+        <textarea
+          id="pedidoWhats"
+          rows="6"
+          placeholder="Cole aqui a mensagem recebida no WhatsApp..."
+        ></textarea>
+        <div class="btn-row">
+          <button id="btnImportarWhats" class="secondary">Importar Pedido</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Cliente</h2>
+        <div class="grid-2">
+          <div>
+            <label for="nome">Nome</label>
+            <input id="nome" placeholder="Nome do cliente" />
+          </div>
+          <div>
+            <label for="telefone">Telefone</label>
+            <input id="telefone" placeholder="(67) 99999-9999" />
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div>
+            <label for="cep">CEP</label>
+            <input id="cep" placeholder="79097-000" />
+            <button id="btnBuscarCepDaRua" class="secondary" type="button"
+                    style="width: 100%; margin-top: 6px; font-size: 0.85rem; padding: 8px;">
+              🔍 Buscar CEP pela rua
+            </button>
+          </div>
+          <div>
+            <label for="numero">Número</label>
+            <input id="numero" placeholder="129" />
+          </div>
+          <div>
+            <label for="endereco">Endereço (Rua e Bairro)</label>
+            <textarea
+              id="endereco"
+              rows="2"
+              list="listaRuasCG"
+              placeholder="Digite a rua ou bairro..."
+              style="min-height: 54px;"
+            ></textarea>
+            <datalist id="listaRuasCG"></datalist>
+          </div>
+        </div>
+
+        <label for="observacao">Observação do Cliente</label>
+        <textarea id="observacao" placeholder="Ponto de referência, troco, etc."></textarea>
+
+        <div class="btn-row">
+          <button id="btnSalvarClienteRapido" class="secondary" type="button">Salvar Cliente na Base</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Montar Pizza</h2>
+        <div class="grid-2">
+          <div>
+            <label for="tamanho">Tamanho</label>
+            <select id="tamanho">
+              <option value="brotinho">Brotinho 25cm (Apenas 1 sabor)</option>
+              <option value="grande">Grande 35cm</option>
+            </select>
+          </div>
+          <div>
+            <label for="tipoPizza">Tipo</label>
+            <select id="tipoPizza">
+              <option value="inteira">Inteira</option>
+              <option value="meio">Meio a Meio</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label for="sabor1">Sabor 1</label>
+            <select id="sabor1"></select>
+          </div>
+          <div id="boxSabor2" style="display: none;">
+            <label for="sabor2">Sabor 2 (Meio a Meio)</label>
+            <select id="sabor2"></select>
+          </div>
+        </div>
+
+        <div id="ingredientes" class="ingredients-preview"></div>
+
+        <div class="grid-2">
+          <div>
+            <label for="adicional">Adicional</label>
+            <select id="adicional">
+              <option value="0">Nenhum adicional</option>
+              <option value="4">Catupiry Extra (+R$ 4,00)</option>
+              <option value="4">Presunto Extra (+R$ 4,00)</option>
+              <option value="4">Cebola Extra (+R$ 4,00)</option>
+              <option value="4">Milho Extra (+R$ 4,00)</option>
+              <option value="4">Ervilha Extra (+R$ 4,00)</option>
+              <option value="5">Muçarela Extra (+R$ 5,00)</option>
+              <option value="5">Bacon Extra (+R$ 5,00)</option>
+            </select>
+          </div>
+          <div>
+            <label for="obsPizza">Observação da Pizza</label>
+            <input id="obsPizza" placeholder="Ex: sem cebola, assar bem" />
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnAdicionarPizza" class="gold" type="button">Adicionar Pizza</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Bebidas</h2>
+        <div class="grid-2">
+          <div>
+            <label for="bebida">Selecionar Bebida</label>
+            <select id="bebida">
+              <option value="">Nenhuma bebida</option>
+              <option value="16">Coca-Cola 2 Litros - R$ 16,00</option>
+              <option value="10">Guaraná Antarctica 1 Litro - R$ 10,00</option>
+              <option value="6">Coca-Cola Lata 310ml - R$ 6,00</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: flex-end;">
+            <button id="btnAdicionarBebida" type="button" style="width: 100%;">Adicionar Bebida</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Carrinho</h2>
+        <div id="carrinho"></div>
+
+        <div class="summary-box">
+          <div class="summary-line">
+            <span>Taxa de Entrega:</span>
+            <span>R$ <span id="taxaEntrega">0.00</span></span>
+          </div>
+          <div id="mensagemEntrega" style="font-size: 0.85rem; color: var(--gold); margin-bottom: 6px;"></div>
+          <div class="summary-total">
+            <span>Total do Pedido:</span>
+            <span>R$ <span id="totalPedido">0.00</span></span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnWhatsApp" class="gold" type="button">Enviar WhatsApp</button>
+          <button id="btnRegistrarHistorico" type="button">Registrar no Histórico</button>
+          <button onclick="imprimirCupomTermico()" class="gold" type="button">🖨️ Imprimir Cupom Térmico</button>
+          <button onclick="novoPedido()" class="secondary" type="button">🆕 Novo Pedido</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 2: SABORES & PREÇOS -->
+    <section id="tab-sabores" class="tab-panel">
+      <div class="card">
+        <h2>Cadastrar / Editar Sabor</h2>
+        <input type="hidden" id="saborEditandoOriginal" />
+        <div class="grid-3">
+          <div>
+            <label for="cadNomeSabor">Nome do Sabor</label>
+            <input id="cadNomeSabor" placeholder="Ex: Portuguesa" />
+          </div>
+          <div>
+            <label for="cadPrecoBrotinho">Brotinho 25cm (R$)</label>
+            <input id="cadPrecoBrotinho" type="number" step="0.50" min="0" placeholder="20.00" />
+          </div>
+          <div>
+            <label for="cadPrecoGrande">Grande 35cm (R$)</label>
+            <input id="cadPrecoGrande" type="number" step="0.50" min="0" placeholder="40.00" />
+          </div>
+        </div>
+        <label for="cadIngredientes">Ingredientes (separados por vírgula)</label>
+        <input id="cadIngredientes" placeholder="Molho, Muçarela, Presunto, Ovo, Cebola, Azeitonas, Orégano" />
+
+        <div class="btn-row">
+          <button id="btnSalvarSabor" class="gold" type="button">Salvar Sabor</button>
+          <button id="btnCancelarEdicaoSabor" class="secondary" type="button">Limpar Campos</button>
+          <button id="btnRestaurarSabores" class="secondary" type="button">Restaurar Sabores Padrão</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Sabores Cadastrados</h2>
+        <div id="listaSabores"></div>
+      </div>
+    </section>
+
+    <!-- ABA 3: CLIENTES -->
+    <section id="tab-clientes" class="tab-panel">
+      <div class="card">
+        <h2>Cadastrar / Editar Cliente</h2>
+        <input type="hidden" id="clienteEditId" />
+        <div class="grid-2">
+          <div>
+            <label for="cliNome">Nome</label>
+            <input id="cliNome" placeholder="Nome completo" />
+          </div>
+          <div>
+            <label for="cliTelefone">Telefone</label>
+            <input id="cliTelefone" placeholder="(67) 99999-9999" />
+          </div>
+        </div>
+        <div class="grid-3">
+          <div>
+            <label for="cliCep">CEP</label>
+            <input id="cliCep" placeholder="79097-000" />
+          </div>
+          <div>
+            <label for="cliNumero">Número</label>
+            <input id="cliNumero" placeholder="129" />
+          </div>
+          <div>
+            <label for="cliEndereco">Endereço</label>
+            <input id="cliEndereco" placeholder="Rua / Bairro" />
+          </div>
+        </div>
+        <label for="cliObs">Observação</label>
+        <input id="cliObs" placeholder="Preferências ou ponto de referência" />
+        <div class="btn-row">
+          <button id="btnSalvarCliente" class="gold" type="button">Salvar Cliente</button>
+          <button id="btnLimparClienteForm" class="secondary" type="button">Limpar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Base de Clientes</h2>
+        <input id="buscaCliente" placeholder="Buscar cliente por nome, telefone ou endereço..." />
+        <div id="listaClientes" style="margin-top: 12px;"></div>
+      </div>
+    </section>
+
+    <!-- ABA 4: HISTÓRICO & CAIXA -->
+    <section id="tab-historico" class="tab-panel">
+      <div class="card">
+        <h2>Resumo do Caixa</h2>
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Pedidos Registrados</div>
+            <div id="kpiQtdPedidos" class="kpi-value">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Faturamento Total</div>
+            <div class="kpi-value">R$ <span id="kpiFaturamento">0.00</span></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Ticket Médio</div>
+            <div class="kpi-value">R$ <span id="kpiTicketMedio">0.00</span></div>
+          </div>
+        </div>
+        <input id="buscaHistorico" placeholder="Buscar pedido por código (KV...), cliente ou status..." />
+        <div id="filtrosStatusHistorico" class="status-stepper" style="margin-top: 10px;">
+          <button type="button" class="status-btn active-feito" data-filtro-status="Todos" onclick="selecionarFiltroHistorico('Todos')">Todos</button>
+          <button type="button" class="status-btn" data-filtro-status="Gerado" onclick="selecionarFiltroHistorico('Gerado')">📥 Gerado</button>
+          <button type="button" class="status-btn" data-filtro-status="Em produção" onclick="selecionarFiltroHistorico('Em produção')">🔥 Em produção</button>
+          <button type="button" class="status-btn" data-filtro-status="Saiu para entrega" onclick="selecionarFiltroHistorico('Saiu para entrega')">🛵 Saiu para entrega</button>
+          <button type="button" class="status-btn" data-filtro-status="Concluído" onclick="selecionarFiltroHistorico('Concluído')">✅ Concluído</button>
+        </div>
+      </div>
+
+      <div class="card" id="cardEditarPedido" style="display: none;">
+        <h2>✏️ Editar Itens do Pedido <span id="editarPedidoNumero"></span></h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 10px;">
+          Altere os itens, o valor ou a taxa de entrega. Depois salve para atualizar o histórico e o caixa.
+        </p>
+        <div id="editarItensLista"></div>
+
+        <div class="grid-3" style="margin-top: 12px;">
+          <div>
+            <label for="editarTaxaEntrega">Taxa de Entrega (R$)</label>
+            <input id="editarTaxaEntrega" type="number" step="0.50" min="0" />
+          </div>
+          <div>
+            <label for="editarClienteHistorico">Cliente</label>
+            <input id="editarClienteHistorico" placeholder="Nome do cliente" />
+          </div>
+          <div>
+            <label for="editarObservacaoHistorico">Observação</label>
+            <input id="editarObservacaoHistorico" placeholder="Observação do pedido" />
+          </div>
+        </div>
+
+        <div class="summary-box">
+          <div class="summary-line"><span>Itens</span><span>R$ <span id="editarSubtotal">0.00</span></span></div>
+          <div class="summary-line"><span>Taxa de Entrega</span><span>R$ <span id="editarTaxaMostrada">0.00</span></span></div>
+          <div class="summary-total"><span>Total</span><span>R$ <span id="editarTotal">0.00</span></span></div>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnSalvarEdicaoPedido" class="gold" type="button">Salvar Alterações</button>
+          <button id="btnAdicionarItemEdicao" class="secondary" type="button" onclick="adicionarItemEdicao()">+ Adicionar Item</button>
+          <button id="btnCancelarEdicaoPedido" class="secondary" type="button">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Histórico de Pedidos</h2>
+        <div id="listaHistorico"></div>
+      </div>
+    </section>
+
+    <!-- ABA 5: ROTAS DO ENTREGADOR -->
+    <section id="tab-rotas" class="tab-panel">
+      <div class="card">
+        <h2>🛵 Rotas do Entregador</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 10px;">
+          Informe o endereço de entrega e o sistema calcula a distância real de carro
+          a partir da Rua Delamare, 129, mostra o tempo estimado e abre a rota no mapa.
+        </p>
+
+        <div class="grid-2">
+          <div>
+            <label for="rotaEndereco">Endereço de entrega</label>
+            <input id="rotaEndereco" placeholder="Rua, número e bairro" />
+          </div>
+          <div>
+            <label for="rotaCliente">Cliente / Pedido (opcional)</label>
+            <input id="rotaCliente" placeholder="Ex: KV0012 - Maria" />
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="btnCalcularRota" class="gold" type="button">Calcular Rota</button>
+          <button id="btnUsarEnderecoPedido" class="secondary" type="button">Usar endereço do pedido atual</button>
+          <button id="btnRotasDoDia" class="secondary" type="button">Rotas dos pedidos de hoje</button>
+        </div>
+
+        <div id="resultadoRota" class="summary-box" style="display: none;"></div>
+      </div>
+
+      <div class="card">
+        <h2>🔌 Teste de Conexão das APIs</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 10px;">
+          A taxa de entrega depende destes serviços responderem. Se algum falhar aqui,
+          a taxa não calcula e o CEP não preenche o endereço.
+        </p>
+        <div class="btn-row">
+          <button id="btnTestarApis" class="gold" type="button">Testar Conexão Agora</button>
+        </div>
+        <div id="resultadoTesteApis" class="summary-box" style="margin-top: 10px;"></div>
+      </div>
+
+      <div class="card">
+        <h2>🔑 Chave da API de Rotas</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 10px;">
+          O cálculo usa o OpenRouteService, que é gratuito (2.000 rotas por dia, sem cartão de crédito).
+          Crie a sua chave em
+          <a href="https://openrouteservice.org" target="_blank" rel="noopener" style="color: var(--gold);">openrouteservice.org</a>
+          e cole aqui. A chave fica salva apenas neste aparelho.
+        </p>
+        <label for="inputChaveRota">Chave da API</label>
+        <input id="inputChaveRota" placeholder="Cole aqui a sua chave" autocomplete="off" spellcheck="false" />
+        <div class="btn-row">
+          <button id="btnSalvarChaveRota" class="gold" type="button">Salvar Chave</button>
+          <button id="btnTestarChaveRota" class="secondary" type="button">Testar Chave</button>
+          <button id="btnApagarChaveRota" class="danger" type="button">Apagar Chave</button>
+        </div>
+        <div id="statusChaveRota" style="font-size: 0.88rem; color: var(--muted); margin-top: 10px;"></div>
+      </div>
+
+      <div class="card">
+        <h2>📋 Entregas de Hoje</h2>
+        <div id="listaRotasDia"></div>
+      </div>
+    </section>
+
+    <!-- ABA 6: RELATÓRIOS & BACKUP -->
+    <section id="tab-relatorios" class="tab-panel">
+      <div class="card">
+        <h2>Exportar Relatórios CSV</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 10px;">
+          Baixe planilhas CSV compatíveis com Excel para controle financeiro e de clientes.
+        </p>
+        <div class="btn-row">
+          <button id="btnExportarPedidosCSV" class="gold" type="button">Baixar Histórico de Pedidos (CSV)</button>
+          <button id="btnExportarSaboresCSV" class="secondary" type="button">Baixar Tabela de Sabores (CSV)</button>
+          <button id="btnExportarClientesCSV" class="secondary" type="button">Baixar Base de Clientes (CSV)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Backup e Restauração (JSON)</h2>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 10px;">
+          Salve todo o sistema (sabores, preços, clientes, histórico e numeração) ou restaure um arquivo JSON.
+        </p>
+        <div class="btn-row">
+          <button id="btnExportarBackup" class="gold" type="button">Exportar Backup JSON</button>
+          <button id="btnImportarBackup" class="secondary" type="button">Restaurar Backup JSON</button>
+        </div>
+        <label for="inputBackupJson">Conteúdo JSON para Restauração</label>
+        <textarea id="inputBackupJson" rows="6" placeholder="Cole aqui o JSON de backup ou selecione um arquivo abaixo..."></textarea>
+        <label for="fileBackupJson">Ou escolher arquivo .json</label>
+        <input id="fileBackupJson" type="file" accept=".json,application/json" />
+      </div>
+    </section>
+    <!-- CUPOM TÉRMICO COMPACTO (SOMENTE IMPRESSÃO) -->
+    <div id="cupomTermico" aria-hidden="true"></div>
+  </div>
+
+  <script>
+    const NUMERO_WHATSAPP = "5567991476156";
+
+    /* ===== ENTREGA: PONTO DE PARTIDA E REGRA DE TAXA ===== */
+    // Origem das entregas — Rua Delamare, 129, Tarumã, CEP 79097-240.
+    // TODA rota parte daqui, em qualquer tela.
+    const ORIGEM_ENTREGA = {
+      endereco: "Rua Delamare, 129 - Jardim Tarumã, Campo Grande - MS",
+      cep: "79097-240",
+      rua: "Rua Delamare",
+      numero: "129"
+    };
+
+    // Regra de taxa: até 3 km é grátis; a partir de 3 km começa em R$ 5,00
+    // e sobe R$ 1,50 por km adicional, até o teto de 10 km.
+    const REPASSE_ATE_KM = 3;            // faixa gratuita (até 3 km)
+    const REPASSE_FIM_INICIAL = 4;       // a partir de 3 km, o primeiro passo é 4 km
+    const REPASSE_INICIAL = 5;           // valor cobrado assim que passa dos 3 km
+    const REPASSE_POR_KM_EXTRA = 1.5;    // valor somado por km além dos 4 km
+
+    // Área de atendimento: entrega somente até 10 km do ponto de partida.
+    const RAIO_MAXIMO_KM = 10;
+
+    // ===== ROTAS E DISTANCIA (OpenRouteService) =====
+    // Chave gratuita, sem cartao de credito: https://openrouteservice.org
+    const ORS_ENDPOINT = "https://api.heigit.org/openrouteservice";
+    const ORS_PROFILE = "driving-car";
+    const ORS_CHAVE_LOCAL = "kv_ors_key";
+
+    // Coordenadas do ponto de partida — Rua Delamare, 129, CEP 79097-240.
+    // Valor de referencia: se estiver errado, o sistema corrige sozinho
+    // buscando pelo CEP na primeira rota calculada (ver obterOrigemReal()).
+    const ORIGEM_COORDS = {
+      lat: -20.5440728,
+      lng: -54.6727293,
+      endereco: "Rua Delamare, 129 - Jardim Tarumã, Campo Grande - MS",
+      cep: "79097-240"
+    };
+
+    // A pizzaria fica na Rua Delamare, 129 (nao em outro numero da mesma rua).
+    // A origem e FIXA: nada de busca por texto livre, que cai em qualquer ponto
+    // da rua (107, 172, 716...). Se precisar mudar, ajuste aqui.
+    function obterOrigemReal() {
+      // limpa o cache antigo que pudesse ter gravado uma posicao errada
+      try {
+        const salvo = localStorage.getItem("kv_origem_coords");
+        if (salvo) {
+          const c = JSON.parse(salvo);
+          // descarta qualquer cache que nao seja exatamente este ponto
+          if (!c || Math.abs(c.lat - ORIGEM_COORDS.lat) > 0.0005 ||
+              Math.abs(c.lng - ORIGEM_COORDS.lng) > 0.0005) {
+            localStorage.removeItem("kv_origem_coords");
+          }
+        }
+      } catch (e) {
+        localStorage.removeItem("kv_origem_coords");
+      }
+      return { lat: ORIGEM_COORDS.lat, lng: ORIGEM_COORDS.lng };
+    }
+
+    // Bairros com entrega grátis, custe o que custar em km.
+    const BAIRROS_ENTREGA_GRATIS = [
+      "Jardim Tarumã"
+    ];
+
+    // Distância de rota (km) do ponto de partida até cada CEP/bairro.
+    // Preencha aqui com os CEPs/bairros que voce atende. Exemplo:
+    //   "79097-240": 0.5,
+    //   "79006-000": 6.2
+    const TABELA_DISTANCIAS_KM = {
+    };
+
+    // Faixas por inicio do CEP: funciona sem cadastrar rua por rua.
+    // Ajuste os km conforme a realidade dos bairros.
+    const FAIXAS_CEP_ENTREGA = [
+      // { prefixo: "79097", km: 1.5,  nome: "Jardim Tarumã" },
+      // { prefixo: "79006", km: 6.5,  nome: "Vila Bandeirante" },
+      // { prefixo: "79002", km: 7.5,  nome: "Centro" }
+    ];
+
+    let timerTaxaReal = null;
+    let timerBuscaRua = null;
+    let ultimaTaxaBuscada = "";
+
+    function normalizarTexto(txt) {
+      return String(txt || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    const SABORES_PADRAO = {
+      "Muçarela": {
+        brotinho: 15,
+        grande: 35,
+        ingredientes: ["Molho", "Muçarela", "Azeitonas", "Orégano"]
+      },
+      "Calabresa": {
+        brotinho: 20,
+        grande: 35,
+        ingredientes: ["Molho", "Muçarela", "Calabresa", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Catupiry": {
+        brotinho: 20,
+        grande: 35,
+        ingredientes: ["Molho", "Muçarela", "Catupiry", "Azeitonas", "Orégano"]
+      },
+      "Calabresa com Catupiry": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Calabresa", "Catupiry", "Azeitonas", "Orégano"]
+      },
+      "Frango com Catupiry": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Frango Desfiado", "Catupiry", "Azeitonas", "Orégano"]
+      },
+      "Presunto": {
+        brotinho: 20,
+        grande: 35,
+        ingredientes: ["Molho", "Muçarela", "Presunto", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Presunto com Catupiry": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Presunto", "Catupiry", "Azeitonas", "Orégano"]
+      },
+      "Brasileira": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Milho Verde", "Ervilha", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Frango com Milho e Tomate": {
+        brotinho: 20,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Frango Desfiado", "Milho Verde", "Tomate", "Azeitonas", "Orégano"]
+      },
+      "Baiana": {
+        brotinho: 23,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Calabresa", "Bacon", "Molho de Pimenta", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Bacon": {
+        brotinho: 23,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Bacon", "Cebola", "Azeitonas", "Orégano"]
+      },
+      "Cremosa": {
+        brotinho: 23,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Catupiry", "Creme de Leite", "Azeitonas", "Orégano"]
+      },
+      "Lombo ao Creme": {
+        brotinho: 23,
+        grande: 40,
+        ingredientes: ["Molho", "Muçarela", "Lombinho", "Creme de Leite", "Azeitonas", "Orégano"]
+      }
+    };
+
+    let SABORES = {};
+    let historicoPedidos = [];
+    let clientesBase = [];
+    let taxaEntrega = 0;
+
+    let pedidoAtual = {
+      numero: "",
+      data: "",
+      status: "Aberto",
+      cliente: "",
+      telefone: "",
+      cep: "",
+      endereco: "",
+      numeroCasa: "",
+      observacao: "",
+      taxaEntrega: 0,
+      itens: [],
+      total: 0
+    };
+
+    function carregarSaboresStorage() {
+      const salvo = localStorage.getItem("kv_sabores");
+      if (salvo) {
+        try {
+          SABORES = JSON.parse(salvo);
+          return;
+        } catch (e) {}
+      }
+      SABORES = JSON.parse(JSON.stringify(SABORES_PADRAO));
+      salvarSaboresStorage();
+    }
+
+    function salvarSaboresStorage() {
+      localStorage.setItem("kv_sabores", JSON.stringify(SABORES));
+    }
+
+    function carregarHistorico() {
+      const dados = localStorage.getItem("historicoPedidos");
+      if (dados) {
+        try {
+          historicoPedidos = JSON.parse(dados);
+        } catch (e) {
+          historicoPedidos = [];
+        }
+      }
+    }
+
+    function salvarHistorico() {
+      localStorage.setItem("historicoPedidos", JSON.stringify(historicoPedidos));
+    }
+
+    function carregarClientes() {
+      const dados = localStorage.getItem("kv_clientes");
+      if (dados) {
+        try {
+          clientesBase = JSON.parse(dados);
+        } catch (e) {
+          clientesBase = [];
+        }
+      }
+    }
+
+    function salvarClientes() {
+      localStorage.setItem("kv_clientes", JSON.stringify(clientesBase));
+    }
+
+
+    const ETAPAS_PEDIDO = [
+      { key: "Gerado", label: "📥 Gerado", pillClass: "status-feito", activeClass: "active-feito" },
+      { key: "Em produção", label: "🔥 Em produção", pillClass: "status-producao", activeClass: "active-producao" },
+      { key: "Saiu para entrega", label: "🛵 Saiu para entrega", pillClass: "status-entrega", activeClass: "active-entrega" },
+      { key: "Concluído", label: "✅ Concluído", pillClass: "status-finalizado", activeClass: "active-finalizado" }
+    ];
+
+    function normalizarStatusPedido(status) {
+      const s = String(status || "").trim().toLowerCase();
+      if (!s || s === "aberto" || s === "feito" || s === "gerado") return "Gerado";
+      if (s.includes("preparo") || s.includes("produ")) return "Em produção";
+      if (s.includes("entrega") || s.includes("saiu")) return "Saiu para entrega";
+      if (s.includes("conclu") || s.includes("final")) return "Concluído";
+      return "Gerado";
+    }
+
+    function obterMetaStatus(status) {
+      const norm = normalizarStatusPedido(status);
+      return ETAPAS_PEDIDO.find((e) => e.key === norm) || ETAPAS_PEDIDO[0];
+    }
+
+    function atualizarBadgeStatusAtual(status) {
+      const meta = obterMetaStatus(status);
+      const badge = document.getElementById("statusPedido");
+      if (!badge) return;
+      badge.className = "status-pill " + meta.pillClass;
+      badge.innerText = meta.label;
+    }
+
+    function definirStatusPedidoAtual(novoStatus) {
+      const meta = obterMetaStatus(novoStatus);
+      pedidoAtual.status = meta.key;
+      atualizarBadgeStatusAtual(meta.key);
+      renderizarBotoesStatusAtual();
+    }
+
+    function renderizarBotoesStatusAtual() {
+      const container = document.getElementById("botoesStatusPedidoAtual");
+      if (!container) return;
+      const atualNorm = normalizarStatusPedido(pedidoAtual.status);
+      container.innerHTML = ETAPAS_PEDIDO.map((etapa) => {
+        const isCurrent = etapa.key === atualNorm;
+        return `<button type="button" class="status-btn ${isCurrent ? etapa.activeClass : ""}" onclick="definirStatusPedidoAtual('${etapa.key}')">${etapa.label}</button>`;
+      }).join("");
+    }
+
+    function gerarNumeroPedido() {
+      let numero = Number(localStorage.getItem("ultimoPedido") || 0);
+      numero++;
+      localStorage.setItem("ultimoPedido", numero);
+      return "KV" + String(numero).padStart(4, "0");
+    }
+
+    function registrarPedido(pedido) {
+      pedido.numero = pedido.numero || gerarNumeroPedido();
+      pedido.data = pedido.data || new Date().toLocaleString("pt-BR");
+      pedido.status = normalizarStatusPedido(pedido.status || pedidoAtual.status || "Feito");
+      historicoPedidos.unshift(pedido);
+      salvarHistorico();
+      renderizarHistorico();
+      popularDatalistRuas();
+    }
+
+    function inicializarPedido() {
+      const agora = new Date();
+      let proximoNum = Number(localStorage.getItem("ultimoPedido") || 0) + 1;
+      const codigo = "KV" + String(proximoNum).padStart(4, "0");
+
+      pedidoAtual.numero = codigo;
+      pedidoAtual.data = agora.toLocaleString("pt-BR");
+      pedidoAtual.status = "Gerado";
+
+      document.getElementById("numeroPedido").innerText = codigo;
+      document.getElementById("dataPedido").innerText = pedidoAtual.data;
+      atualizarBadgeStatusAtual("Gerado");
+      renderizarBotoesStatusAtual();
+    }
+
+    function carregarSabores() {
+      const tamanho = document.getElementById("tamanho").value;
+      const sabor1 = document.getElementById("sabor1");
+      const sabor2 = document.getElementById("sabor2");
+
+      const prev1 = sabor1.value;
+      const prev2 = sabor2.value;
+
+      sabor1.innerHTML = '<option value="">🍕 Selecione um sabor</option>';
+      sabor2.innerHTML = '<option value="">🍕 Selecione um sabor</option>';
+
+      Object.keys(SABORES).forEach((nome) => {
+        const preco = tamanho === "brotinho" ? Number(SABORES[nome].brotinho) : Number(SABORES[nome].grande);
+        sabor1.innerHTML += `<option value="${nome}">${nome} - R$ ${preco.toFixed(2)}</option>`;
+        sabor2.innerHTML += `<option value="${nome}">${nome} - R$ ${preco.toFixed(2)}</option>`;
+      });
+
+      if (prev1 && SABORES[prev1]) sabor1.value = prev1;
+      if (prev2 && SABORES[prev2]) sabor2.value = prev2;
+
+      atualizarVisualPedido();
+      atualizarPreviewIngredientes();
+    }
+
+    function atualizarVisualPedido() {
+      const tamanho = document.getElementById("tamanho").value;
+      const tipoSelect = document.getElementById("tipoPizza");
+      const boxSabor2 = document.getElementById("boxSabor2");
+
+      if (tamanho === "brotinho") {
+        tipoSelect.disabled = true;
+        tipoSelect.value = "inteira";
+        boxSabor2.style.display = "none";
+      } else {
+        tipoSelect.disabled = false;
+        boxSabor2.style.display = tipoSelect.value === "meio" ? "block" : "none";
+      }
+
+      atualizarPreviewIngredientes();
+    }
+
+    function atualizarPreviewIngredientes() {
+      const el = document.getElementById("ingredientes");
+      const tamanho = document.getElementById("tamanho").value;
+      const tipo = document.getElementById("tipoPizza").value;
+      const s1 = document.getElementById("sabor1").value;
+      const s2 = document.getElementById("sabor2").value;
+
+      if (!s1 || !SABORES[s1]) {
+        el.innerText = "";
+        return;
+      }
+
+      if (tamanho === "grande" && tipo === "meio" && s2 && SABORES[s2]) {
+        el.innerText =
+          `Ingredientes — 50% ${s1}: ${SABORES[s1].ingredientes.join(", ")} | ` +
+          `50% ${s2}: ${SABORES[s2].ingredientes.join(", ")}`;
+      } else {
+        el.innerText = `Ingredientes: ${SABORES[s1].ingredientes.join(", ")}`;
+      }
+    }
+
+    function adicionarItem(item) {
+      pedidoAtual.itens.push(item);
+      atualizarCarrinho();
+    }
+
+    function removerItem(indice) {
+      pedidoAtual.itens.splice(indice, 1);
+      atualizarCarrinho();
+    }
+
+    function limparPedido() {
+      pedidoAtual.itens = [];
+      atualizarCarrinho();
+    }
+
+    function atualizarCarrinho() {
+      const carrinho = document.getElementById("carrinho");
+      if (!carrinho) return;
+
+      let html = "";
+      pedidoAtual.itens.forEach((item, index) => {
+        html += `
+          <div class="item">
+            <b>${item.descricao}</b><br />
+            ${item.ingredientes ? `<span style="color: var(--muted); font-size: 0.85rem;">${item.ingredientes}</span><br />` : ""}
+            ${item.observacao ? `<span style="color: var(--gold); font-size: 0.85rem;">Obs: ${item.observacao}</span><br />` : ""}
+            <div style="margin-top: 6px; display: flex; justify-content: space-between; align-items: center;">
+              <strong>Valor: R$ ${Number(item.valor).toFixed(2)}</strong>
+              <button class="danger" onclick="removerItem(${index})" type="button">Excluir</button>
+            </div>
+          </div>
+        `;
+      });
+
+      carrinho.innerHTML = html || '<p style="color: var(--muted);">Nenhum item adicionado ainda.</p>';
+      atualizarTotal();
+    }
+
+    function atualizarTotal() {
+      let subtotal = 0;
+      pedidoAtual.itens.forEach((item) => {
+        subtotal += Number(item.valor) || 0;
+      });
+
+      const total = subtotal + taxaEntrega;
+      pedidoAtual.taxaEntrega = taxaEntrega;
+      pedidoAtual.total = total;
+
+      document.getElementById("taxaEntrega").innerText = taxaEntrega.toFixed(2);
+      document.getElementById("totalPedido").innerText = total.toFixed(2);
+    }
+
+    function avisarEndereco(mensagem) {
+      const el = document.getElementById("mensagemEntrega");
+      if (!el) return;
+      el.innerHTML = mensagem;
+    }
+
+    function calcularTaxaEntrega() {
+      const cep = document.getElementById("cep").value.replace(/[^0-9]/g, "");
+      const bairro = obterBairroDoEndereco();
+
+      if (cep.length < 8 && !bairro) {
+        return;
+      }
+
+      // 1) bairro com entrega gratis
+      const bairroGratis = BAIRROS_ENTREGA_GRATIS.map(normalizarTexto);
+      if (bairro && bairroGratis.includes(normalizarTexto(bairro))) {
+        taxaEntrega = 0;
+        document.getElementById("mensagemEntrega").innerHTML = "🎉 ENTREGA GRÁTIS para este bairro";
+        atualizarTotal();
+        return;
+      }
+
+      // 2) tabela de CEP / bairro
+      const chave = obterChaveEntrega(cep, bairro);
+      if (TABELA_DISTANCIAS_KM[chave] !== undefined) {
+        aplicarTaxaPorKm(TABELA_DISTANCIAS_KM[chave], bairro ? bairro : chave);
+        return;
+      }
+
+      // 3) CEP conhecido na lista de referencia: usa a distancia dele
+      if (cep.length === 8) {
+        const ref = RUAS_REFERENCIA_CG.find(function (r) {
+          return String(r.cep).replace(/[^0-9]/g, "") === cep;
+        });
+        if (ref && ref.km !== undefined) {
+          aplicarTaxaPorKm(ref.km, ref.bairro || ref.rua);
+          return;
+        }
+
+        // 4) mesmo sem km cadastrado, decide pela faixa do CEP
+        if (FAIXAS_CEP_ENTREGA.length) {
+          const faixa = FAIXAS_CEP_ENTREGA.find(function (f) {
+            return cep.startsWith(f.prefixo);
+          });
+          if (faixa) {
+            aplicarTaxaPorKm(faixa.km, faixa.nome);
+            return;
+          }
+        }
+
+        document.getElementById("mensagemEntrega").innerHTML =
+          "⚠️ Taxa a confirmar: bairro ainda não cadastrado. Fale com a pizzaria.";
+        taxaEntrega = 5;
+        atualizarTotal();
+        return;
+      }
+
+      document.getElementById("mensagemEntrega").innerHTML =
+        "Informe o CEP para calcular a taxa de entrega.";
+    }
+
+    function obterBairroDoEndereco() {
+      const texto = document.getElementById("endereco").value || "";
+      if (texto.includes(" - ")) {
+        return texto.split(" - ").slice(1).join(" - ").trim();
+      }
+      return "";
+    }
+
+    function obterChaveEntrega(cep, bairro) {
+      const numeros = String(cep || "").replace(/[^0-9]/g, "");
+      if (numeros.length === 8) {
+        return numeros.slice(0, 5) + "-" + numeros.slice(5, 8);
+      }
+      return bairro || "";
+    }
+
+    function calcularTaxaPorDistancia(distanciaKm) {
+      if (distanciaKm <= REPASSE_ATE_KM) {
+        return 0;
+      }
+      if (distanciaKm <= REPASSE_FIM_INICIAL) {
+        return REPASSE_INICIAL;
+      }
+      // cada km iniciado além dos 4 km soma R$ 1,50
+      const kmExtra = Math.ceil(distanciaKm - REPASSE_FIM_INICIAL);
+      return REPASSE_INICIAL + kmExtra * REPASSE_POR_KM_EXTRA;
+    }
+
+    function dentroDaAreaDeEntrega(distanciaKm) {
+      return Number(distanciaKm) <= RAIO_MAXIMO_KM;
+    }
+
+    function aplicarTaxaPorKm(distanciaKm, referencia) {
+      if (!dentroDaAreaDeEntrega(distanciaKm)) {
+        taxaEntrega = calcularTaxaPorDistancia(RAIO_MAXIMO_KM);
+        document.getElementById("mensagemEntrega").innerHTML =
+          "🚫 FORA DA ÁREA DE ENTREGA — " + referencia + " fica a " +
+          distanciaKm.toLocaleString("pt-BR") + " km (limite de " + RAIO_MAXIMO_KM +
+          " km). Confirme com a pizzaria antes de fechar.";
+        atualizarTotal();
+        return;
+      }
+
+      taxaEntrega = calcularTaxaPorDistancia(distanciaKm);
+
+      if (taxaEntrega === 0) {
+        document.getElementById("mensagemEntrega").innerHTML =
+          "🎉 ENTREGA GRÁTIS — " + referencia + " (até " + REPASSE_ATE_KM + " km)";
+      } else {
+        const kmExtra = Math.max(0, Math.ceil(distanciaKm - REPASSE_FIM_INICIAL));
+        const detalhe = kmExtra > 0
+          ? " + " + kmExtra + " km x R$ " + REPASSE_POR_KM_EXTRA.toFixed(2)
+          : " (faixa de " + REPASSE_ATE_KM + " a " + REPASSE_FIM_INICIAL + " km)";
+        document.getElementById("mensagemEntrega").innerHTML =
+          "Taxa: R$ " + taxaEntrega.toFixed(2) + " — " + distanciaKm.toLocaleString("pt-BR") +
+          " km" + detalhe;
+      }
+
+      atualizarTotal();
+    }
+
+    function promoverFreteParaConfirmar() {
+      taxaEntrega = 5;
+    }
+
+    const RUAS_REFERENCIA_CG = [
+      { rua: "Rua Delamare", bairro: "Jardim Tarumã", cep: "79097-240" },
+      { rua: "Rua Yokohama", bairro: "Jardim Tarumã", cep: "79097-010" },
+      { rua: "Rua das Garças", bairro: "Jardim Tarumã", cep: "79097-020" },
+      { rua: "Avenida Guaicurus", bairro: "Jardim Tarumã", cep: "79097-000" },
+      { rua: "Rua Marquês de Lavradio", bairro: "Jardim Tarumã", cep: "79097-030" },
+      { rua: "Rua Brilhante", bairro: "Vila Bandeirante", cep: "79006-000" },
+      { rua: "Avenida Afonso Pena", bairro: "Centro", cep: "79002-000" },
+      { rua: "Rua 14 de Julho", bairro: "Centro", cep: "79002-110" }
+    ];
+    function popularDatalistRuas() {
+      const dl = document.getElementById("listaRuasCG");
+      if (!dl) return;
+      const mapa = new Map();
+
+      RUAS_REFERENCIA_CG.forEach((r) => {
+        mapa.set(`${r.rua} - ${r.bairro}`.toLowerCase(), r);
+      });
+
+      (clientesBase || []).forEach((c) => {
+        if (c.endereco) {
+          mapa.set(String(c.endereco).toLowerCase(), {
+            rua: c.endereco,
+            bairro: "",
+            cep: c.cep || ""
+          });
+        }
+      });
+
+      dl.innerHTML = "";
+      mapa.forEach((item) => {
+        const opt = document.createElement("option");
+        opt.value = item.bairro ? `${item.rua} - ${item.bairro}` : item.rua;
+        dl.appendChild(opt);
+      });
+    }
+
+    async function buscarCEP() {
+      const cep = document.getElementById("cep").value.replace(/[^0-9]/g, "");
+      if (cep.length !== 8) return;
+
+      try {
+        const resposta = await fetch("https://viacep.com.br/ws/" + cep + "/json/");
+        const dados = await resposta.json();
+        if (dados.erro) {
+          avisarEndereco("CEP nao encontrado. Confira os 8 numeros.");
+          return;
+        }
+
+        const log = dados.logradouro || "";
+        const bai = dados.bairro || "";
+        if (log || bai) {
+          document.getElementById("endereco").value = bai ? `${log} - ${bai}` : log;
+          avisarEndereco("");
+        } else {
+          avisarEndereco("CEP localizado, mas sem rua cadastrada.");
+        }
+        calcularTaxaEntrega();
+      } catch (erro) {
+        console.log("Erro CEP", erro);
+        avisarEndereco("Sem conexao para buscar o CEP agora.");
+      }
+    }
+
+    async function buscarCEPPorRua() {
+      const campoEnd = document.getElementById("endereco");
+      const campoCep = document.getElementById("cep");
+      const texto = (campoEnd.value || "").trim();
+      if (texto.length < 4) return;
+
+      const ruaLimpa = texto.split(" - ")[0].trim();
+      const textoTxt = normalizarTexto(texto);
+      const ruaTxt = normalizarTexto(ruaLimpa);
+      const matchLocal = RUAS_REFERENCIA_CG.find(
+        (r) =>
+          normalizarTexto(`${r.rua} - ${r.bairro}`) === textoTxt ||
+          normalizarTexto(r.rua) === ruaTxt
+      );
+
+      if (matchLocal && matchLocal.cep) {
+        campoCep.value = matchLocal.cep;
+        if (!texto.includes(" - ") && matchLocal.bairro) {
+          campoEnd.value = `${matchLocal.rua} - ${matchLocal.bairro}`;
+        }
+        calcularTaxaEntrega();
+        return;
+      }
+
+      const cliMatch = (clientesBase || []).find(
+        (c) => (c.endereco || "").toLowerCase().includes(ruaLimpa.toLowerCase()) && c.cep
+      );
+      if (cliMatch) {
+        campoCep.value = cliMatch.cep;
+        calcularTaxaEntrega();
+        return;
+      }
+
+      if (ruaLimpa.length >= 3) {
+// O ViaCEP exige o logradouro SEM o tipo (Rua, Avenida, Travessa...)
         // e com no minimo 3 caracteres.
         const semTipo = ruaLimpa
           .replace(/^(rua|r\.?|avenida|av\.?|travessa|tv\.?|alameda|al\.?|rodovia|rod\.?|praca|praca|estrada|est\.?)\s+/i, "")
