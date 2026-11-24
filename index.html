@@ -2153,7 +2153,14 @@
     document.getElementById("tamanho").addEventListener("change", carregarSabores);
     document.getElementById("tipoPizza").addEventListener("change", atualizarVisualPedido);
     document.getElementById("sabor1").addEventListener("change", atualizarPreviewIngredientes);
+    document.getElementById("sabor2").addEventListener("change", atualizarPreviewIngredientes);
+
     document.getElementById("btnAdicionarPizza").addEventListener("click", function () {
+      if (this.disabled) return;          // evita clique duplo
+      this.disabled = true;
+      const botao = this;
+      setTimeout(function () { botao.disabled = false; }, 400);
+
       const tamanho = document.getElementById("tamanho").value;
       const tipo = document.getElementById("tipoPizza").value;
       const sabor1 = document.getElementById("sabor1").value;
@@ -2202,6 +2209,11 @@
     });
 
     document.getElementById("btnAdicionarBebida").addEventListener("click", function () {
+      if (this.disabled) return;          // evita clique duplo
+      const botaoBebida = this;
+      this.disabled = true;
+      setTimeout(function () { botaoBebida.disabled = false; }, 400);
+
       const sel = document.getElementById("bebida");
       if (!sel.value) {
         alert("Selecione uma bebida.");
@@ -2219,6 +2231,7 @@
         observacao: "",
         valor: valor
       });
+      // mantem a bebida selecionada: assim o botao nao acusa "selecione uma bebida"
     });
 
     document.getElementById("btnWhatsApp").addEventListener("click", function () {
@@ -2240,8 +2253,7 @@
       pedido.numero = gerarNumeroPedido();
       pedido.data = new Date().toLocaleString("pt-BR");
       registrarPedido(pedido);
-      document.getElementById("numeroPedido").innerText =
-        "KV" + String(Number(localStorage.getItem("ultimoPedido") || 0) + 1).padStart(4, "0");
+      document.getElementById("numeroPedido").innerText = "KV" + String(Number(localStorage.getItem("ultimoPedido") || 0) + 1).padStart(4, "0");
       alert("Pedido registrado no histórico.");
     });
 
@@ -2285,8 +2297,8 @@
       const grande = Number(document.getElementById("cadPrecoGrande").value);
       const ingredientes = document.getElementById("cadIngredientes").value
         .split(",")
-        .map(function (t) { return t.trim(); })
-        .filter(function (t) { return t; });
+        .map(function (i) { return i.trim(); })
+        .filter(function (i) { return i; });
       const original = document.getElementById("saborEditandoOriginal").value;
 
       if (!nome) {
@@ -2297,10 +2309,12 @@
         alert("Informe os preços do brotinho e do grande.");
         return;
       }
+
       if (original && original !== nome) {
         delete SABORES[original];
       }
       SABORES[nome] = { brotinho: brotinho, grande: grande, ingredientes: ingredientes };
+
       salvarSaboresStorage();
       carregarSabores();
       renderizarListaSabores();
