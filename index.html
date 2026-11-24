@@ -2060,10 +2060,6 @@
       const nomeAdicional = adicionalEl.options[adicionalEl.selectedIndex].text;
       const obsPizza = document.getElementById("obsPizza").value.trim();
 
-      const valorAdicional = Number(adicionalEl.value) || 0;
-      const nomeAdicional = adicionalEl.options[adicionalEl.selectedIndex].text;
-      const obsPizza = document.getElementById("obsPizza").value.trim();
-
       adicionarItem({
         descricao: valorAdicional > 0 ? descricao + " + " + nomeAdicional : descricao,
         ingredientes: ingredientes,
@@ -2449,7 +2445,7 @@
     async function calcularRotaDoEndereco(endereco, cliente) {
       const box = document.getElementById("resultadoRota");
       box.style.display = "block";
-      box.innerHTML = "<span style="color: var(--muted);">Calculando a rota...</span>";
+      box.innerHTML = '<span style="color: var(--muted);">Calculando a rota...</span>';
 
       try {
         const ponto = await geocodificar(endereco);
@@ -2468,14 +2464,14 @@
           <div class="summary-line"><span>Tempo estimado</span><span>${rota.duracao} min</span></div>
           <div class="summary-line"><span>Ida e volta (entregador)</span><span>${rota.idaEVoltaKm.toFixed(1)} km</span></div>
           <div class="summary-total"><span>Taxa de entrega</span><span>${dentro ? formatarTaxa(rota.distanciaKm) : "FORA DA ÁREA"}</span></div>
-          ${dentro ? "" : "<p style="color: var(--danger); font-size: 0.9rem; margin-top: 6px;">⚠️ Passa do limite de " + RAIO_MAXIMO_KM + " km de atendimento.</p>"}
+          ${dentro ? "" : '<p style="color: var(--danger); font-size: 0.9rem; margin-top: 6px;">⚠️ Passa do limite de ' + RAIO_MAXIMO_KM + ' km de atendimento.</p>'}
           <div class="btn-row">
             <button class="gold" type="button" onclick="window.open('${linkMapa}', '_blank')">🗺️ Abrir rota no mapa</button>
             <button class="secondary" type="button" onclick="enviarRotaWhats('${endereco.replace(/'/g, "")}', ${rota.distanciaKm}, ${rota.duracao})">📲 Enviar ao entregador</button>
           </div>
         `;
       } catch (erro) {
-        box.innerHTML = "<span style="color: var(--danger);">⚠️ " + erro.message + "</span>";
+        box.innerHTML = '<span style="color: var(--danger);">⚠️ ' + erro.message + '</span>';
       }
     }
 
