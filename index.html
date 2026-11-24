@@ -289,6 +289,62 @@
       margin-top: 6px;
     }
 
+    .status-pill.status-feito {
+      background: rgba(210, 153, 34, 0.2);
+      color: #f0b429;
+      border: 1px solid rgba(240, 180, 41, 0.45);
+    }
+    .status-pill.status-producao {
+      background: rgba(224, 159, 62, 0.22);
+      color: #ff9f1c;
+      border: 1px solid rgba(255, 159, 28, 0.5);
+    }
+    .status-pill.status-entrega {
+      background: rgba(56, 139, 253, 0.2);
+      color: #58a6ff;
+      border: 1px solid rgba(88, 166, 255, 0.45);
+    }
+    .status-pill.status-finalizado {
+      background: rgba(46, 160, 67, 0.22);
+      color: #3fb950;
+      border: 1px solid rgba(63, 185, 80, 0.5);
+    }
+    .status-stepper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .status-btn {
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      border-radius: 7px;
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      font-weight: 700;
+    }
+    .status-btn.active-feito {
+      background: #d29922;
+      color: #160f0a;
+      border-color: #d29922;
+    }
+    .status-btn.active-producao {
+      background: #e09f3e;
+      color: #160f0a;
+      border-color: #e09f3e;
+    }
+    .status-btn.active-entrega {
+      background: #2f81f7;
+      color: #fff;
+      border-color: #2f81f7;
+    }
+    .status-btn.active-finalizado {
+      background: #2ea043;
+      color: #fff;
+      border-color: #2ea043;
+    }
+
     #cupomTermico {
       display: none;
     }
@@ -381,9 +437,10 @@
       <div class="card">
         <div class="brand-top">
           <h2 id="numeroPedido" style="margin-bottom: 0;">KV0001</h2>
-          <span id="statusPedido" class="status-pill">🟡 Aberto</span>
+          <span id="statusPedido" class="status-pill status-feito">📥 Gerado</span>
         </div>
         <p id="dataPedido" style="color: var(--muted); font-size: 0.88rem; margin-top: 6px;"></p>
+        <div id="botoesStatusPedidoAtual" class="status-stepper" aria-label="Etapas do pedido atual"></div>
       </div>
 
       <div id="cardImportarWhats" class="card">
@@ -639,6 +696,13 @@
           </div>
         </div>
         <input id="buscaHistorico" placeholder="Buscar pedido por código (KV...), cliente ou status..." />
+        <div id="filtrosStatusHistorico" class="status-stepper" style="margin-top: 10px;">
+          <button type="button" class="status-btn active-feito" data-filtro-status="Todos" onclick="selecionarFiltroHistorico('Todos')">Todos</button>
+          <button type="button" class="status-btn" data-filtro-status="Gerado" onclick="selecionarFiltroHistorico('Gerado')">📥 Gerado</button>
+          <button type="button" class="status-btn" data-filtro-status="Em produção" onclick="selecionarFiltroHistorico('Em produção')">🔥 Em produção</button>
+          <button type="button" class="status-btn" data-filtro-status="Saiu para entrega" onclick="selecionarFiltroHistorico('Saiu para entrega')">🛵 Saiu para entrega</button>
+          <button type="button" class="status-btn" data-filtro-status="Concluído" onclick="selecionarFiltroHistorico('Concluído')">✅ Concluído</button>
+        </div>
       </div>
 
       <div class="card">
@@ -817,6 +881,52 @@
       localStorage.setItem("kv_clientes", JSON.stringify(clientesBase));
     }
 
+    const ETAPAS_PEDIDO = [
+      { key: "Gerado", label: "📥 Gerado", pillClass: "status-feito", activeClass: "active-feito" },
+      { key: "Em produção", label: "🔥 Em produção", pillClass: "status-producao", activeClass: "active-producao" },
+      { key: "Saiu para entrega", label: "🛵 Saiu para entrega", pillClass: "status-entrega", activeClass: "active-entrega" },
+      { key: "Concluído", label: "✅ Concluído", pillClass: "status-finalizado", activeClass: "active-finalizado" }
+    ];
+
+    function normalizarStatusPedido(status) {
+      const s = String(status || "").trim().toLowerCase();
+      if (!s || s === "aberto" || s === "feito" || s === "gerado") return "Gerado";
+      if (s.includes("preparo") || s.includes("produ")) return "Em produção";
+      if (s.includes("entrega") || s.includes("saiu")) return "Saiu para entrega";
+      if (s.includes("conclu") || s.includes("final")) return "Concluído";
+      return "Gerado";
+    }
+
+    function obterMetaStatus(status) {
+      const norm = normalizarStatusPedido(status);
+      return ETAPAS_PEDIDO.find((e) => e.key === norm) || ETAPAS_PEDIDO[0];
+    }
+
+    function atualizarBadgeStatusAtual(status) {
+      const meta = obterMetaStatus(status);
+      const badge = document.getElementById("statusPedido");
+      if (!badge) return;
+      badge.className = "status-pill " + meta.pillClass;
+      badge.innerText = meta.label;
+    }
+
+    function definirStatusPedidoAtual(novoStatus) {
+      const meta = obterMetaStatus(novoStatus);
+      pedidoAtual.status = meta.key;
+      atualizarBadgeStatusAtual(meta.key);
+      renderizarBotoesStatusAtual();
+    }
+
+    function renderizarBotoesStatusAtual() {
+      const container = document.getElementById("botoesStatusPedidoAtual");
+      if (!container) return;
+      const atualNorm = normalizarStatusPedido(pedidoAtual.status);
+      container.innerHTML = ETAPAS_PEDIDO.map((etapa) => {
+        const isCurrent = etapa.key === atualNorm;
+        return `<button type="button" class="status-btn ${isCurrent ? etapa.activeClass : ""}" onclick="definirStatusPedidoAtual('${etapa.key}')">${etapa.label}</button>`;
+      }).join("");
+    }
+
     function gerarNumeroPedido() {
       let numero = Number(localStorage.getItem("ultimoPedido") || 0);
       numero++;
@@ -827,11 +937,11 @@
     function registrarPedido(pedido) {
       pedido.numero = pedido.numero || gerarNumeroPedido();
       pedido.data = pedido.data || new Date().toLocaleString("pt-BR");
-      pedido.status = pedido.status || "Aberto";
+      pedido.status = normalizarStatusPedido(pedido.status || pedidoAtual.status || "Feito");
       historicoPedidos.unshift(pedido);
       salvarHistorico();
       renderizarHistorico();
-    popularDatalistRuas();
+      popularDatalistRuas();
     }
 
     function inicializarPedido() {
@@ -841,11 +951,12 @@
 
       pedidoAtual.numero = codigo;
       pedidoAtual.data = agora.toLocaleString("pt-BR");
-      pedidoAtual.status = "Aberto";
+      pedidoAtual.status = "Gerado";
 
       document.getElementById("numeroPedido").innerText = codigo;
       document.getElementById("dataPedido").innerText = pedidoAtual.data;
-      document.getElementById("statusPedido").innerText = "🟡 Aberto";
+      atualizarBadgeStatusAtual("Gerado");
+      renderizarBotoesStatusAtual();
     }
 
     function carregarSabores() {
@@ -1126,705 +1237,4 @@
     function enviarWhatsApp(pedido) {
       let mensagem = "KING VENTURA PIZZARIA\n\n";
       mensagem += "Pedido: " + (pedido.numero || document.getElementById("numeroPedido").innerText) + "\n";
-      mensagem += "Cliente: " + (pedido.cliente || "") + "\n";
-      mensagem += "Telefone: " + (pedido.telefone || "") + "\n";
-      mensagem += "CEP: " + (pedido.cep || "") + "\n";
-      mensagem += "Endereço: " + (pedido.endereco || "") + "\n";
-      mensagem += "Número: " + (pedido.numeroCasa || "") + "\n";
-      mensagem += "Observação: " + (pedido.observacao || "") + "\n";
-      mensagem += "Taxa de Entrega: R$ " + Number(pedido.taxaEntrega || 0).toFixed(2) + "\n\n";
-      mensagem += "ITENS:\n[KV-ITENS]\n";
-
-      (pedido.itens || []).forEach((item) => {
-        mensagem += item.descricao + " - R$ " + Number(item.valor).toFixed(2) + "\n";
-        if (item.adicionais && item.adicionais.length) {
-          mensagem += "Adicionais: " + item.adicionais.join(", ") + "\n";
-        }
-        if (item.observacao) {
-          mensagem += "Obs: " + item.observacao + "\n";
-        }
-        mensagem += "\n";
-      });
-
-      mensagem += "\nTOTAL: R$ " + Number(pedido.total || 0).toFixed(2);
-
-      window.open(
-        "https://wa.me/" + NUMERO_WHATSAPP + "?text=" + encodeURIComponent(mensagem),
-        "_blank"
-      );
-    }
-
-    function importarPedidoWhats() {
-      const texto = document.getElementById("pedidoWhats").value;
-      if (!texto.trim()) return;
-
-      limparPedido();
-
-      const nome = texto.match(/Cliente:\s*(.*)/i);
-      const telefone = texto.match(/Telefone:\s*(.*)/i);
-      const cep = texto.match(/CEP:\s*(.*)/i);
-      const numero = texto.match(/N[uú]mero:\s*(.*)/i);
-      const endereco = texto.match(/Endere[cç]o:\s*(.*)/i);
-      const obs = texto.match(/Observa[cç][aã]o:\s*(.*)/i);
-
-      document.getElementById("nome").value = nome ? nome[1].trim() : "";
-      document.getElementById("telefone").value = telefone ? telefone[1].trim() : "";
-      document.getElementById("cep").value = cep ? cep[1].trim() : "";
-      document.getElementById("numero").value = numero ? numero[1].trim() : "";
-      if (endereco && endereco[1].trim()) {
-        document.getElementById("endereco").value = endereco[1].trim();
-      }
-      if (obs && obs[1].trim()) {
-        document.getElementById("observacao").value = obs[1].trim();
-      }
-
-      const linhas = texto.split("\n");
-      linhas.forEach((rawLinha) => {
-        const linha = rawLinha.trim();
-
-        if (linha.startsWith("Brotinho 25cm - ")) {
-          const sabor = linha
-            .split(" - R$ ")[0]
-            .replace("Brotinho 25cm - ", "")
-            .split(" + ")[0]
-            .trim();
-
-          if (SABORES[sabor]) {
-            document.getElementById("tamanho").value = "brotinho";
-            carregarSabores();
-            document.getElementById("sabor1").value = sabor;
-            document.getElementById("btnAdicionarPizza").click();
-          }
-        } else if (linha.startsWith("Grande 35cm Meio a Meio - ")) {
-          const descricaoPizza = linha
-            .split(" - R$ ")[0]
-            .replace("Grande 35cm Meio a Meio - ", "");
-          const partes = descricaoPizza.split(" + ")[0].split(" / ");
-
-          if (partes.length === 2 && SABORES[partes[0].trim()] && SABORES[partes[1].trim()]) {
-            document.getElementById("tamanho").value = "grande";
-            document.getElementById("tipoPizza").value = "meio";
-            carregarSabores();
-            atualizarVisualPedido();
-            document.getElementById("sabor1").value = partes[0].trim();
-            document.getElementById("sabor2").value = partes[1].trim();
-            document.getElementById("btnAdicionarPizza").click();
-          }
-        } else if (linha.startsWith("Grande 35cm - ")) {
-          const sabor = linha
-            .split(" - R$ ")[0]
-            .replace("Grande 35cm - ", "")
-            .split(" + ")[0]
-            .trim();
-
-          if (SABORES[sabor]) {
-            document.getElementById("tamanho").value = "grande";
-            document.getElementById("tipoPizza").value = "inteira";
-            carregarSabores();
-            document.getElementById("sabor1").value = sabor;
-            document.getElementById("btnAdicionarPizza").click();
-          }
-        }
-      });
-
-      const bebidaSelect = document.getElementById("bebida");
-      for (let i = 1; i < bebidaSelect.options.length; i++) {
-        const optText = bebidaSelect.options[i].text.split(" - R$ ")[0];
-        if (texto.includes(optText)) {
-          bebidaSelect.selectedIndex = i;
-          document.getElementById("btnAdicionarBebida").click();
-        }
-      }
-
-      buscarCEP();
-      calcularTaxaEntrega();
-      alert("Pedido importado!");
-    }
-
-    function novoPedido() {
-      if (!confirm("Deseja limpar o pedido atual e iniciar um novo pedido?")) {
-        return;
-      }
-      location.reload();
-    }
-
-    /* GESTÃO DE SABORES & PREÇOS */
-    function renderizarListaSabores() {
-      const container = document.getElementById("listaSabores");
-      const nomes = Object.keys(SABORES);
-
-      if (!nomes.length) {
-        container.innerHTML = '<p style="color: var(--muted);">Nenhum sabor cadastrado.</p>';
-        return;
-      }
-
-      container.innerHTML = nomes
-        .map((nome) => {
-          const s = SABORES[nome];
-          return `
-            <div class="list-card">
-              <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-                <div>
-                  <strong>${nome}</strong><br />
-                  <span style="color: var(--gold); font-size: 0.9rem;">
-                    Brotinho 25cm: R$ ${Number(s.brotinho).toFixed(2)} | Grande 35cm: R$ ${Number(s.grande).toFixed(2)}
-                  </span><br />
-                  <span style="color: var(--muted); font-size: 0.85rem;">
-                    Ingredientes: ${(s.ingredientes || []).join(", ")}
-                  </span>
-                </div>
-                <div class="btn-row" style="margin-top: 0;">
-                  <button class="secondary" onclick="prepararEdicaoSabor('${nome.replace(/'/g, "\'")}')" type="button">Editar</button>
-                  <button class="danger" onclick="excluirSabor('${nome.replace(/'/g, "\'")}')" type="button">Excluir</button>
-                </div>
-              </div>
-            </div>
-          `;
-        })
-        .join("");
-    }
-
-    function prepararEdicaoSabor(nome) {
-      const s = SABORES[nome];
-      if (!s) return;
-      document.getElementById("saborEditandoOriginal").value = nome;
-      document.getElementById("cadNomeSabor").value = nome;
-      document.getElementById("cadPrecoBrotinho").value = s.brotinho;
-      document.getElementById("cadPrecoGrande").value = s.grande;
-      document.getElementById("cadIngredientes").value = (s.ingredientes || []).join(", ");
-    }
-
-    function limparFormSabor() {
-      document.getElementById("saborEditandoOriginal").value = "";
-      document.getElementById("cadNomeSabor").value = "";
-      document.getElementById("cadPrecoBrotinho").value = "";
-      document.getElementById("cadPrecoGrande").value = "";
-      document.getElementById("cadIngredientes").value = "";
-    }
-
-    function excluirSabor(nome) {
-      if (!confirm(`Excluir o sabor "${nome}"?`)) return;
-      delete SABORES[nome];
-      salvarSaboresStorage();
-      carregarSabores();
-      renderizarListaSabores();
-    }
-
-    /* GESTÃO DE CLIENTES */
-    function salvarClienteBase(dados) {
-      if (!dados.nome) {
-        alert("Informe o nome do cliente.");
-        return;
-      }
-
-      if (dados.id) {
-        const idx = clientesBase.findIndex((c) => c.id === dados.id);
-        if (idx >= 0) {
-          clientesBase[idx] = { ...clientesBase[idx], ...dados };
-        }
-      } else {
-        const existente = clientesBase.find(
-          (c) => c.nome.toLowerCase() === dados.nome.toLowerCase()
-        );
-        if (existente) {
-          Object.assign(existente, dados, { id: existente.id });
-        } else {
-          clientesBase.unshift({
-            id: "CLI-" + Date.now(),
-            ...dados
-          });
-        }
-      }
-
-      salvarClientes();
-      renderizarClientes();
-    }
-
-    function usarClienteNoPedido(id) {
-      const cli = clientesBase.find((c) => c.id === id);
-      if (!cli) return;
-
-      document.getElementById("nome").value = cli.nome || "";
-      document.getElementById("telefone").value = cli.telefone || "";
-      document.getElementById("cep").value = cli.cep || "";
-      document.getElementById("numero").value = cli.numero || "";
-      document.getElementById("endereco").value = cli.endereco || "";
-      document.getElementById("observacao").value = cli.observacao || "";
-
-      calcularTaxaEntrega();
-      mudarAba("pedido");
-    }
-
-    function editarClienteBase(id) {
-      const cli = clientesBase.find((c) => c.id === id);
-      if (!cli) return;
-
-      document.getElementById("clienteEditId").value = cli.id;
-      document.getElementById("cliNome").value = cli.nome || "";
-      document.getElementById("cliTelefone").value = cli.telefone || "";
-      document.getElementById("cliCep").value = cli.cep || "";
-      document.getElementById("cliNumero").value = cli.numero || "";
-      document.getElementById("cliEndereco").value = cli.endereco || "";
-      document.getElementById("cliObs").value = cli.observacao || "";
-    }
-
-    function excluirClienteBase(id) {
-      if (!confirm("Deseja remover este cliente?")) return;
-      clientesBase = clientesBase.filter((c) => c.id !== id);
-      salvarClientes();
-      renderizarClientes();
-    }
-
-    function renderizarClientes() {
-      const container = document.getElementById("listaClientes");
-      const termo = (document.getElementById("buscaCliente").value || "").toLowerCase().trim();
-
-      const filtrados = clientesBase.filter((c) => {
-        if (!termo) return true;
-        return (
-          (c.nome || "").toLowerCase().includes(termo) ||
-          (c.telefone || "").toLowerCase().includes(termo) ||
-          (c.endereco || "").toLowerCase().includes(termo)
-        );
-      });
-
-      if (!filtrados.length) {
-        container.innerHTML = '<p style="color: var(--muted);">Nenhum cliente encontrado.</p>';
-        return;
-      }
-
-      container.innerHTML = filtrados
-        .map(
-          (c) => `
-          <div class="list-card">
-            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-              <div>
-                <strong>${c.nome}</strong> ${c.telefone ? `• ${c.telefone}` : ""}<br />
-                <span style="color: var(--muted); font-size: 0.85rem;">
-                  ${c.endereco || ""} ${c.numero ? "nº " + c.numero : ""} ${c.cep ? "• CEP " + c.cep : ""}
-                </span>
-                ${c.observacao ? `<br /><span style="color: var(--gold); font-size: 0.82rem;">Obs: ${c.observacao}</span>` : ""}
-              </div>
-              <div class="btn-row" style="margin-top: 0;">
-                <button class="gold" onclick="usarClienteNoPedido('${c.id}')" type="button">Usar no Pedido</button>
-                <button class="secondary" onclick="editarClienteBase('${c.id}')" type="button">Editar</button>
-                <button class="danger" onclick="excluirClienteBase('${c.id}')" type="button">Excluir</button>
-              </div>
-            </div>
-          </div>
-        `
-        )
-        .join("");
-    }
-
-    /* HISTÓRICO & CAIXA */
-    function alternarStatusPedido(index) {
-      const ordem = ["Aberto", "Em Preparo", "Saiu para Entrega", "Concluído"];
-      const atual = historicoPedidos[index].status || "Aberto";
-      const prox = ordem[(ordem.indexOf(atual) + 1) % ordem.length];
-      historicoPedidos[index].status = prox;
-      salvarHistorico();
-      renderizarHistorico();
-    popularDatalistRuas();
-    }
-
-    function renderizarHistorico() {
-      const container = document.getElementById("listaHistorico");
-      const termo = (document.getElementById("buscaHistorico").value || "").toLowerCase().trim();
-
-      let soma = 0;
-      historicoPedidos.forEach((p) => {
-        const val = Number(String(p.total || 0).replace(",", "."));
-        if (!isNaN(val)) soma += val;
-      });
-
-      const qtd = historicoPedidos.length;
-      const ticket = qtd > 0 ? soma / qtd : 0;
-
-      document.getElementById("kpiQtdPedidos").innerText = qtd;
-      document.getElementById("kpiFaturamento").innerText = soma.toFixed(2);
-      document.getElementById("kpiTicketMedio").innerText = ticket.toFixed(2);
-
-      const filtrados = historicoPedidos
-        .map((p, idx) => ({ p, idx }))
-        .filter(({ p }) => {
-          if (!termo) return true;
-          return (
-            (p.numero || "").toLowerCase().includes(termo) ||
-            (p.cliente || "").toLowerCase().includes(termo) ||
-            (p.status || "").toLowerCase().includes(termo)
-          );
-        });
-
-      if (!filtrados.length) {
-        container.innerHTML = '<p style="color: var(--muted);">Nenhum pedido registrado no histórico.</p>';
-        return;
-      }
-
-      container.innerHTML = filtrados
-        .map(
-          ({ p, idx }) => `
-          <div class="list-card">
-            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-              <div>
-                <strong>${p.numero || "KV"}</strong> • <span class="status-pill">${p.status || "Aberto"}</span><br />
-                <span style="font-size: 0.9rem;">Cliente: ${p.cliente || "Não informado"} ${p.telefone ? "• " + p.telefone : ""}</span><br />
-                <span style="color: var(--muted); font-size: 0.82rem;">${p.data || ""}</span>
-              </div>
-              <div style="text-align: right;">
-                <strong style="color: var(--gold); font-size: 1.05rem;">R$ ${Number(p.total || 0).toFixed(2)}</strong><br />
-                <button class="secondary" style="margin-top: 6px;" onclick="alternarStatusPedido(${idx})" type="button">
-                  Mudar Status
-                </button>
-              </div>
-            </div>
-          </div>
-        `
-        )
-        .join("");
-    }
-
-    /* EXPORTAÇÃO CSV & BACKUP JSON */
-    function baixarCSV(nomeArquivo, linhas) {
-      const csv = linhas
-        .map((linha) =>
-          linha.map((campo) => `"${String(campo ?? "").replace(/"/g, '""')}"`).join(";")
-        )
-        .join("\n");
-
-      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = nomeArquivo;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function mudarAba(tabName) {
-      document.querySelectorAll(".nav-tab").forEach((btn) => {
-        btn.classList.toggle("active", btn.dataset.tab === tabName);
-      });
-      document.querySelectorAll(".tab-panel").forEach((panel) => {
-        panel.classList.toggle("active", panel.id === "tab-" + tabName);
-      });
-    }
-
-    /* EVENTOS */
-    document.querySelectorAll(".nav-tab").forEach((btn) => {
-      btn.addEventListener("click", () => mudarAba(btn.dataset.tab));
-    });
-
-    document.getElementById("tamanho").addEventListener("change", carregarSabores);
-    document.getElementById("tipoPizza").addEventListener("change", atualizarVisualPedido);
-    document.getElementById("sabor1").addEventListener("change", atualizarPreviewIngredientes);
-    document.getElementById("sabor2").addEventListener("change", atualizarPreviewIngredientes);
-
-    document.getElementById("btnAdicionarPizza").addEventListener("click", function () {
-      const tamanho = document.getElementById("tamanho").value;
-      const tipo = document.getElementById("tipoPizza").value;
-      const sabor1 = document.getElementById("sabor1").value;
-      const sabor2 = document.getElementById("sabor2").value;
-
-      if (!sabor1 || !SABORES[sabor1]) {
-        alert("Selecione o Sabor 1.");
-        return;
-      }
-
-      let descricao = "";
-      let valor = 0;
-      let ingredientes = "";
-
-      if (tamanho === "brotinho") {
-        descricao = "Brotinho 25cm - " + sabor1;
-        valor = Number(SABORES[sabor1].brotinho);
-        ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
-      } else if (tipo === "meio") {
-        if (!sabor2 || !SABORES[sabor2]) {
-          alert("Selecione o Sabor 2 para pizza Meio a Meio.");
-          return;
-        }
-        descricao = "Grande 35cm Meio a Meio - " + sabor1 + " / " + sabor2;
-        valor = Math.max(Number(SABORES[sabor1].grande), Number(SABORES[sabor2].grande));
-        ingredientes =
-          "50% " + sabor1 + ": " + (SABORES[sabor1].ingredientes || []).join(", ") +
-          " | 50% " + sabor2 + ": " + (SABORES[sabor2].ingredientes || []).join(", ");
-      } else {
-        descricao = "Grande 35cm - " + sabor1;
-        valor = Number(SABORES[sabor1].grande);
-        ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
-      }
-
-      const adicionalEl = document.getElementById("adicional");
-      const valorAdicional = Number(adicionalEl.value) || 0;
-      const nomeAdicional = adicionalEl.options[adicionalEl.selectedIndex].text;
-      const obsPizza = document.getElementById("obsPizza").value.trim();
-
-      adicionarItem({
-        descricao: valorAdicional > 0 ? descricao + " + " + nomeAdicional : descricao,
-        valor: valor + valorAdicional,
-        ingredientes,
-        adicionais: valorAdicional > 0 ? [nomeAdicional] : [],
-        observacao: obsPizza
-      });
-
-      adicionalEl.selectedIndex = 0;
-      document.getElementById("obsPizza").value = "";
-    });
-
-    document.getElementById("btnAdicionarBebida").addEventListener("click", function () {
-      const bebidaEl = document.getElementById("bebida");
-      if (!bebidaEl.value) return;
-
-      adicionarItem({
-        descricao: bebidaEl.options[bebidaEl.selectedIndex].text,
-        valor: Number(bebidaEl.value),
-        ingredientes: ""
-      });
-    });
-
-    document.getElementById("btnWhatsApp").addEventListener("click", function () {
-      sincronizarDadosClientePedido();
-      enviarWhatsApp(pedidoAtual);
-    });
-
-    document.getElementById("btnRegistrarHistorico").addEventListener("click", function () {
-      if (!pedidoAtual.itens.length) {
-        alert("Adicione ao menos um item antes de registrar.");
-        return;
-      }
-      sincronizarDadosClientePedido();
-      const copia = JSON.parse(JSON.stringify(pedidoAtual));
-      registrarPedido(copia);
-      alert("Pedido " + copia.numero + " registrado no histórico!");
-    });
-
-    document.getElementById("cep").addEventListener("blur", async function () {
-      await buscarCEP();
-      calcularTaxaEntrega();
-    });
-
-    document.getElementById("btnImportarWhats").addEventListener("click", importarPedidoWhats);
-
-    document.getElementById("btnSalvarClienteRapido").addEventListener("click", function () {
-      salvarClienteBase({
-        nome: document.getElementById("nome").value.trim(),
-        telefone: document.getElementById("telefone").value.trim(),
-        cep: document.getElementById("cep").value.trim(),
-        numero: document.getElementById("numero").value.trim(),
-        endereco: document.getElementById("endereco").value.trim(),
-        observacao: document.getElementById("observacao").value.trim()
-      });
-      alert("Cliente salvo na base!");
-    });
-
-    document.getElementById("btnSalvarSabor").addEventListener("click", function () {
-      const original = document.getElementById("saborEditandoOriginal").value.trim();
-      const nome = document.getElementById("cadNomeSabor").value.trim();
-      const brotinho = Number(document.getElementById("cadPrecoBrotinho").value);
-      const grande = Number(document.getElementById("cadPrecoGrande").value);
-      const ingredientes = document
-        .getElementById("cadIngredientes")
-        .value.split(",")
-        .map((i) => i.trim())
-        .filter(Boolean);
-
-      if (!nome || isNaN(brotinho) || isNaN(grande)) {
-        alert("Preencha o nome do sabor e os preços de Brotinho e Grande.");
-        return;
-      }
-
-      if (original && original !== nome && SABORES[original]) {
-        delete SABORES[original];
-      }
-
-      SABORES[nome] = {
-        brotinho,
-        grande,
-        ingredientes: ingredientes.length ? ingredientes : ["Molho", "Muçarela", "Orégano"]
-      };
-
-      salvarSaboresStorage();
-      carregarSabores();
-      renderizarListaSabores();
-      limparFormSabor();
-      alert("Sabor salvo com sucesso!");
-    });
-
-    document.getElementById("btnCancelarEdicaoSabor").addEventListener("click", limparFormSabor);
-
-    document.getElementById("btnRestaurarSabores").addEventListener("click", function () {
-      if (!confirm("Restaurar os 13 sabores padrão da King Ventura?")) return;
-      SABORES = JSON.parse(JSON.stringify(SABORES_PADRAO));
-      salvarSaboresStorage();
-      carregarSabores();
-      renderizarListaSabores();
-      limparFormSabor();
-    });
-
-    document.getElementById("btnSalvarCliente").addEventListener("click", function () {
-      salvarClienteBase({
-        id: document.getElementById("clienteEditId").value.trim(),
-        nome: document.getElementById("cliNome").value.trim(),
-        telefone: document.getElementById("cliTelefone").value.trim(),
-        cep: document.getElementById("cliCep").value.trim(),
-        numero: document.getElementById("cliNumero").value.trim(),
-        endereco: document.getElementById("cliEndereco").value.trim(),
-        observacao: document.getElementById("cliObs").value.trim()
-      });
-
-      document.getElementById("clienteEditId").value = "";
-      document.getElementById("cliNome").value = "";
-      document.getElementById("cliTelefone").value = "";
-      document.getElementById("cliCep").value = "";
-      document.getElementById("cliNumero").value = "";
-      document.getElementById("cliEndereco").value = "";
-      document.getElementById("cliObs").value = "";
-      alert("Cliente salvo!");
-    });
-
-    document.getElementById("btnLimparClienteForm").addEventListener("click", function () {
-      document.getElementById("clienteEditId").value = "";
-      document.getElementById("cliNome").value = "";
-      document.getElementById("cliTelefone").value = "";
-      document.getElementById("cliCep").value = "";
-      document.getElementById("cliNumero").value = "";
-      document.getElementById("cliEndereco").value = "";
-      document.getElementById("cliObs").value = "";
-    });
-
-    document.getElementById("buscaCliente").addEventListener("input", renderizarClientes);
-    document.getElementById("buscaHistorico").addEventListener("input", renderizarHistorico);
-
-    document.getElementById("btnExportarPedidosCSV").addEventListener("click", function () {
-      const linhas = [
-        ["Numero", "Data", "Status", "Cliente", "Telefone", "Endereco", "TaxaEntrega", "Total"],
-        ...historicoPedidos.map((p) => [
-          p.numero || "",
-          p.data || "",
-          p.status || "Aberto",
-          p.cliente || "",
-          p.telefone || "",
-          `${p.endereco || ""} ${p.numeroCasa || ""}`.trim(),
-          Number(p.taxaEntrega || 0).toFixed(2).replace(".", ","),
-          Number(p.total || 0).toFixed(2).replace(".", ",")
-        ])
-      ];
-      baixarCSV("king-ventura-pedidos.csv", linhas);
-    });
-
-    document.getElementById("btnExportarSaboresCSV").addEventListener("click", function () {
-      const linhas = [
-        ["Sabor", "Brotinho25cm", "Grande35cm", "Ingredientes"],
-        ...Object.keys(SABORES).map((nome) => [
-          nome,
-          Number(SABORES[nome].brotinho).toFixed(2).replace(".", ","),
-          Number(SABORES[nome].grande).toFixed(2).replace(".", ","),
-          (SABORES[nome].ingredientes || []).join(", ")
-        ])
-      ];
-      baixarCSV("king-ventura-sabores.csv", linhas);
-    });
-
-    document.getElementById("btnExportarClientesCSV").addEventListener("click", function () {
-      const linhas = [
-        ["Nome", "Telefone", "CEP", "Numero", "Endereco", "Observacao"],
-        ...clientesBase.map((c) => [
-          c.nome || "",
-          c.telefone || "",
-          c.cep || "",
-          c.numero || "",
-          c.endereco || "",
-          c.observacao || ""
-        ])
-      ];
-      baixarCSV("king-ventura-clientes.csv", linhas);
-    });
-
-    document.getElementById("btnExportarBackup").addEventListener("click", function () {
-      const payload = {
-        sistema: "KING VENTURA PIZZARIA",
-        versao: "V7.2 REBUILD",
-        exportadoEm: new Date().toISOString(),
-        ultimoPedido: Number(localStorage.getItem("ultimoPedido") || 0),
-        sabores: SABORES,
-        clientes: clientesBase,
-        historicoPedidos
-      };
-      const jsonStr = JSON.stringify(payload, null, 2);
-      document.getElementById("inputBackupJson").value = jsonStr;
-
-      const blob = new Blob([jsonStr], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "king-ventura-backup.json";
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-
-    document.getElementById("fileBackupJson").addEventListener("change", function (e) {
-      const arquivo = e.target.files && e.target.files[0];
-      if (!arquivo) return;
-      const leitor = new FileReader();
-      leitor.onload = function (ev) {
-        document.getElementById("inputBackupJson").value = ev.target.result || "";
-      };
-      leitor.readAsText(arquivo);
-    });
-
-    document.getElementById("btnImportarBackup").addEventListener("click", function () {
-      const raw = document.getElementById("inputBackupJson").value.trim();
-      if (!raw) {
-        alert("Cole ou carregue um JSON de backup primeiro.");
-        return;
-      }
-
-      try {
-        const dados = JSON.parse(raw);
-        if (dados.sabores && typeof dados.sabores === "object") {
-          SABORES = dados.sabores;
-          salvarSaboresStorage();
-        }
-        if (Array.isArray(dados.clientes)) {
-          clientesBase = dados.clientes;
-          salvarClientes();
-        }
-        if (Array.isArray(dados.historicoPedidos)) {
-          historicoPedidos = dados.historicoPedidos;
-          salvarHistorico();
-        }
-        if (typeof dados.ultimoPedido === "number") {
-          localStorage.setItem("ultimoPedido", String(dados.ultimoPedido));
-        }
-
-        carregarSabores();
-        renderizarListaSabores();
-        renderizarClientes();
-        renderizarHistorico();
-    popularDatalistRuas();
-        inicializarPedido();
-        atualizarCarrinho();
-        alert("Backup restaurado com sucesso!");
-      } catch (err) {
-        alert("JSON inválido: " + err.message);
-      }
-    });
-
-    document.getElementById("endereco").addEventListener("blur", buscarCEPPorRua);
-    document.getElementById("endereco").addEventListener("change", buscarCEPPorRua);
-
-    /* INICIALIZAÇÃO */
-    carregarSaboresStorage();
-    carregarHistorico();
-    carregarClientes();
-    inicializarPedido();
-    carregarSabores();
-    atualizarCarrinho();
-    renderizarListaSabores();
-    renderizarClientes();
-    renderizarHistorico();
-    popularDatalistRuas();
-  </script>
-</body>
-</html>
+      mensagem += "Status: " + normalizarStatusPedido(pedido.status || pedidoAtual.status || "Gerado") + "\n";
