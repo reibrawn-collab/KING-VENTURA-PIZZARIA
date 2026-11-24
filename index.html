@@ -952,13 +952,37 @@
     const ORS_PROFILE = "driving-car";
     const ORS_CHAVE_LOCAL = "kv_ors_key";
 
-    // Coordenadas do ponto de partida — Rua Delamare, 129
+    // Coordenadas do ponto de partida — Rua Delamare, 129, CEP 79097-240.
+    // Valor de referencia: se estiver errado, o sistema corrige sozinho
+    // buscando pelo CEP na primeira rota calculada (ver obterOrigemReal()).
     const ORIGEM_COORDS = {
-      lat: -20.4941,
-      lng: -54.5885,
+      lat: -20.5440728,
+      lng: -54.6727293,
       endereco: "Rua Delamare, 129 - Jardim Tarumã, Campo Grande - MS",
       cep: "79097-240"
     };
+
+    const ORIGEM_CACHE_LOCAL = "kv_origem_coords";
+
+    // Descobre a posicao da pizzaria pelo CEP e guarda no aparelho.
+    // Se o CEP nao responder, usa as coordenadas de referencia acima.
+    async function obterOrigemReal() {
+      const salvo = localStorage.getItem(ORIGEM_CACHE_LOCAL);
+      if (salvo) {
+        try {
+          const c = JSON.parse(salvo);
+          if (c && c.lat && c.lng) return c;
+        } catch (e) {}
+      }
+      try {
+        const achado = await geocodificar(ORIGEM_COORDS.endereco);
+        const coords = { lat: achado.lat, lng: achado.lng };
+        localStorage.setItem(ORIGEM_CACHE_LOCAL, JSON.stringify(coords));
+        return coords;
+      } catch (e) {
+        return { lat: ORIGEM_COORDS.lat, lng: ORIGEM_COORDS.lng };
+      }
+    }
 
     // Bairros com entrega grátis, custe o que custar em km.
     const BAIRROS_ENTREGA_GRATIS = [
@@ -2423,10 +2447,12 @@
       const chave = obterChaveRota();
       if (!chave) throw new Error("Cadastre a chave da API na aba Rotas do Entregador.");
 
+      const origem = await obterOrigemReal();
+
       const url = ORS_ENDPOINT + "/v2/directions/" + ORS_PROFILE + "/geojson";
       const corpo = {
         coordinates: [
-          [ORIGEM_COORDS.lng, ORIGEM_COORDS.lat],
+          [origem.lng, origem.lat],
           [lng, lat]
         ],
         units: "km"
@@ -2487,8 +2513,9 @@
         const dentro = dentroDaAreaDeEntrega(rota.distanciaKm);
         const taxa = dentro ? calcularTaxaPorDistancia(rota.distanciaKm) : null;
 
+        const origemUsada = await obterOrigemReal();
         const linkMapa = "https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=" +
-          ORIGEM_COORDS.lat + "%2C" + ORIGEM_COORDS.lng + "%3B" + ponto.lat + "%2C" + ponto.lng;
+          origemUsada.lat + "%2C" + origemUsada.lng + "%3B" + ponto.lat + "%2C" + ponto.lng;
 
         box.innerHTML = `
           <div class="summary-line"><span>Cliente</span><span>${cliente ? cliente : "—"}</span></div>
