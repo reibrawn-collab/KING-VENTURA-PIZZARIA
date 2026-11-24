@@ -1791,3 +1791,220 @@
         nome: document.getElementById("nome").value.trim(),
         telefone: document.getElementById("telefone").value.trim(),
         cep: document.getElementById("cep").value.trim(),
+        numero: document.getElementById("numero").value.trim(),
+        endereco: document.getElementById("endereco").value.trim(),
+        observacao: document.getElementById("observacao").value.trim()
+      });
+      alert("Cliente salvo na base!");
+    });
+
+    document.getElementById("btnSalvarSabor").addEventListener("click", function () {
+      const original = document.getElementById("saborEditandoOriginal").value.trim();
+      const nome = document.getElementById("cadNomeSabor").value.trim();
+      const brotinho = Number(document.getElementById("cadPrecoBrotinho").value);
+      const grande = Number(document.getElementById("cadPrecoGrande").value);
+      const ingredientes = document
+        .getElementById("cadIngredientes")
+        .value.split(",")
+        .map((i) => i.trim())
+        .filter(Boolean);
+
+      if (!nome || isNaN(brotinho) || isNaN(grande)) {
+        alert("Preencha o nome do sabor e os preços de Brotinho e Grande.");
+        return;
+      }
+
+      if (original && original !== nome && SABORES[original]) {
+        delete SABORES[original];
+      }
+
+      SABORES[nome] = {
+        brotinho,
+        grande,
+        ingredientes: ingredientes.length ? ingredientes : ["Molho", "Muçarela", "Orégano"]
+      };
+
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+      limparFormSabor();
+      alert("Sabor salvo com sucesso!");
+    });
+
+    document.getElementById("btnCancelarEdicaoSabor").addEventListener("click", limparFormSabor);
+
+    document.getElementById("btnRestaurarSabores").addEventListener("click", function () {
+      if (!confirm("Restaurar os 13 sabores padrão da King Ventura?")) return;
+      SABORES = JSON.parse(JSON.stringify(SABORES_PADRAO));
+      salvarSaboresStorage();
+      carregarSabores();
+      renderizarListaSabores();
+      limparFormSabor();
+    });
+
+    document.getElementById("btnSalvarCliente").addEventListener("click", function () {
+      salvarClienteBase({
+        id: document.getElementById("clienteEditId").value.trim(),
+        nome: document.getElementById("cliNome").value.trim(),
+        telefone: document.getElementById("cliTelefone").value.trim(),
+        cep: document.getElementById("cliCep").value.trim(),
+        numero: document.getElementById("cliNumero").value.trim(),
+        endereco: document.getElementById("cliEndereco").value.trim(),
+        observacao: document.getElementById("cliObs").value.trim()
+      });
+
+      document.getElementById("clienteEditId").value = "";
+      document.getElementById("cliNome").value = "";
+      document.getElementById("cliTelefone").value = "";
+      document.getElementById("cliCep").value = "";
+      document.getElementById("cliNumero").value = "";
+      document.getElementById("cliEndereco").value = "";
+      document.getElementById("cliObs").value = "";
+      alert("Cliente salvo!");
+    });
+
+    document.getElementById("btnLimparClienteForm").addEventListener("click", function () {
+      document.getElementById("clienteEditId").value = "";
+      document.getElementById("cliNome").value = "";
+      document.getElementById("cliTelefone").value = "";
+      document.getElementById("cliCep").value = "";
+      document.getElementById("cliNumero").value = "";
+      document.getElementById("cliEndereco").value = "";
+      document.getElementById("cliObs").value = "";
+    });
+
+    document.getElementById("buscaCliente").addEventListener("input", renderizarClientes);
+    document.getElementById("buscaHistorico").addEventListener("input", renderizarHistorico);
+
+    document.getElementById("btnExportarPedidosCSV").addEventListener("click", function () {
+      const linhas = [
+        ["Numero", "Data", "Status", "Cliente", "Telefone", "Endereco", "TaxaEntrega", "Total"],
+        ...historicoPedidos.map((p) => [
+          p.numero || "",
+          p.data || "",
+          normalizarStatusPedido(p.status),
+          p.cliente || "",
+          p.telefone || "",
+          `${p.endereco || ""} ${p.numeroCasa || ""}`.trim(),
+          Number(p.taxaEntrega || 0).toFixed(2).replace(".", ","),
+          Number(p.total || 0).toFixed(2).replace(".", ",")
+        ])
+      ];
+      baixarCSV("king-ventura-pedidos.csv", linhas);
+    });
+
+    document.getElementById("btnExportarSaboresCSV").addEventListener("click", function () {
+      const linhas = [
+        ["Sabor", "Brotinho25cm", "Grande35cm", "Ingredientes"],
+        ...Object.keys(SABORES).map((nome) => [
+          nome,
+          Number(SABORES[nome].brotinho).toFixed(2).replace(".", ","),
+          Number(SABORES[nome].grande).toFixed(2).replace(".", ","),
+          (SABORES[nome].ingredientes || []).join(", ")
+        ])
+      ];
+      baixarCSV("king-ventura-sabores.csv", linhas);
+    });
+
+    document.getElementById("btnExportarClientesCSV").addEventListener("click", function () {
+      const linhas = [
+        ["Nome", "Telefone", "CEP", "Numero", "Endereco", "Observacao"],
+        ...clientesBase.map((c) => [
+          c.nome || "",
+          c.telefone || "",
+          c.cep || "",
+          c.numero || "",
+          c.endereco || "",
+          c.observacao || ""
+        ])
+      ];
+      baixarCSV("king-ventura-clientes.csv", linhas);
+    });
+
+    document.getElementById("btnExportarBackup").addEventListener("click", function () {
+      const payload = {
+        sistema: "KING VENTURA PIZZARIA",
+        versao: "V7.2 REBUILD",
+        exportadoEm: new Date().toISOString(),
+        ultimoPedido: Number(localStorage.getItem("ultimoPedido") || 0),
+        sabores: SABORES,
+        clientes: clientesBase,
+        historicoPedidos
+      };
+      const jsonStr = JSON.stringify(payload, null, 2);
+      document.getElementById("inputBackupJson").value = jsonStr;
+
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "king-ventura-backup.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById("fileBackupJson").addEventListener("change", function (e) {
+      const arquivo = e.target.files && e.target.files[0];
+      if (!arquivo) return;
+      const leitor = new FileReader();
+      leitor.onload = function (ev) {
+        document.getElementById("inputBackupJson").value = ev.target.result || "";
+      };
+      leitor.readAsText(arquivo);
+    });
+
+    document.getElementById("btnImportarBackup").addEventListener("click", function () {
+      const raw = document.getElementById("inputBackupJson").value.trim();
+      if (!raw) {
+        alert("Cole ou carregue um JSON de backup primeiro.");
+        return;
+      }
+
+      try {
+        const dados = JSON.parse(raw);
+        if (dados.sabores && typeof dados.sabores === "object") {
+          SABORES = dados.sabores;
+          salvarSaboresStorage();
+        }
+        if (Array.isArray(dados.clientes)) {
+          clientesBase = dados.clientes;
+          salvarClientes();
+        }
+        if (Array.isArray(dados.historicoPedidos)) {
+          historicoPedidos = dados.historicoPedidos;
+          salvarHistorico();
+        }
+        if (typeof dados.ultimoPedido === "number") {
+          localStorage.setItem("ultimoPedido", String(dados.ultimoPedido));
+        }
+
+        carregarSabores();
+        renderizarListaSabores();
+        renderizarClientes();
+        renderizarHistorico();
+        popularDatalistRuas();
+        inicializarPedido();
+        atualizarCarrinho();
+        alert("Backup restaurado com sucesso!");
+      } catch (err) {
+        alert("JSON inválido: " + err.message);
+      }
+    });
+
+    document.getElementById("endereco").addEventListener("blur", buscarCEPPorRua);
+    document.getElementById("endereco").addEventListener("change", buscarCEPPorRua);
+
+    /* INICIALIZAÇÃO */
+    carregarSaboresStorage();
+    carregarHistorico();
+    carregarClientes();
+    inicializarPedido();
+    carregarSabores();
+    atualizarCarrinho();
+    renderizarListaSabores();
+    renderizarClientes();
+    renderizarHistorico();
+    popularDatalistRuas();
+  </script>
+</body>
+</html>
