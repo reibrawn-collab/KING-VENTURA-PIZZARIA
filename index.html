@@ -1386,19 +1386,24 @@
         return;
       }
 
-      // 3) distancia real pela API de rotas (espera o endereco ficar completo)
+      // 3) distancia real pela API de rotas, a partir do CEP e do numero
       const enderecoEl = document.getElementById("endereco");
       const numeroEl = document.getElementById("numero");
       const endereco = (enderecoEl ? enderecoEl.value : "").trim();
       const numero = (numeroEl ? numeroEl.value : "").trim();
 
-      if (!endereco || endereco.length < 5) {
+      let completo = "";
+      if (cep.length === 8) {
+        // com CEP, a busca fica precisa e nao depende da rua estar preenchida
+        completo = endereco + (numero ? ", " + numero : "") + ", CEP " + cep + ", Campo Grande - MS";
+      } else if (endereco.length >= 5) {
+        completo = [endereco, numero].filter(Boolean).join(", ");
+      } else {
         document.getElementById("mensagemEntrega").innerHTML =
-          "Informe o endereço para calcular a taxa de entrega.";
+          "Informe o CEP ou o endereço para calcular a taxa de entrega.";
         return;
       }
 
-      const completo = [endereco, numero].filter(Boolean).join(", ");
       const assinatura = completo.toLowerCase();
       if (assinatura === ultimaTaxaBuscada) return;
 
@@ -2099,6 +2104,7 @@
                 <div class="btn-row" style="margin-top: 6px; justify-content: flex-end;">
                   <button class="secondary" onclick="alternarStatusPedido(${idx})" type="button">Próxima Etapa</button>
                   <button class="gold" onclick="editarPedidoHistorico(${idx})" type="button">✏️ Editar Itens</button>
+                  <button class="danger" onclick="excluirPedidoHistorico(${idx})" type="button">🗑️ Excluir Pedido</button>
                 </div>
               </div>
             </div>
@@ -2114,6 +2120,26 @@
 
     /* ===== EDITAR ITENS DO PEDIDO NO HISTORICO ===== */
     let indiceEditandoPedido = -1;
+
+    function excluirPedidoHistorico(indice) {
+      const p = historicoPedidos[indice];
+      if (!p) return;
+
+      const resumo = (p.numero || "KV") + " — " + (p.cliente || "sem nome") +
+        " — R$ " + Number(p.total || 0).toFixed(2);
+      if (!confirm("Excluir este pedido do histórico?\n\n" + resumo +
+        "\n\nEle sai do caixa, do faturamento e do ticket médio.")) return;
+
+      historicoPedidos.splice(indice, 1);
+      salvarHistorico();
+
+      // se estava editando justamente este pedido, fecha o painel
+      if (indiceEditandoPedido === indice) fecharEdicaoPedido();
+      else if (indiceEditandoPedido > indice) indiceEditandoPedido--;
+
+      renderizarHistorico();
+      popularDatalistRuas();
+    }
 
     function editarPedidoHistorico(indice) {
       const p = historicoPedidos[indice];
@@ -2458,6 +2484,7 @@
       if (numeros.length === 8) {
         campoCepPedido.value = numeros.slice(0, 5) + "-" + numeros.slice(5);
         buscarCEP();
+        ultimaTaxaBuscada = "";   // CEP novo: libera nova consulta de distancia
       }
       calcularTaxaEntrega();
     });
