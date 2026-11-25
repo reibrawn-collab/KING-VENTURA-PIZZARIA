@@ -1750,7 +1750,7 @@
 
 function imprimirCupomTermico() {
   sincronizarDadosClientePedido();
-  const pedido = pedidoAtual;  // seu pedido atual com tudo preenchido
+  const pedido = pedidoAtual;
   const texto = `
 KING VENTURA PIZZARIA
 Cliente: ${pedido.cliente || ""}
@@ -1766,7 +1766,7 @@ ${(pedido.itens || []).map(i =>
 Taxa de Entrega: R$ ${Number(pedido.taxaEntrega || 0).toFixed(2)}
 Total: R$ ${Number(pedido.total || 0).toFixed(2)}
 `;
-  // Abre nova janela só com o conteúdo do cupom
+  
   const janela = window.open("", "_blank", "width=300,height=600");
   if (!janela) {
     alert("Autorize pop-ups para impressão.");
@@ -1784,16 +1784,17 @@ Total: R$ ${Number(pedido.total || 0).toFixed(2)}
       <body>
         <pre>${texto}</pre>
         <script>
-          window.onload = function() {
+          window.onload = () => {
             window.print();
-            window.onafterprint = function() { window.close(); };
-          }
-        </script>
+            window.onafterprint = () => window.close();
+          };
+        <\/script>
       </body>
     </html>
   `);
   janela.document.close();
 }
+
 
     function sincronizarDadosClientePedido() {
       pedidoAtual.cliente = document.getElementById("nome").value.trim();
