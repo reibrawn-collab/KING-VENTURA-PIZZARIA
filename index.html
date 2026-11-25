@@ -1753,31 +1753,29 @@
 
 function imprimirCupomTermico() {
   sincronizarDadosClientePedido();
-  
   const texto = montarTextoPedido(pedidoAtual)
-    .replace("[KV-ITENS]", pedidoAtual.itens.map(i => 
+    .replace("[KV-ITENS]", pedidoAtual.itens.map(i =>
       `${i.descricao} - R$ ${Number(i.valor).toFixed(2)}${i.observacao ? " (Obs: " + i.observacao + ")" : ""}`
     ).join("\n"));
   const cupomDiv = document.getElementById("cupomTermico");
   cupomDiv.innerText = texto;
   cupomDiv.style.display = "block";
-  
   const bodyChildren = Array.from(document.body.children);
   bodyChildren.forEach(el => {
-    if(el.id !== "cupomTermico") {
+    if (el.id !== "cupomTermico") {
       el.style.display = "none";
     }
   });
-  
   window.print();
-  
-  // Após imprimir, restaurar a visibilidade original da página
-  cupomDiv.style.display = "none";
-  bodyChildren.forEach(el => {
-    if(el.id !== "cupomTermico") {
-      el.style.display = "";
-    }
-  });
+  // Em alguns navegadores é bom ter um pequeno delay pra evitar flicker
+  setTimeout(() => {
+    cupomDiv.style.display = "none";
+    bodyChildren.forEach(el => {
+      if (el.id !== "cupomTermico") {
+        el.style.display = "";
+      }
+    });
+  }, 500);
 }
 
 
