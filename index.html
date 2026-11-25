@@ -484,6 +484,7 @@
       <button class="nav-tab active" data-tab="pedido">🍕 Pedido</button>
       <button class="nav-tab" data-tab="sabores">📋 Sabores & Preços</button>
       <button class="nav-tab" data-tab="clientes">👤 Clientes</button>
+      <button id="btnVerCupom" class="gold" type="button">Ver Cupom para Imprimir</button>
       <button class="nav-tab" data-tab="historico">📊 Histórico & Caixa</button>
       <button class="nav-tab" data-tab="rotas">🛵 Rotas do Entregador</button>
       <button class="nav-tab" data-tab="relatorios">💾 Relatórios & Backup</button>
@@ -3296,6 +3297,11 @@ document.getElementById("btnAdicionarBebida").addEventListener("click", function
   });
   sel.value = "";
 })
+    document.getElementById("btnVerCupom").addEventListener("click", function () {
+  sincronizarDadosClientePedido(); // Atualiza pedidoAtual com os dados do formulário
+  localStorage.setItem("pedidoParaImprimir", JSON.stringify(pedidoAtual));
+  window.open("cupom.html", "_blank", "width=320,height=600");
+});
     /* INICIALIZAÇÃO */
     carregarSaboresStorage();
     carregarHistorico();
