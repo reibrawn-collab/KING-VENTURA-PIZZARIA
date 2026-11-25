@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cupom Térmico</title>
+  <style>
+    body { font-family: monospace; font-size: 14px; padding: 10px; }
+    pre { white-space: pre-wrap; }
+    button {
+      margin-top: 20px;
+      padding: 8px 14px;
+      font-size: 1rem;
+      background-color: #1b4f9c;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #145086;
+    }
+  </style>
+</head>
+<body>
+  <pre id="cupom"></pre>
+  <button id="btnImprimir">Imprimir Cupom</button>
+  <script>
+    const pedido = JSON.parse(localStorage.getItem("pedidoParaImprimir") || "{}");
+    function montarTexto(p) {
+      let texto = "KING VENTURA PIZZARIA\n\n";
+      texto += `Cliente: ${p.cliente || ""}\n`;
+      texto += `Telefone: ${p.telefone || ""}\n`;
+      texto += `CEP: ${p.cep || ""}\n`;
+      texto += `Endereço: ${p.endereco || ""}\n`;
+      texto += `Número: ${p.numeroCasa || ""}\n`;
+      texto += `Observação: ${p.observacao || ""}\n\n`;
+      texto += "ITENS:\n";
+      (p.itens || []).forEach(i => {
+        texto += `${i.descricao} - R$ ${i.valor.toFixed(2)}${i.observacao ? " (Obs: " + i.observacao + ")" : ""}\n`;
+      });
+      texto += `\nTaxa de Entrega: R$ ${p.taxaEntrega.toFixed(2)}\n`;
+      texto += `TOTAL: R$ ${p.total.toFixed(2)}\n`;
+      return texto;
+    }
+    document.getElementById("cupom").innerText = montarTexto(pedido);
+    document.getElementById("btnImprimir").addEventListener("click", function () {
+      window.print();
+    });
+  </script>
+</body>
+</html>
