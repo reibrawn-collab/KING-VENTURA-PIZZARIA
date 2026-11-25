@@ -1753,48 +1753,32 @@
 
 function imprimirCupomTermico() {
   sincronizarDadosClientePedido();
-  const pedido = pedidoAtual;
-  const texto = `
-KING VENTURA PIZZARIA
-Cliente: ${pedido.cliente || ""}
-Telefone: ${pedido.telefone || ""}
-CEP: ${pedido.cep || ""}
-Endereço: ${pedido.endereco || ""}
-Número: ${pedido.numeroCasa || ""}
-Observação: ${pedido.observacao || ""}
-ITENS:
-${(pedido.itens || []).map(item => `${item.descricao} - R$ ${item.valor.toFixed(2)}${item.observacao ? " (Obs: " + item.observacao + ")" : ""}`).join("\n")}
-Taxa de Entrega: R$ ${pedido.taxaEntrega.toFixed(2)}
-TOTAL: R$ ${pedido.total.toFixed(2)}
-`;
-  const printWindow = window.open("", "PRINT", "width=320,height=600");
-  if (!printWindow) {
-    alert("Permita pop-ups para imprimir.");
-    return;
-  }
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Cupom Térmico</title>
-        <style>
-          body { font-family: monospace; font-size: 14px; padding: 10px; }
-          pre { white-space: pre-wrap; }
-        </style>
-      </head>
-      <body>
-        <pre>${texto}</pre>
-        <script>
-          window.onload = function() {
-            window.print();
-            window.onafterprint = window.close;
-          };
-        <\/script>
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
+  
+  const texto = montarTextoPedido(pedidoAtual)
+    .replace("[KV-ITENS]", pedidoAtual.itens.map(i => 
+      `${i.descricao} - R$ ${Number(i.valor).toFixed(2)}${i.observacao ? " (Obs: " + i.observacao + ")" : ""}`
+    ).join("\n"));
+  const cupomDiv = document.getElementById("cupomTermico");
+  cupomDiv.innerText = texto;
+  cupomDiv.style.display = "block";
+  
+  const bodyChildren = Array.from(document.body.children);
+  bodyChildren.forEach(el => {
+    if(el.id !== "cupomTermico") {
+      el.style.display = "none";
+    }
+  });
+  
+  window.print();
+  
+  // Após imprimir, restaurar a visibilidade original da página
+  cupomDiv.style.display = "none";
+  bodyChildren.forEach(el => {
+    if(el.id !== "cupomTermico") {
+      el.style.display = "";
+    }
+  });
 }
-
 
 
     function sincronizarDadosClientePedido() {
