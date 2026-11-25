@@ -2151,84 +2151,74 @@
     document.getElementById("sabor1").addEventListener("change", atualizarPreviewIngredientes);
     document.getElementById("sabor2").addEventListener("change", atualizarPreviewIngredientes);
 
-    document.getElementById("btnAdicionarPizza").addEventListener("click", function () {
-      if (this.disabled) return;          // evita clique duplo
-      this.disabled = true;
-      const botao = this;
-      setTimeout(function () { botao.disabled = false; }, 400);
-
-      const tamanho = document.getElementById("tamanho").value;
-      const tipo = document.getElementById("tipoPizza").value;
-      const sabor1 = document.getElementById("sabor1").value;
-      const sabor2 = document.getElementById("sabor2").value;
-
-      if (!sabor1 || !SABORES[sabor1]) {
-        alert("Selecione o Sabor 1.");
-        return;
-      }
-
-      let descricao = "";
-      let valor = 0;
-      let ingredientes = "";
-
-      if (tamanho === "brotinho") {
-        descricao = "Brotinho 25cm - " + sabor1;
-        valor = Number(SABORES[sabor1].brotinho);
-        ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
-      } else if (tipo === "meio") {
-        if (!sabor2 || !SABORES[sabor2]) {
-          alert("Selecione o Sabor 2 para pizza Meio a Meio.");
-          return;
-        }
-        descricao = "Grande 35cm Meio a Meio - " + sabor1 + " / " + sabor2;
-        valor = Math.max(Number(SABORES[sabor1].grande), Number(SABORES[sabor2].grande));
-        ingredientes =
-          "50% " + sabor1 + ": " + (SABORES[sabor1].ingredientes || []).join(", ") +
-          " | 50% " + sabor2 + ": " + (SABORES[sabor2].ingredientes || []).join(", ");
-      } else {
-        descricao = "Grande 35cm - " + sabor1;
-        valor = Number(SABORES[sabor1].grande);
-        ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
-      }
-
-      const adicionalEl = document.getElementById("adicional");
-      const valorAdicional = Number(adicionalEl.value) || 0;
-      const nomeAdicional = adicionalEl.options[adicionalEl.selectedIndex].text;
-      const obsPizza = document.getElementById("obsPizza").value.trim();
-
-      adicionarItem({
-        descricao: valorAdicional > 0 ? descricao + " + " + nomeAdicional : descricao,
-        ingredientes: ingredientes,
-        observacao: obsPizza,
-        valor: valor + valorAdicional
-      });
-    });
-
-    document.getElementById("btnAdicionarBebida").addEventListener("click", function () {
-      if (this.disabled) return;          // evita clique duplo
-      const botaoBebida = this;
-      this.disabled = true;
-      setTimeout(function () { botaoBebida.disabled = false; }, 400);
-
-      const sel = document.getElementById("bebida");
-      if (!sel.value) {
-        alert("Selecione uma bebida.");
-        return;
-      }
-      const descricao = sel.options[sel.selectedIndex].text.split(" - R$ ")[0];
-      const valor = Number(sel.value);
-      if (!valor || isNaN(valor)) {
-        alert("Selecione uma bebida válida.");
-        return;
-      }
-      adicionarItem({
-        descricao: descricao,
-        ingredientes: "",
-        observacao: "",
-        valor: valor
-      });
-      // mantem a bebida selecionada: assim o botao nao acusa "selecione uma bebida"
-    });
+   document.getElementById("btnAdicionarPizza").addEventListener("click", function () {
+  if (this.disabled) return;
+  this.disabled = true;
+  const botao = this;
+  setTimeout(() => { botao.disabled = false; }, 400);
+  const tamanho = document.getElementById("tamanho").value;
+  const tipo = document.getElementById("tipoPizza").value;
+  const sabor1 = document.getElementById("sabor1").value;
+  const sabor2 = document.getElementById("sabor2").value;
+  if (!sabor1 || !SABORES[sabor1]) {
+    alert("Selecione o Sabor 1.");
+    return;
+  }
+  let descricao = "";
+  let valor = 0;
+  let ingredientes = "";
+  if (tamanho === "brotinho") {
+    descricao = "Brotinho 25cm - " + sabor1;
+    valor = Number(SABORES[sabor1].brotinho);
+    ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
+  } else if (tipo === "meio") {
+    if (!sabor2 || !SABORES[sabor2]) {
+      alert("Selecione o Sabor 2 para pizza Meio a Meio.");
+      return;
+    }
+    descricao = `Grande 35cm Meio a Meio - ${sabor1} / ${sabor2}`;
+    valor = Math.max(Number(SABORES[sabor1].grande), Number(SABORES[sabor2].grande));
+    ingredientes = `50% ${sabor1}: ${(SABORES[sabor1].ingredientes || []).join(", ")} | 50% ${sabor2}: ${(SABORES[sabor2].ingredientes || []).join(", ")}`;
+  } else {
+    descricao = "Grande 35cm - " + sabor1;
+    valor = Number(SABORES[sabor1].grande);
+    ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
+  }
+  const adicionalEl = document.getElementById("adicional");
+  const valorAdicional = Number(adicionalEl.value) || 0;
+  const nomeAdicional = adicionalEl.options[adicionalEl.selectedIndex].text;
+  const obsPizza = document.getElementById("obsPizza").value.trim();
+  adicionarItem({
+    descricao: valorAdicional > 0 ? `${descricao} + ${nomeAdicional}` : descricao,
+    ingredientes: ingredientes,
+    observacao: obsPizza,
+    valor: valor + valorAdicional
+  });
+});
+document.getElementById("btnAdicionarBebida").addEventListener("click", function () {
+  if (this.disabled) return;
+  this.disabled = true;
+  const botaoBebida = this;
+  setTimeout(() => { botaoBebida.disabled = false; }, 400);
+  const sel = document.getElementById("bebida");
+  if (!sel.value) {
+    alert("Selecione uma bebida.");
+    return;
+  }
+  const descricao = sel.options[sel.selectedIndex].text.split(" - R$ ")[0];
+  const valor = Number(sel.value);
+  if (!valor || isNaN(valor)) {
+    alert("Selecione uma bebida válida.");
+    return;
+  }
+  adicionarItem({
+    descricao: descricao,
+    ingredientes: "",
+    observacao: "",
+    valor: valor
+  });
+  sel.value = "";
+});
 
     document.getElementById("btnWhatsApp").addEventListener("click", function () {
       if (!pedidoAtual.itens.length) {
