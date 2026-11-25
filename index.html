@@ -1766,7 +1766,6 @@ ${(pedido.itens || []).map(i =>
 Taxa de Entrega: R$ ${Number(pedido.taxaEntrega || 0).toFixed(2)}
 Total: R$ ${Number(pedido.total || 0).toFixed(2)}
 `;
-  
   const janela = window.open("", "_blank", "width=300,height=600");
   if (!janela) {
     alert("Autorize pop-ups para impressão.");
