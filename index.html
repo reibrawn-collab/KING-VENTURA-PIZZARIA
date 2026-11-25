@@ -1762,33 +1762,39 @@ CEP: ${pedido.cep || ""}
 Endereço: ${pedido.endereco || ""}
 Número: ${pedido.numeroCasa || ""}
 Observação: ${pedido.observacao || ""}
-Itens:
-${(pedido.itens || []).map(i =>
-  `${i.descricao} - R$ ${Number(i.valor).toFixed(2)}${i.observacao ? " (Obs: " + i.observacao + ")" : ""}`
-).join("\n")}
-Taxa de Entrega: R$ ${Number(pedido.taxaEntrega || 0).toFixed(2)}
-Total: R$ ${Number(pedido.total || 0).toFixed(2)}
+ITENS:
+${(pedido.itens || []).map(item => `${item.descricao} - R$ ${item.valor.toFixed(2)}${item.observacao ? " (Obs: " + item.observacao + ")" : ""}`).join("\n")}
+Taxa de Entrega: R$ ${pedido.taxaEntrega.toFixed(2)}
+TOTAL: R$ ${pedido.total.toFixed(2)}
 `;
-  const janela = window.open("", "_blank", "width=320,height=600");
-  if (!janela) {
-    alert("Por favor, autorize pop-ups para imprimir.");
+  const printWindow = window.open("", "PRINT", "width=320,height=600");
+  if (!printWindow) {
+    alert("Permita pop-ups para imprimir.");
     return;
   }
-  
-  janela.document.write(`
-    <html><head><title>Cupom Térmico</title>
-    <style>body { font-family: monospace; font-size: 14px; padding: 10px; }</style>
-    </head><body><pre>${texto}</pre>
-    <script>
-      window.onload = function() {
-        window.print();
-        window.onafterprint = function() { window.close(); };
-      };
-    <\/script>
-    </body></html>
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Cupom Térmico</title>
+        <style>
+          body { font-family: monospace; font-size: 14px; padding: 10px; }
+          pre { white-space: pre-wrap; }
+        </style>
+      </head>
+      <body>
+        <pre>${texto}</pre>
+        <script>
+          window.onload = function() {
+            window.print();
+            window.onafterprint = window.close;
+          };
+        <\/script>
+      </body>
+    </html>
   `);
-  janela.document.close();
-  }
+  printWindow.document.close();
+}
+
 
 
     function sincronizarDadosClientePedido() {
