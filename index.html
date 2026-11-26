@@ -337,7 +337,21 @@
       color: var(--muted);
       margin-top: 6px;
     }
+.extra-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+  cursor: pointer;
+  color: var(--text);
+}
 
+.extra-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex-shrink: 0;
+}
     
     /* Etapas na paleta Grêmio: azul claro -> azul -> branco -> branco cheio */
     .status-pill.status-feito {
