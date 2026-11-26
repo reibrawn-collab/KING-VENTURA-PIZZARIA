@@ -594,9 +594,15 @@
         <div class="grid-2">
           <div>
             <label>Adicionais</label>
-
-<div id="listaAdicionais" class="extras-list">
-
+<button
+  type="button"
+  id="btnMostrarAdicionais"
+  class="secondary"
+  style="width:100%;margin-bottom:8px;"
+>
+  ➕ Escolher Adicionais
+</button>
+<div id="listaAdicionais" class="extras-list" style="display:none;">
   <label class="extra-item">
     <input type="checkbox" value="4" data-nome="Catupiry Extra">
     Catupiry Extra (+R$ 4,00)
@@ -3341,6 +3347,20 @@ document.getElementById("btnAdicionarBebida").addEventListener("click", function
   sincronizarDadosClientePedido(); // Atualiza pedidoAtual com os dados do formulário
   localStorage.setItem("pedidoParaImprimir", JSON.stringify(pedidoAtual));
   window.open("cupom.html", "_blank", "width=320,height=600");
+});
+    document.getElementById("btnMostrarAdicionais")
+.addEventListener("click", function () {
+ 
+const lista = document.getElementById("listaAdicionais");
+ 
+if (lista.style.display === "none") {
+lista.style.display = "block";
+this.innerText = "➖ Ocultar Adicionais";
+} else {
+lista.style.display = "none";
+this.innerText = "➕ Escolher Adicionais";
+}
+ 
 });
     /* INICIALIZAÇÃO */
     carregarSaboresStorage();
