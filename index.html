@@ -3291,16 +3291,27 @@ document.getElementById("btnAdicionarPizza").addEventListener("click", function 
     valor = Number(SABORES[sabor1].grande);
     ingredientes = (SABORES[sabor1].ingredientes || []).join(", ");
   }
-  const adicionalEl = document.getElementById("adicional");
-  const valorAdicional = Number(adicionalEl.value) || 0;
-  const nomeAdicional = adicionalEl.options[adicionalEl.selectedIndex].text;
-  const obsPizza = document.getElementById("obsPizza").value.trim();
-  adicionarItem({
-    descricao: valorAdicional > 0 ? `${descricao} + ${nomeAdicional}` : descricao,
-    ingredientes: ingredientes,
-    observacao: obsPizza,
-    valor: valor + valorAdicional
-  });
+let valorAdicional = 0;
+let nomesAdicionais = [];
+
+document.querySelectorAll("#listaAdicionais input:checked").forEach(item => {
+  valorAdicional += Number(item.value) || 0;
+  nomesAdicionais.push(item.dataset.nome);
+});
+
+const obsPizza = document.getElementById("obsPizza").value.trim();
+
+adicionarItem({
+  descricao: nomesAdicionais.length
+    ? descricao + " + " + nomesAdicionais.join(", ")
+    : descricao,
+  ingredientes: ingredientes,
+  observacao: obsPizza,
+  valor: valor + valorAdicional
+});
+
+document.querySelectorAll("#listaAdicionais input:checked")
+  .forEach(item => item.checked = false);
 });
 document.getElementById("btnAdicionarBebida").addEventListener("click", function () {
   if (this.disabled) return;
