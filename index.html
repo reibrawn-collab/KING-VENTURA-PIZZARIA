@@ -3333,6 +3333,7 @@ adicionarItem({
 document.querySelectorAll("#listaAdicionais input:checked")
   .forEach(item => item.checked = false);
 });
+    atualizarTextoAdicionais();
 document.getElementById("btnAdicionarBebida").addEventListener("click", function () {
   if (this.disabled) return;
   this.disabled = true;
@@ -3362,19 +3363,38 @@ document.getElementById("btnAdicionarBebida").addEventListener("click", function
   localStorage.setItem("pedidoParaImprimir", JSON.stringify(pedidoAtual));
   window.open("cupom.html", "_blank", "width=320,height=600");
 });
-    document.getElementById("btnMostrarAdicionais")
-.addEventListener("click", function () {
- 
-const lista = document.getElementById("listaAdicionais");
- 
-if (lista.style.display === "none") {
-lista.style.display = "block";
-this.innerText = "➖ Ocultar Adicionais";
-} else {
-lista.style.display = "none";
-this.innerText = "➕ Escolher Adicionais";
+  const btnAdicionais = document.getElementById("btnMostrarAdicionais");
+
+function atualizarTextoAdicionais() {
+  const marcados = document.querySelectorAll(
+    "#listaAdicionais input:checked"
+  );
+
+  const qtd = marcados.length;
+
+  if (qtd === 0) {
+    btnAdicionais.innerText = "➕ Escolher Adicionais";
+  } else {
+    btnAdicionais.innerText = `➕ Adicionais (${qtd})`;
+  }
 }
- 
+
+btnAdicionais.addEventListener("click", function () {
+
+  const lista = document.getElementById("listaAdicionais");
+
+  if (lista.style.display === "none") {
+    lista.style.display = "block";
+    this.innerText = "➖ Ocultar Adicionais";
+  } else {
+    lista.style.display = "none";
+    atualizarTextoAdicionais();
+  }
+
+});
+
+document.querySelectorAll("#listaAdicionais input").forEach(item => {
+  item.addEventListener("change", atualizarTextoAdicionais);
 });
     /* INICIALIZAÇÃO */
     carregarSaboresStorage();
