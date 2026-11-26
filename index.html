@@ -3332,8 +3332,11 @@ adicionarItem({
 
 document.querySelectorAll("#listaAdicionais input:checked")
   .forEach(item => item.checked = false);
+  
+  atualizarTextoAdicionais();
+  
 });
-    atualizarTextoAdicionais();
+  
 document.getElementById("btnAdicionarBebida").addEventListener("click", function () {
   if (this.disabled) return;
   this.disabled = true;
