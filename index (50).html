@@ -352,7 +352,7 @@
   margin: 0;
   flex-shrink: 0;
 }
-    
+
     /* Etapas na paleta Grêmio: azul claro -> azul -> branco -> branco cheio */
     .status-pill.status-feito {
       background: rgba(127, 184, 245, 0.18);
@@ -2186,7 +2186,7 @@ function imprimirCupomTermico() {
     document.getElementById("sabor1").addEventListener("change", atualizarPreviewIngredientes);
     document.getElementById("sabor2").addEventListener("change", atualizarPreviewIngredientes);
 
-   
+
     document.getElementById("btnWhatsApp").addEventListener("click", function () {
       if (!pedidoAtual.itens.length) {
         alert("Adicione pelo menos um item antes de enviar.");
@@ -3336,6 +3336,7 @@ document.querySelectorAll("#listaAdicionais input:checked")
   atualizarTextoAdicionais();
   
 });
+    atualizarTextoAdicionais();
   
 document.getElementById("btnAdicionarBebida").addEventListener("click", function () {
   if (this.disabled) return;
